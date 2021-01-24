@@ -1,0 +1,7 @@
+python-telegram-bot
+gTTS
+Pillow
+pandas
+numpy
+psycopg2
+python-dotenv
