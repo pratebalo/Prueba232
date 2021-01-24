@@ -81,13 +81,13 @@ def birthday(context: CallbackContext):
 
 
 def echo(update: Update, context: CallbackContext):
-    data = db.select("data")
-    user_id = update.effective_user['id']
-    nombre = update.effective_user['first_name']
-    data.loc[data["user_id"] == user_id, "total_mensajes"] += 1
-    data.loc[data["user_id"] == user_id, "ultimo_mensaje"] = datetime.today().strftime('%d/%m/%Y %H:%M')
-    logger.info(
-        f"{nombre} ha enviado {update.message.text}. Con un total de {data.loc[data['user_id'] == user_id, 'total_mensajes'].values[0]} mensajes")
+    # data = db.select("data")
+    user_id = update.effective_user.id
+    nombre = update.effective_user.first_name
+    # data.loc[data["user_id"] == user_id, "total_mensajes"] += 1
+    # data.loc[data["user_id"] == user_id, "ultimo_mensaje"] = datetime.today().strftime('%d/%m/%Y %H:%M')
+    # logger.info(f"{nombre} ha enviado {update.message.text}. Con un total de {data.loc[data['user_id'] == user_id, 'total_mensajes'].values[0]} mensajes")
+    logger.info(f"{nombre} con id: {user_id} ha enviado {update.message.text}")
 
 
 def loquendo(update: Update, context: CallbackContext):
@@ -210,7 +210,7 @@ if __name__ == "__main__":
     dp.add_handler(CommandHandler("check", check))
 
     dp.add_handler(CommandHandler("random", random_number))
-    dp.add_handler(MessageHandler(Filters.text, echo))
+    dp.add_handler(MessageHandler(Filters.all, echo))
 
     job.run_daily(birthday, time(6, 0, 00, 000000), days=(0, 1, 2, 3, 4, 5, 6))
     run(updater)
