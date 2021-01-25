@@ -96,7 +96,6 @@ def echo(update: Update, context: CallbackContext):
             f"{fila.apodo} ha enviado {update.message.text}. Con un total de {fila.total_mensajes} mensajes")
     else:
         logger.info(f"{nombre} con id: {user_id} ha enviado {update.message.text}")
-    logger.info(f"chat: {update.effective_chat}")
 
 
 def loquendo(update: Update, context: CallbackContext):
