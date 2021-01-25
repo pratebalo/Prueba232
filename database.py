@@ -79,3 +79,15 @@ def update_lista(lista):
     connection.commit()
     cursor.close()
     connection.close()
+
+def update_data(data):
+    query = f"""set DateStyle='ISO, DMY';
+        UPDATE data
+        SET ultimo_mensaje='{data.ultimo_mensaje}', total_mensajes={data.total_mensajes}
+        WHERE id={data.id};"""
+    connection = psycopg2.connect(DATABASE_URL)
+    cursor = connection.cursor()
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()

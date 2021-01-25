@@ -21,22 +21,23 @@ import logging
 import requests
 from io import BytesIO
 
-
 import database as db
 import listas
 import tareas
+from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger()
-LOQUENDO_1, LOQUENDO_2 = range(2)
 
+LOQUENDO_1, LOQUENDO_2 = range(2)
 CULOS_1 = range(1)
+ID_MANITOBA = -400660182
+
 load_dotenv()
 TOKEN = os.environ.get("TOKEN")
 mode = os.environ.get("mode")
-ID_MANITOBA = -400660182
 
 if mode == "dev":
     def run(updater):
@@ -81,18 +82,29 @@ def birthday(context: CallbackContext):
 
 
 def echo(update: Update, context: CallbackContext):
-    # data = db.select("data")
+    data = db.select("data")
     user_id = update.effective_user.id
     nombre = update.effective_user.first_name
-    # data.loc[data["user_id"] == user_id, "total_mensajes"] += 1
-    # data.loc[data["user_id"] == user_id, "ultimo_mensaje"] = datetime.today().strftime('%d/%m/%Y %H:%M')
-    # logger.info(f"{nombre} ha enviado {update.message.text}. Con un total de {data.loc[data['user_id'] == user_id, 'total_mensajes'].values[0]} mensajes")
-    logger.info(f"{nombre} con id: {user_id} ha enviado {update.message.text}")
+    fila = data.loc[data.id == user_id]
+    data.loc[data.id == user_id, "ultimo_mensaje"] = datetime.today().strftime('%d/%m/%Y %H:%M')
+    if len(fila) == 1:
+        fila=fila.iloc[0]
+        fila.total_mensajes += 1
+        fila.ultimo_mensaje = datetime.today().strftime('%d/%m/%Y %H:%M')
+        db.update_data(fila)
+        logger.info(
+            f"{fila.apodo} ha enviado {update.message.text}. Con un total de {fila.total_mensajes} mensajes")
+    else:
+        logger.info(f"{nombre} con id: {user_id} ha enviado {update.message.text}")
+    print(update.effective_chat)
+
+
+
 
 
 def loquendo(update: Update, context: CallbackContext):
     chat_id = update.message.chat_id
-    user = update.message.from_user
+    user = update.effective_user
     logger.info(f"User {user.first_name} entro en el comando loquendo")
     # Send message with text and appended InlineKeyboard
     context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, "¿Qué texto quieres convertir?")
@@ -103,24 +115,53 @@ def loquendo(update: Update, context: CallbackContext):
 
 def loquendo2(update: Update, context: CallbackContext):
     chat_id = update.message.chat_id
-    user = update.message.from_user
+    user = update.effective_user
+    idi = ['af', 'ar', 'bn', 'bs', 'ca', 'cs', 'cy', 'da', 'de', 'el', 'en', 'eo', 'es', 'et', 'fi', 'fr', 'gu',
+           'hi', 'hr', 'hu', 'hy', 'id', 'is', 'it', 'ja', 'jw', 'km', 'kn', 'ko', 'la', 'lv', 'mk', 'ml', 'mr',
+           'my', 'ne', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'si', 'sk', 'sq', 'sr', 'su', 'sv', 'sw', 'ta', 'te',
+           'th', 'tl', 'tr', 'uk', 'ur', 'vi', 'zh-CN', 'zh-cn', 'zh-tw', 'en-us', 'en-ca', 'en-uk', 'en-gb',
+           'en-au', 'en-gh', 'en-in', 'en-ie', 'en-nz', 'en-ng', 'en-ph', 'en-za', 'en-tz', 'fr-ca', 'fr-fr',
+           'pt-br', 'pt-pt', 'es-es', 'es-us', ]
+    idiomas = ['Afrikaans', 'Arabic', 'Bengali', 'Bosnian', 'Catalan', 'Czech', 'Welsh', 'Danish', 'German', 'Greek',
+               'English', 'Esperanto', 'Spanish', 'Estonian', 'Finnish', 'French', 'Gujarati', 'Hindi', 'Croatian',
+               'Hungarian', 'Armenian', 'Indonesian', 'Icelandic', 'Italian', 'Japanese', 'Javanese', 'Khmer',
+               'Kannada',
+               'Korean', 'Latin', 'Latvian', 'Macedonian', 'Malayalam', 'Marathi', 'Myanmar', 'Nepali', 'Dutch',
+               'Norwegian', 'Polish', 'Portuguese', 'Romanian', 'Russian', 'Sinhala', 'Slovak', 'Albanian', 'Serbian',
+               'Sundanese', 'Swedish', 'Swahili', 'Tamil', 'Telugu', 'Thai', 'Filipino', 'Turkish', 'Ukrainian', 'Urdu',
+               'Vietnamese', 'Chinese', 'Mandarin Ch', 'Mandarin Tw', '(US)',
+               '(Canada)', '(UK)', '(UK)', '(Australia)', '(Ghana)',
+               '(India)', 'English (Ireland)', 'English (New Zealand)', 'English (Nigeria)',
+               '(Philippines)', '(South Africa)', '(Tanzania)', 'French CAN',
+               'French', 'Portuguese Br', 'Portuguese Pt', 'Español',
+               'Spanish USA', ]
+    part_keyboard = []
+    keyboard = []
+    for i, (lang, lg) in enumerate(zip(idiomas, idi)):
+        part_keyboard.append(InlineKeyboardButton(lang, callback_data=lg))
+        if i % 3 == 2 or i == len(idiomas):
+            keyboard.append(part_keyboard)
+            part_keyboard = []
 
+    reply_markup = InlineKeyboardMarkup(keyboard)
     logger.info(f"User {user.first_name} mando el texto:\n {update.message.text}")
     # Send message with text and appended InlineKeyboard
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
-    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, "¿Qué idioma quieres poner?")
+    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, text="¿Qué idioma quieres poner?",
+                                                              reply_markup=reply_markup)
+
     context.user_data["texto"] = update.message.text
     # Tell ConversationHandler that we're in state `FIRST` now
     return LOQUENDO_2
 
 
 def end_loquendo(update: Update, context: CallbackContext):
-    chat_id = update.message.chat_id
-    user = update.message.from_user
-    logger.info(f"User {user.first_name} mando el idioma:\n {update.message.text}")
+    chat_id = update.callback_query.message.chat_id
+    user = update.effective_user
+    logger.info(f"User {user.first_name} mando el idioma:\n {update.callback_query.data}")
     # Send message with text and appended InlineKeyboard
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
-    tts = gTTS(context.user_data["texto"], lang=update.message.text)
+    tts = gTTS(context.user_data["texto"], lang=update.callback_query.data)
     tts.save("audio.mp3")
     context.bot.sendAudio(chat_id, audio=open("audio.mp3", "rb"))
 
@@ -134,7 +175,7 @@ def check(update: Update, context: CallbackContext):
 
 def culos(update: Update, context: CallbackContext):
     chat_id = update.message.chat_id
-    user = update.message.from_user
+    user = update.effective_user
     logger.info(f"User {user.first_name} entro en el comando culos")
     # Send message with text and appended InlineKeyboard
     context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, "Enviame la imagen sin bordes")
@@ -144,25 +185,44 @@ def culos(update: Update, context: CallbackContext):
 
 
 def culos2(update: Update, context: CallbackContext):
+    # im1 = Image.open('mono.jpg')
+    # url = context.bot.get_file(file_id=update.message.photo[-1].file_id).file_path
+    # response = requests.get(url)
+    # im2 = Image.open(BytesIO(response.content))
+    # size = 150, 150
+    # im2.thumbnail(size, Image.ANTIALIAS)
+    # x, y = im2.size
+    # eX, eY = 90, 130  # Size of Bounding Box for ellipse
+    # bbox = (x / 2 - eX / 2, y / 2 - eY / 2, x / 2 + eX / 2, y / 2 + eY / 2)
+    #
+    # mask_im = Image.new("L", im2.size, 0)
+    # draw = ImageDraw.Draw(mask_im)
+    # draw.ellipse(bbox, fill=255)
+    # back_im = im1.copy()
+    # back_im.paste(im2, (260, 350), mask_im)
+    # back_im.save('culo_final.jpg', quality=95)
+
     im1 = Image.open('mono.jpg')
     url = context.bot.get_file(file_id=update.message.photo[-1].file_id).file_path
     response = requests.get(url)
     im2 = Image.open(BytesIO(response.content))
-    size = 150, 150
+    size = 160, 160
     im2.thumbnail(size, Image.ANTIALIAS)
     x, y = im2.size
-    eX, eY = 130, 130  # Size of Bounding Box for ellipse
+    eX, eY = 80, 120  # Size of Bounding Box for ellipse
     bbox = (x / 2 - eX / 2, y / 2 - eY / 2, x / 2 + eX / 2, y / 2 + eY / 2)
 
     mask_im = Image.new("L", im2.size, 0)
     draw = ImageDraw.Draw(mask_im)
     draw.ellipse(bbox, fill=255)
+
     back_im = im1.copy()
-    back_im.paste(im2, (260, 350), mask_im)
+    back_im.paste(im2, (680, 90), mask_im)
+    back_im.show()
     back_im.save('culo_final.jpg', quality=95)
 
     chat_id = update.message.chat_id
-    user = update.message.from_user
+    user = update.effective_user
     logger.info(f"User {user.first_name} mando el idioma:\n {update.message.text}")
     # Send message with text and appended InlineKeyboard
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
@@ -189,7 +249,7 @@ if __name__ == "__main__":
         entry_points=[CommandHandler('loquendo', loquendo)],
         states={
             LOQUENDO_1: [MessageHandler(Filters.text & ~Filters.command, loquendo2)],
-            LOQUENDO_2: [MessageHandler(Filters.text & ~Filters.command, end_loquendo)]
+            LOQUENDO_2: [CallbackQueryHandler(end_loquendo)]
 
         },
         fallbacks=[CommandHandler('loquendo', loquendo)],
