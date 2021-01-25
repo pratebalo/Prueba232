@@ -11,13 +11,16 @@ import pandas as pd
 import logging
 import database as db
 import random
+from datetime import date
 from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
 
 # Stages
 ELEGIR_TAREA, CREAR_TAREA1, CREAR_TAREA2, CREAR_TAREA3, CREAR_TAREA4, \
 CREAR_TAREA5, EDITAR_TAREA1, ELIMINAR_TAREA1, VER_TAREA = range(9)
-ID_MANITOBA = -1001307358592
-
+#pruebas
+#ID_MANITOBA = -1001307358592
+#llavens
+ID_MANITOBA = -1001255856526
 logger = logging.getLogger()
 
 
@@ -131,9 +134,11 @@ def elegir_fecha2(update: Update, context: CallbackContext):
         context.bot.deleteMessage(
             update.callback_query.message.chat.id,
             update.callback_query.message.message_id)
+        result = result.strftime("%d/%m/%Y")
         context.user_data["fecha"] = result
 
         logger.info(f"{update.effective_user.first_name} ha elegido la fecha {result}")
+
         context.user_data["oldMessage"] = context.bot.sendMessage(update.effective_chat.id,
                                                                   text="Introduce la descripcion")
         return CREAR_TAREA4
