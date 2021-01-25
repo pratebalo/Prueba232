@@ -66,6 +66,7 @@ def end_ver_tarea(update: Update, context: CallbackContext):
     all_tareas = context.user_data["all_tareas"]
     data = context.user_data["data"]
     tarea = all_tareas[all_tareas.id == int(update.callback_query.data)].iloc[0]
+    print(tarea)
     logger.info(f"{update.effective_user.first_name} seleccionó ver la tarea '{tarea.descripcion}'")
 
     text = f"{update.effective_user.first_name} ha solicitado ver la tarea:\n"+tarea_to_text(tarea,data)
