@@ -97,7 +97,6 @@ def echo(update: Update, context: CallbackContext):
     else:
         logger.info(f"{nombre} con id: {user_id} ha enviado {update.message.text}")
     logger.info(f"chat: {update.effective_chat}")
-    context.bot.deleteMessage(update.message.message_id)
 
 
 def loquendo(update: Update, context: CallbackContext):
@@ -105,8 +104,8 @@ def loquendo(update: Update, context: CallbackContext):
     user = update.effective_user
     logger.info(f"User {user.first_name} entro en el comando loquendo")
     # Send message with text and appended InlineKeyboard
-    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, "¿Qué texto quieres convertir?")
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
+    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, "¿Qué texto quieres convertir?")
     # Tell ConversationHandler that we're in state `FIRST` now
     return LOQUENDO_1
 
