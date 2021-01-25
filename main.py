@@ -96,7 +96,7 @@ def echo(update: Update, context: CallbackContext):
             f"{fila.apodo} ha enviado {update.message.text}. Con un total de {fila.total_mensajes} mensajes")
     else:
         logger.info(f"{nombre} con id: {user_id} ha enviado {update.message.text}")
-    print(update.effective_chat)
+    logger.info(f"chat: {update.effective_chat}")
     context.bot.deleteMessage(update.message.message_id)
 
 
