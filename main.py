@@ -97,9 +97,7 @@ def echo(update: Update, context: CallbackContext):
     else:
         logger.info(f"{nombre} con id: {user_id} ha enviado {update.message.text}")
     print(update.effective_chat)
-
-
-
+    context.bot.deleteMessage(update.message.message_id)
 
 
 def loquendo(update: Update, context: CallbackContext):
