@@ -51,8 +51,9 @@ def update_conversacion(conversacion):
     query = f"""
         UPDATE  conversaciones
         SET
-        total_mensajes ={conversacion.total_mensajes}
-    WHERE id={conversacion.id};"""
+            total_mensajes ={conversacion.total_mensajes},
+            mensaje_id = {conversacion.mensaje_id}
+        WHERE id={conversacion.id};"""
     connection = psycopg2.connect(DATABASE_URL)
     cursor = connection.cursor()
     cursor.execute(query)

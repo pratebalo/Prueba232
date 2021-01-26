@@ -92,7 +92,7 @@ def echo(update: Update, context: CallbackContext):
     if chat_id == ID_CONVERSACIONES:
         conversaciones = db.select("conversaciones")
         if user_id == ID_TELEGRAM:
-            mensaje = context.bot.sendMessage(ID_MANITOBA, parse_mode="HTML",
+            mensaje = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                               text=f"Se ha iniciado una conversacion: <b>{update.message.text}</b>")
             db.insert_conversacion(conversacion_id, mensaje.message_id, update.message.text)
         else:
@@ -100,8 +100,11 @@ def echo(update: Update, context: CallbackContext):
             conversacion = conversaciones[conversaciones.id == reply_id].iloc[0]
             conversacion.total_mensajes += 1
             db.update_conversacion(conversacion)
-            context.bot.edit_message_text(chat_id=ID_MANITOBA, message_id=conversacion.mensaje_id, parse_mode="HTML",
-                                          text=f"La conversación <b>{conversacion.nombre}</b> tiene mensajes nuevos")
+            context.bot.deleteMessage(chat_id=ID_MANITOBA, message_id=int(conversacion.mensaje_id))
+            mensaje = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
+                                          text=f"La conversación <b>{conversacion.nombre}</b> tiene un total de {conversacion.total_mensajes} mensajes")
+            conversacion.mensaje_id=mensaje.message_id
+            db.update_conversacion(conversacion)
     nombre = update.effective_user.first_name
     fila = data.loc[data.id == user_id]
     data.loc[data.id == user_id, "ultimo_mensaje"] = datetime.today().strftime('%d/%m/%Y %H:%M')
