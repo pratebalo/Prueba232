@@ -122,14 +122,13 @@ def editar_lista(update: Update, context: CallbackContext):
     keyboard = []
     for i, (elem, tipo) in enumerate(zip(lista.elementos, lista.tipo_elementos)):
         marcar = "✅" if tipo == 0 else "❌"
-        keyboard.append([InlineKeyboardButton(elem, callback_data="NADA"),
+        keyboard.append([InlineKeyboardButton(str(i+1), callback_data="NADA"),
                          InlineKeyboardButton("📝", callback_data="EDITAR" + str(i)),
                          InlineKeyboardButton(marcar, callback_data="MARCAR" + str(i)),
                          InlineKeyboardButton("🗑", callback_data="ELIMINAR" + str(i))])
     keyboard.append([InlineKeyboardButton("Añadir nuevos elementos", callback_data=str("AÑADIR"))])
-    keyboard.append([InlineKeyboardButton("Termianr", callback_data=str("TERMINAR"))])
+    keyboard.append([InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))])
     reply_markup = InlineKeyboardMarkup(keyboard)
-    print(query)
     query.delete_message()
     texto = f"{update.effective_user.first_name}: ¿Que quieres hacer?:\n{lista_to_text(lista)}"
     context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML", text=texto,
@@ -140,8 +139,6 @@ def editar_lista(update: Update, context: CallbackContext):
 
 def editar_lista_o(update: Update, context: CallbackContext):
     query = update.callback_query
-    all_listas = context.user_data["all_listas"]
-    print(query.data)
     lista = context.user_data["lista"]
 
     logger.info(f"""{update.effective_user.first_name} ha elegido editar la lista '{lista.nombre}'""")
@@ -156,7 +153,6 @@ def editar_lista_o(update: Update, context: CallbackContext):
     keyboard.append([InlineKeyboardButton("Añadir nuevo elemento", callback_data=str("AÑADIR"))])
     keyboard.append([InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))])
     reply_markup = InlineKeyboardMarkup(keyboard)
-    print(query)
     query.delete_message()
 
     texto = f"{update.effective_user.first_name}: ¿Que quieres hacer?:\n{lista_to_text(lista)}"
