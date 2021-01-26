@@ -33,7 +33,10 @@ logger = logging.getLogger()
 
 LOQUENDO_1, LOQUENDO_2 = range(2)
 CULOS_1 = range(1)
-ID_MANITOBA = -400660182
+
+ID_MANITOBA = -1001255856526
+ID_CONVERSACIONES = -1001462256012
+ID_TELEGRAM = 777000
 
 load_dotenv()
 TOKEN = os.environ.get("TOKEN")
@@ -83,12 +86,27 @@ def birthday(context: CallbackContext):
 
 def echo(update: Update, context: CallbackContext):
     data = db.select("data")
-    user_id = update.effective_user.id
+    user_id = int(update.effective_user.id)
+    chat_id = int(update.effective_chat.id)
+    conversacion_id = int(update.message.message_id)
+    if chat_id == ID_CONVERSACIONES:
+        conversaciones = db.select("conversaciones")
+        if user_id == ID_TELEGRAM:
+            mensaje = context.bot.sendMessage(ID_MANITOBA, parse_mode="HTML",
+                                              text=f"Se ha iniciado una conversacion: <b>{update.message.text}</b>")
+            db.insert_conversacion(conversacion_id, mensaje.message_id, update.message.text)
+        else:
+            reply_id = update.message.reply_to_message.message_id
+            conversacion = conversaciones[conversaciones.id == reply_id].iloc[0]
+            conversacion.total_mensajes += 1
+            db.update_conversacion(conversacion)
+            context.bot.edit_message_text(chat_id=ID_MANITOBA, message_id=conversacion.mensaje_id, parse_mode="HTML",
+                                          text=f"La conversación <b>{conversacion.nombre}</b> tiene mensajes nuevos")
     nombre = update.effective_user.first_name
     fila = data.loc[data.id == user_id]
     data.loc[data.id == user_id, "ultimo_mensaje"] = datetime.today().strftime('%d/%m/%Y %H:%M')
     if len(fila) == 1:
-        fila=fila.iloc[0]
+        fila = fila.iloc[0]
         fila.total_mensajes += 1
         fila.ultimo_mensaje = datetime.today().strftime('%d/%m/%Y %H:%M')
         db.update_data(fila)
@@ -96,6 +114,7 @@ def echo(update: Update, context: CallbackContext):
             f"{fila.apodo} ha enviado {update.message.text}. Con un total de {fila.total_mensajes} mensajes")
     else:
         logger.info(f"{nombre} con id: {user_id} ha enviado {update.message.text}")
+
 
 
 def loquendo(update: Update, context: CallbackContext):

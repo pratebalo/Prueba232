@@ -34,10 +34,37 @@ def insert_tarea(tarea):
     connection.close()
 
 
+def insert_conversacion(id, mensaje_id, nombre):
+    query = f"""INSERT INTO conversaciones
+                (id, mensaje_id,nombre, total_mensajes)
+                VALUES ({id},{mensaje_id},'{nombre}',{0});"""
+
+    connection = psycopg2.connect(DATABASE_URL)
+    cursor = connection.cursor()
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+
+def update_conversacion(conversacion):
+    query = f"""
+        UPDATE  conversaciones
+        SET
+        total_mensajes ={conversacion.total_mensajes}
+    WHERE id={conversacion.id};"""
+    connection = psycopg2.connect(DATABASE_URL)
+    cursor = connection.cursor()
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+
 def select(table):
     query = f"SELECT * FROM {table}"
     connection = psycopg2.connect(DATABASE_URL)
-    result = pd.read_sql(query, connection)
+    result = pd.read_sql(query, connection).sort_values(by="id", ignore_index=True)
     connection.close()
     return result
 
@@ -79,6 +106,7 @@ def update_lista(lista):
     connection.commit()
     cursor.close()
     connection.close()
+
 
 def update_data(data):
     query = f"""set DateStyle='ISO, DMY';
