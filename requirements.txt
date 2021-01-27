@@ -6,3 +6,4 @@ numpy
 psycopg2
 python-dotenv
 python-telegram-bot-calendar
+newrelic

@@ -19,7 +19,6 @@ logger = logging.getLogger()
 
 
 def listas(update: Update, context: CallbackContext):
-    print(update)
     if update.message:
         all_listas = db.select("listas")
         context.user_data["all_listas"] = all_listas
@@ -138,7 +137,6 @@ def editar_lista(update: Update, context: CallbackContext):
             line_keyboard.append(InlineKeyboardButton("👌🏽", callback_data="NADA"))
         line_keyboard.append(InlineKeyboardButton("🗑", callback_data="ELIMINAR" + str(i)))
         keyboard.append(line_keyboard)
-    print(keyboard)
     keyboard.append([InlineKeyboardButton("Añadir nuevo elemento", callback_data=str("AÑADIR"))])
     keyboard.append([InlineKeyboardButton("Atras", callback_data=str("ATRAS")),
                      InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))])
