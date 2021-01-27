@@ -24,8 +24,10 @@ logger = logging.getLogger()
 
 
 def tareas(update: Update, context: CallbackContext):
-    chat_id = update.message.chat_id
-    user = update.message.from_user
+    if update.message:
+        context.bot.deleteMessage(update.effective_chat.id, update.message.message_id)
+        context.user_data["ediciones"] = []
+    user = update.effective_user
     context.user_data["creador_tarea"] = user["id"]
     logger.info(f"{user.first_name} entro en el comando tareas")
     all_tareas = db.select("tareas")
@@ -46,14 +48,14 @@ def tareas(update: Update, context: CallbackContext):
     keyboard.append([InlineKeyboardButton("Terminar", callback_data="TERMINAR")])
     reply_markup = InlineKeyboardMarkup(keyboard)
     # Send message with text and appended InlineKeyboard
-    context.bot.sendMessage(chat_id, text, reply_markup=reply_markup)
-    context.bot.deleteMessage(chat_id, update.message.message_id)
+    context.bot.sendMessage(update.effective_chat.id, text, reply_markup=reply_markup)
     # Tell ConversationHandler that we're in state `FIRST` now
     context.user_data["personas_asignadas"] = []
     return ELEGIR_TAREA
 
 
 def ver_tarea(update: Update, context: CallbackContext):
+    print("ver")
     all_tareas = context.user_data["all_tareas"]
     data = context.user_data["data"]
     pos_tarea = int(update.callback_query.data.replace("VER", ""))
@@ -123,9 +125,8 @@ def elegir_fecha2(update: Update, context: CallbackContext):
                                       update.callback_query.message.message_id,
                                       reply_markup=key)
     elif result:
-        context.bot.deleteMessage(
-            update.callback_query.message.chat.id,
-            update.callback_query.message.message_id)
+        context.bot.deleteMessage(update.effective_chat.id,
+                                  update.callback_query.message.message_id)
         result = result.strftime("%d/%m/%Y")
         context.user_data["fecha"] = result
 
@@ -144,7 +145,7 @@ def end_creacion(update: Update, context: CallbackContext):
                        "fecha": context.user_data["fecha"], "creador": context.user_data["creador_tarea"]})
 
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
-    context.bot.deleteMessage(message.chat_id, message.message_id)
+    context.bot.deleteMessage(update.effective_chat.id, message.message_id)
 
     texto = f"""{update.effective_user.first_name} ha creado la tarea:\n""" + tarea_to_text(tarea, data)
 
@@ -169,7 +170,8 @@ def end_creacion(update: Update, context: CallbackContext):
     keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR")),
                  InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))]]
 
-    context.bot.sendMessage(message.chat_id, parse_mode="HTML", text=texto, reply_markup=InlineKeyboardMarkup(keyboard))
+    context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML", text=texto,
+                            reply_markup=InlineKeyboardMarkup(keyboard))
     context.user_data["ediciones"].append("\n" + texto)
     return FINAL_OPTION
 
@@ -186,11 +188,11 @@ def eliminar_tarea(update: Update, context: CallbackContext):
     keyboard = []
 
     all_tareas = context.user_data["all_tareas"]
-    pos_tarea = int(update.callback_query.data.replace("VER", ""))
+    pos_tarea = int(update.callback_query.data.replace("ELIMINAR", ""))
     tarea = all_tareas.iloc[pos_tarea]
-    tarea = db.delete("tareas", tarea.id)
+    db.delete("tareas", tarea.id)
     data = context.user_data["data"]
-    texto=f"{update.effective_user.first_name} ha eliminado la tarea \n<b>{tarea_to_text(tarea, data)}</b>"
+    texto = f"{update.effective_user.first_name} ha eliminado la tarea \n<b>{tarea_to_text(tarea, data)}</b>"
 
     keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR")),
                  InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))]]
@@ -210,8 +212,9 @@ def tarea_to_text(tarea, data):
 
 def terminar(update: Update, context: CallbackContext):
     update.callback_query.delete_message()
-    context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML", text="\n".join(context.user_data["ediciones"]))
-    context.user_data["ediciones"] = []
+    if context.user_data["ediciones"]:
+        context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML",
+                                text="\n".join(context.user_data["ediciones"]))
     return ConversationHandler.END
 
 
@@ -222,7 +225,8 @@ conv_handler_tareas = ConversationHandler(
             CallbackQueryHandler(ver_tarea, pattern='^VER'),
             CallbackQueryHandler(crear_tarea, pattern='^CREAR'),
             CallbackQueryHandler(editar_tarea, pattern='^EDITAR'),
-            CallbackQueryHandler(eliminar_tarea, pattern='^ELIMINAR')
+            CallbackQueryHandler(eliminar_tarea, pattern='^ELIMINAR'),
+            CallbackQueryHandler(terminar, pattern='^TERMINAR')
         ],
         CREAR_TAREA1: [CallbackQueryHandler(crear_tarea2)],
         CREAR_TAREA2: [
