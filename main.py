@@ -9,7 +9,7 @@ from telegram.ext import (
     Filters,
     Updater
 )
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 from gtts import gTTS
 from PIL import Image, ImageDraw
 import pandas as pd
@@ -79,9 +79,17 @@ def birthday(context: CallbackContext):
     cumpleaneros = data[data.cumple == fecha]
 
     for _, cumpleanero in cumpleaneros.iterrows():
-        print(f"Felicidades {cumpleanero.nombre}")
         context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                 text=f"Felicidades <b>{cumpleanero.nombre}</b>")
+
+
+def muditos(context: CallbackContext):
+    data = db.select("data")
+    hoy = datetime.today()
+    data.ultimo_mensaje = pd.to_datetime(data.ultimo_mensaje)
+    for _, persona in data[data.ultimo_mensaje < (hoy - timedelta(23))].iterrows():
+        context.bot.sendMessage(ID_MANITOBA, parse_mode="HTML",
+                                text=f"""Te echamos de menos <a href="tg://user?id=971495585">{persona.id}</a>""")
 
 
 def echo(update: Update, context: CallbackContext):
@@ -102,22 +110,21 @@ def echo(update: Update, context: CallbackContext):
             db.update_conversacion(conversacion)
             context.bot.deleteMessage(chat_id=ID_MANITOBA, message_id=int(conversacion.mensaje_id))
             mensaje = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
-                                          text=f"La conversación <b>{conversacion.nombre}</b> tiene un total de {conversacion.total_mensajes} mensajes")
-            conversacion.mensaje_id=mensaje.message_id
+                                              text=f"La conversación <b>{conversacion.nombre}</b> tiene un total de {conversacion.total_mensajes} mensajes")
+            conversacion.mensaje_id = mensaje.message_id
             db.update_conversacion(conversacion)
     nombre = update.effective_user.first_name
     fila = data.loc[data.id == user_id]
-    data.loc[data.id == user_id, "ultimo_mensaje"] = datetime.today().strftime('%d/%m/%Y %H:%M')
     if len(fila) == 1:
         fila = fila.iloc[0]
         fila.total_mensajes += 1
-        fila.ultimo_mensaje = datetime.today().strftime('%d/%m/%Y %H:%M')
+        fila.ultimo_mensaje = datetime.today().strftime('%d/%m/%Y %H:%M:S')
         db.update_data(fila)
         logger.info(
             f"{fila.apodo} ha enviado {update.message.text}. Con un total de {fila.total_mensajes} mensajes")
     else:
         logger.info(f"{nombre} con id: {user_id} ha enviado {update.message.text}")
-    print(update.message)
+
 
 
 def loquendo(update: Update, context: CallbackContext):
@@ -254,7 +261,6 @@ def culos2(update: Update, context: CallbackContext):
 if __name__ == "__main__":
     load_dotenv()
     my_bot = Bot(token=TOKEN)
-    # print(my_bot.getMe())
     updater = Updater(my_bot.token, use_context=True)
 
     dp = updater.dispatcher
@@ -290,5 +296,6 @@ if __name__ == "__main__":
     dp.add_handler(CommandHandler("random", random_number))
     dp.add_handler(MessageHandler(Filters.all, echo))
 
+    job.run_daily(birthday, time(6, 0, 00, 000000), days=(0, 1, 2, 3, 4, 5, 6))
     job.run_daily(birthday, time(6, 0, 00, 000000), days=(0, 1, 2, 3, 4, 5, 6))
     run(updater)

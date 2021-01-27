@@ -91,7 +91,6 @@ def crear_tarea2(update: Update, context: CallbackContext):
     keyboard = []
     part_keyboard = []
     data = context.user_data["data"]
-    print(context.user_data["personas_asignadas"])
     for i, persona in data.sort_values(by="nombre", ignore_index=True).iterrows():
         if not persona.id in context.user_data["personas_asignadas"]:
             part_keyboard.append(InlineKeyboardButton(persona.apodo, callback_data=str(persona.id)))

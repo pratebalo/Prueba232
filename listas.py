@@ -13,7 +13,7 @@ import logging
 import database as db
 
 ELEGIR_LISTA, CREAR_LISTA1, CREAR_LISTA2, EDITAR_LISTA1, EDITAR_LISTA2, EDITAR_LISTA_A, EDITAR_LISTA_E, \
-EDITAR_LISTA_O = range(8)
+EDITAR_LISTA_O, FINAL_OPTION = range(9)
 ID_MANITOBA = -1001255856526
 logger = logging.getLogger()
 
@@ -43,7 +43,7 @@ def listas(update: Update, context: CallbackContext):
         if lista.creador == user.id:
             keyboardline.append(InlineKeyboardButton("🗑", callback_data="ELIMINAR" + str(lista.id)))
         else:
-            keyboardline.append(InlineKeyboardButton("🗑", callback_data="NADA"))
+            keyboardline.append(InlineKeyboardButton(" ", callback_data="NADA"))
         keyboard.append(keyboardline)
     keyboard.append([InlineKeyboardButton("Crear nueva lista", callback_data=str("CREAR"))])
     keyboard.append([InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))])
@@ -62,10 +62,11 @@ def ver_lista(update: Update, context: CallbackContext):
 
     logger.info(f"{update.effective_user.first_name} seleccionó ver la lista '{lista.nombre}'")
     text = f"{update.effective_user.first_name} ha solicitado ver la lista:\n{lista_to_text(lista)}"
+    keyboard = [InlineKeyboardButton("Continuar", callback_data="CONTINUAR"),
+                InlineKeyboardButton("Terminar", callback_data="TERMINAR")]
+    update.callback_query.edit_message_text(parse_mode="HTML", text=text, reply_markup=InlineKeyboardMarkup([keyboard]))
 
-    update.callback_query.edit_message_text(parse_mode="HTML", text=text)
-
-    return ConversationHandler.END
+    return FINAL_OPTION
 
 
 def crear_lista(update: Update, context: CallbackContext):
@@ -115,7 +116,7 @@ def end_crear_lista(update: Update, context: CallbackContext):
     db.insert_lista(new_lista)
     logger.info(f"""{update.effective_user.first_name} ha creado la lista {context.user_data["nombre_lista"]}""")
 
-    return ConversationHandler.END
+    return FINAL_OPTION
 
 
 def editar_lista(update: Update, context: CallbackContext):
@@ -140,7 +141,6 @@ def editar_lista(update: Update, context: CallbackContext):
     keyboard.append([InlineKeyboardButton("Añadir nuevo elemento", callback_data=str("AÑADIR"))])
     keyboard.append([InlineKeyboardButton("Atras", callback_data=str("ATRAS")),
                      InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))])
-    print(keyboard)
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.delete_message()
     texto = f"{update.effective_user.first_name}: ¿Que quieres hacer?:\n{lista_to_text(lista)}"
@@ -204,7 +204,7 @@ def end_editar_lista_anadir(update: Update, context: CallbackContext):
     logger.info(f"""{update.effective_user.first_name} ha editado la lista '{lista.nombre}'""")
     db.update_lista(lista)
 
-    return ConversationHandler.END
+    return FINAL_OPTION
 
 
 def end_editar_lista_eliminar(update: Update, context: CallbackContext):
@@ -293,16 +293,19 @@ conv_handler_listas = ConversationHandler(
         ],
         CREAR_LISTA1: [MessageHandler(Filters.text & ~Filters.command, crear_lista2)],
         CREAR_LISTA2: [MessageHandler(Filters.text & ~Filters.command, end_crear_lista)],
-        EDITAR_LISTA2: [CallbackQueryHandler(editar_lista_anadir, pattern='^AÑADIR$'),
-                        CallbackQueryHandler(editar_lista_o, pattern='^NADA$'),
-                        CallbackQueryHandler(end_editar_lista_marcar, pattern='^MARCAR'),
-                        CallbackQueryHandler(editar_lista_editar, pattern='^EDITAR'),
-                        CallbackQueryHandler(end_editar_lista_eliminar, pattern='^ELIMINAR'),
-                        CallbackQueryHandler(listas, pattern='^ATRAS'),
-                        CallbackQueryHandler(terminar, pattern='^TERMINAR$')],
+        EDITAR_LISTA2: [
+            CallbackQueryHandler(editar_lista_anadir, pattern='^AÑADIR$'),
+            CallbackQueryHandler(end_editar_lista_marcar, pattern='^MARCAR'),
+            CallbackQueryHandler(editar_lista_editar, pattern='^EDITAR'),
+            CallbackQueryHandler(end_editar_lista_eliminar, pattern='^ELIMINAR'),
+            CallbackQueryHandler(listas, pattern='^ATRAS'),
+            CallbackQueryHandler(terminar, pattern='^TERMINAR$')],
         EDITAR_LISTA_A: [MessageHandler(Filters.text & ~Filters.command, end_editar_lista_anadir)],
         EDITAR_LISTA_E: [MessageHandler(Filters.text & ~Filters.command, end_editar_lista_editar)],
-        EDITAR_LISTA_O: [],
+        FINAL_OPTION: [
+            CallbackQueryHandler(listas, pattern='^CONTINUAR'),
+            CallbackQueryHandler(editar_lista, pattern='^CONTINUAR_EDITAR'),
+            CallbackQueryHandler(terminar, pattern='^TERMINAR')],
 
     },
     fallbacks=[CommandHandler('listas', listas)],
