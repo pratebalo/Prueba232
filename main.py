@@ -36,6 +36,7 @@ CULOS_1 = range(1)
 
 ID_MANITOBA = -1001255856526
 ID_CONVERSACIONES = -1001462256012
+ID_PRUEBAS = -1001307358592
 ID_TELEGRAM = 777000
 
 load_dotenv()
@@ -88,12 +89,21 @@ def muditos(context: CallbackContext):
     hoy = datetime.today()
     data.ultimo_mensaje = pd.to_datetime(data.ultimo_mensaje)
     for _, persona in data[data.ultimo_mensaje < (hoy - timedelta(23))].iterrows():
-        context.bot.sendMessage(ID_MANITOBA, parse_mode="HTML",
-                                text=f"""Te echamos de menos <a href="tg://user?id=971495585">{persona.id}</a>""")
+        context.bot.sendMessage(ID_PRUEBAS, parse_mode="HTML",
+                                text=f"""Te echamos de menos <a href="tg://user?id=persona.id">{persona.apodo}</a>""")
+
+def muditos2(context: CallbackContext):
+    data = db.select("data")
+    hoy = datetime.today()
+    data.ultimo_mensaje = pd.to_datetime(data.ultimo_mensaje)
+    for _, persona in data[data.ultimo_mensaje < (hoy - timedelta(23))].iterrows():
+        context.bot.sendMessage(ID_PRUEBAS, parse_mode="HTML",
+                                text=f"""No Te echamos de menos <a href="tg://user?id=persona.id">{persona.apodo}</a>""")
 
 
 def echo(update: Update, context: CallbackContext):
     data = db.select("data")
+    print(update.effective_chat.id)
     user_id = int(update.effective_user.id)
     chat_id = int(update.effective_chat.id)
     conversacion_id = int(update.message.message_id)
@@ -297,5 +307,6 @@ if __name__ == "__main__":
     dp.add_handler(MessageHandler(Filters.all, echo))
 
     job.run_daily(birthday, time(6, 0, 00, 000000), days=(0, 1, 2, 3, 4, 5, 6))
-    job.run_daily(muditos, time(18, 31, 00, 000000), days=(0, 1, 2, 3, 4, 5, 6))
+    job.run_daily(muditos, time(18, 36, 00, 000000), days=(0, 1, 2, 3, 4, 5, 6))
+    job.run_daily(muditos2, time(17, 36, 00, 000000), days=(0, 1, 2, 3, 4, 5, 6))
     run(updater)
