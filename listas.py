@@ -19,12 +19,14 @@ logger = logging.getLogger()
 
 
 def listas(update: Update, context: CallbackContext):
+    if not update.callback_query:
+        context.user_data["ediciones"] = []
+
+    all_listas = db.select("listas")
+    context.user_data["all_listas"] = all_listas
     if update.message:
-        all_listas = db.select("listas")
-        context.user_data["all_listas"] = all_listas
         id_mensaje = update.message.message_id
     else:
-        all_listas = context.user_data["all_listas"]
         id_mensaje = update.callback_query.message.message_id
 
     chat_id = update.effective_chat.id
@@ -90,7 +92,7 @@ def crear_lista2(update: Update, context: CallbackContext):
     context.bot.deleteMessage(message.chat_id, message.message_id)
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
     context.user_data["oldMessage"] = context.bot.sendMessage(message.chat_id, parse_mode="Markdown",
-                                                              text=f"{update.effective_user.first_name}: Escribe la lista en el siguiento formato:\n**Elemento1**\n**Elemento2** ")
+                                                              text=f"{update.effective_user.first_name}: Escribe la lista en el siguiente formato:\n**Elemento1**\n**Elemento2** ")
     return CREAR_LISTA2
 
 
@@ -99,14 +101,10 @@ def end_crear_lista(update: Update, context: CallbackContext):
 
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
-    text = f"""{update.effective_user.first_name} ha creado la lista:\n<b>{context.user_data["nombre_lista"]}</b>:\n"""
 
     elementos = []
     for id, line in enumerate(update.message.text.splitlines()):
-        text += f"  {id + 1}. <b>{line}</b>\n"
         elementos.append(line)
-
-    context.bot.sendMessage(update.message.chat_id, parse_mode="HTML", text=text)
 
     tipo_elementos = [0] * len(elementos)
     new_lista = pd.Series(
@@ -114,8 +112,14 @@ def end_crear_lista(update: Update, context: CallbackContext):
          "creador": update.effective_user["id"],
          "fecha": datetime.today().strftime('%d/%m/%Y %H:%M'), "id": 0})
     db.insert_lista(new_lista)
-    logger.info(f"""{update.effective_user.first_name} ha creado la lista {context.user_data["nombre_lista"]}""")
+    keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR")),
+                 InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))]]
 
+    text = f"""{update.effective_user.first_name} ha creado la lista:\n{lista_to_text(new_lista)}\n"""
+    logger.info(f"""{update.effective_user.first_name} ha creado la lista {context.user_data["nombre_lista"]}""")
+    context.bot.sendMessage(update.effective_chat.id,
+                            parse_mode="HTML", text=text, reply_markup=InlineKeyboardMarkup(keyboard))
+    context.user_data["ediciones"].append("\n" + text)
     return FINAL_OPTION
 
 
@@ -198,40 +202,55 @@ def end_editar_lista_anadir(update: Update, context: CallbackContext):
         lista.elementos.append(line)
         lista.tipo_elementos.append(0)
 
-    texto = f"{update.effective_user.first_name} ha editado la lista:\n{lista_to_text(lista)}"
+    texto = f"{update.effective_user.first_name} ha añadido elementos a la lista:\n{lista_to_text(lista)}"
 
-    context.bot.sendMessage(update.message.chat_id, parse_mode="HTML", text=texto)
     logger.info(f"""{update.effective_user.first_name} ha editado la lista '{lista.nombre}'""")
     db.update_lista(lista)
+    keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR_EDITAR")),
+                 InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))]]
 
+    context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML", text=texto,
+                            reply_markup=InlineKeyboardMarkup(keyboard))
+    context.user_data["ediciones"].append("\n" + texto)
     return FINAL_OPTION
 
 
 def end_editar_lista_eliminar(update: Update, context: CallbackContext):
     lista = context.user_data["lista"]
     pos_elemento = int(update.callback_query.data.replace("ELIMINAR", ""))
+    texto = f"{update.effective_user.first_name} ha eliminado '{lista.elementos[pos_elemento]}' de la lista:\n{lista_to_text(lista)}"
     lista.elementos.pop(pos_elemento)
     lista.tipo_elementos.pop(pos_elemento)
-    texto = f"{update.effective_user.first_name} ha editado la lista:\n{lista_to_text(lista)}"
 
-    context.bot.sendMessage(update.callback_query.message.chat_id, parse_mode="HTML", text=texto)
-
-    logger.info(f"""{update.effective_user.first_name} ha editado la lista '{lista.nombre}'""")
+    logger.info(
+        f"""{update.effective_user.first_name} ha eliminado '{lista.elementos[pos_elemento]}' de la lista '{lista.nombre}'""")
     db.update_lista(lista)
-    editar_lista_o(update, context)
+
+    keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR_EDITAR")),
+                 InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))]]
+
+    context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML", text=texto,
+                            reply_markup=InlineKeyboardMarkup(keyboard))
+    context.user_data["ediciones"].append("\n" + texto)
+    return FINAL_OPTION
 
 
 def end_editar_lista_marcar(update: Update, context: CallbackContext):
     lista = context.user_data["lista"]
     pos_elemento = int(update.callback_query.data.replace("MARCAR", ""))
     lista.tipo_elementos[pos_elemento] = 1 - lista.tipo_elementos[pos_elemento]
-    # context.bot.deleteMessage(update.callback_query.message.chat_id, update.callback_query.message.message_id)
+    context.bot.deleteMessage(update.callback_query.message.chat_id, update.callback_query.message.message_id)
     texto = f"{update.effective_user.first_name} ha editado la lista:\n{lista_to_text(lista)}"
 
-    context.bot.sendMessage(update.callback_query.message.chat_id, parse_mode="HTML", text=texto)
     db.update_lista(lista)
 
-    editar_lista_o(update, context)
+    keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR_EDITAR")),
+                 InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))]]
+
+    context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML", text=texto,
+                            reply_markup=InlineKeyboardMarkup(keyboard))
+    context.user_data["ediciones"].append("\n" + texto)
+    return FINAL_OPTION
 
 
 def editar_lista_editar(update: Update, context: CallbackContext):
@@ -251,10 +270,16 @@ def end_editar_lista_editar(update: Update, context: CallbackContext):
     lista.elementos[pos_elemento] = update.message.text
     lista.tipo_elementos[pos_elemento] = 0
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
-    texto = f"{update.effective_user.first_name} ha editado la lista:\n {lista_to_text(lista)}"
-    context.bot.sendMessage(update.message.chat_id, parse_mode="HTML", text=texto)
+    texto = f"{update.effective_user.first_name} ha editado el elemento {pos_elemento} de la lista:\n {lista_to_text(lista)}"
     db.update_lista(lista)
-    return ConversationHandler.END
+
+    keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR")),
+                 InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))]]
+
+    context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML", text=texto,
+                            reply_markup=InlineKeyboardMarkup(keyboard))
+    context.user_data["ediciones"].append("\n" + texto)
+    return FINAL_OPTION
 
 
 def eliminar_lista(update: Update, context: CallbackContext):
@@ -262,12 +287,18 @@ def eliminar_lista(update: Update, context: CallbackContext):
     lista = db.delete("listas", id_lista).iloc[0]
     logger.info(f"""{update.effective_user.first_name} ha eliminado la lista '{lista.nombre}'""")
     texto = f"{update.effective_user.first_name} ha eliminado la lista:\n{lista_to_text(lista)}"
-    update.callback_query.edit_message_text(parse_mode="HTML", text=texto)
-    return ConversationHandler.END
+    keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR")),
+                 InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))]]
+
+    update.callback_query.edit_message_text(parse_mode="HTML", text=texto, reply_markup=InlineKeyboardMarkup(keyboard))
+    context.user_data["ediciones"].append("\n" + texto)
+    return FINAL_OPTION
 
 
 def terminar(update: Update, context: CallbackContext):
     update.callback_query.delete_message()
+    context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML", text="\n".join(context.user_data["ediciones"]))
+    context.user_data["ediciones"] = []
     return ConversationHandler.END
 
 
