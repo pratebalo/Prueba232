@@ -43,9 +43,8 @@ def tareas(update: Update, context: CallbackContext):
         part_keyboard.append(InlineKeyboardButton("🖋", callback_data="EDITAR" + str(i)))
         part_keyboard.append(InlineKeyboardButton("🗑", callback_data="ELIMINAR" + str(i)))
         keyboard.append(part_keyboard)
-
-    keyboard.append(InlineKeyboardButton("Crear nueva tarea", callback_data="CREAR"))
-    keyboard.append(InlineKeyboardButton("Terminar", callback_data="TERMINAR"))
+    keyboard.append([InlineKeyboardButton("Crear nueva tarea", callback_data="CREAR")])
+    keyboard.append([InlineKeyboardButton("Terminar", callback_data="TERMINAR")])
     reply_markup = InlineKeyboardMarkup(keyboard)
     # Send message with text and appended InlineKeyboard
     context.bot.sendMessage(chat_id, text, reply_markup=reply_markup)
@@ -170,20 +169,6 @@ def end_creacion(update: Update, context: CallbackContext):
 
 def editar_tarea(update: Update, context: CallbackContext):
     """Show new choice of buttons"""
-    query = update.callback_query
-    query.answer()
-    keyboard = []
-    all_tareas = context.user_data["all_tareas"]
-    for _, tarea in all_tareas.iterrows():
-        keyboard.append([InlineKeyboardButton(tarea.descripcion, callback_data=str(tarea.id))])
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(
-        text="Que tarea quieres editar", reply_markup=reply_markup
-    )
-    return EDITAR_TAREA1
-
-
-def end_edicion(update: Update, context: CallbackContext):
     update.callback_query.edit_message_text(parse_mode="HTML",
                                             text=f"Se ha editado la tarea")
     return ConversationHandler.END
@@ -192,32 +177,16 @@ def end_edicion(update: Update, context: CallbackContext):
 def eliminar_tarea(update: Update, context: CallbackContext):
     query = update.callback_query
     keyboard = []
+
     all_tareas = context.user_data["all_tareas"]
-    for _, tarea in all_tareas.iterrows():
-        keyboard.append([InlineKeyboardButton(tarea.descripcion, callback_data=tarea.id)])
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(
-        text="¿Qué tarea quieres eliminar?", reply_markup=reply_markup
-    )
-    return ELIMINAR_TAREA1
-
-
-def end_eliminacion(update: Update, context: CallbackContext):
-    """Returns `ConversationHandler.END`, which tells the
-    # ConversationHandler that the conversation is over"""
-
-    id_tarea = int(update.callback_query.data)
-    tarea = db.delete("tareas", id_tarea)
+    pos_tarea= int(update.callback_query.data.replace("VER",""))
+    tarea = all_tareas.iloc[pos_tarea]
+    tarea = db.delete("tareas", tarea.id)
     data = context.user_data["data"]
-    if len(tarea) == 0:
-        update.callback_query.edit_message_text(parse_mode="HTML",
-                                                text=f"La tarea ya habia sido eliminada")
-    else:
-        update.callback_query.edit_message_text(parse_mode="HTML",
-                                                text=f"Se ha eliminado la tarea \n<b>{tarea_to_text(tarea.iloc[0], data)}</b>")
+    update.callback_query.edit_message_text(parse_mode="HTML",
+                                           text=f"Se ha eliminado la tarea \n<b>{tarea_to_text(tarea, data)}</b>")
 
     return ConversationHandler.END
-
 
 def tarea_to_text(tarea, data):
     text = f"-<b>{tarea.descripcion}</b>:\n" \
@@ -232,10 +201,10 @@ conv_handler_tareas = ConversationHandler(
     entry_points=[CommandHandler('tareas', tareas)],
     states={
         ELEGIR_TAREA: [
-            CallbackQueryHandler(crear_tarea, pattern='^' + str("CREAR") + '$'),
-            CallbackQueryHandler(editar_tarea, pattern='^' + str("EDITAR") + '$'),
-            CallbackQueryHandler(eliminar_tarea, pattern='^' + str("ELIMINAR") + '$'),
-            CallbackQueryHandler(ver_tarea, pattern='^' + str("VER") + '$')
+            CallbackQueryHandler(ver_tarea, pattern='^VER'),
+            CallbackQueryHandler(crear_tarea, pattern='^CREAR'),
+            CallbackQueryHandler(editar_tarea, pattern='^EDITAR'),
+            CallbackQueryHandler(eliminar_tarea, pattern='^ELIMINAR')
         ],
         CREAR_TAREA1: [CallbackQueryHandler(crear_tarea2)],
         CREAR_TAREA2: [
@@ -243,9 +212,7 @@ conv_handler_tareas = ConversationHandler(
             CallbackQueryHandler(crear_tarea2),
         ],
         CREAR_TAREA3: [CallbackQueryHandler(elegir_fecha2)],
-        CREAR_TAREA4: [MessageHandler(Filters.text & ~Filters.command, end_creacion)],
-        EDITAR_TAREA1: [CallbackQueryHandler(end_edicion)],
-        ELIMINAR_TAREA1: [CallbackQueryHandler(end_eliminacion)]
+        CREAR_TAREA4: [MessageHandler(Filters.text & ~Filters.command, end_creacion)]
     },
     fallbacks=[CommandHandler('tareas', tareas)],
 )
