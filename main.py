@@ -307,6 +307,6 @@ if __name__ == "__main__":
     dp.add_handler(MessageHandler(Filters.all, echo))
 
     job.run_daily(birthday, time(6, 0, 00, 000000), days=(0, 1, 2, 3, 4, 5, 6))
-    job.run_daily(muditos, time(18, 36, 00, 000000), days=(0, 1, 2, 3, 4, 5, 6))
-    job.run_daily(muditos2, time(17, 36, 00, 000000), days=(0, 1, 2, 3, 4, 5, 6))
+    job.run_daily(muditos, time(18, 37, 00, 000000), days=(0, 1, 2, 3, 4, 5, 6))
+    job.run_daily(muditos2, time(17, 37, 00, 000000), days=(0, 1, 2, 3, 4, 5, 6))
     run(updater)
