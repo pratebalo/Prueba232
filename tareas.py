@@ -27,6 +27,8 @@ def tareas(update: Update, context: CallbackContext):
     if update.message:
         context.bot.deleteMessage(update.effective_chat.id, update.message.message_id)
         context.user_data["ediciones"] = []
+    else:
+        context.bot.deleteMessage(update.effective_chat.id, update.callback_query.message.message_id)
     user = update.effective_user
     context.user_data["creador_tarea"] = user["id"]
     logger.info(f"{user.first_name} entro en el comando tareas")
@@ -178,17 +180,26 @@ def end_creacion(update: Update, context: CallbackContext):
 
 def editar_tarea(update: Update, context: CallbackContext):
     """Show new choice of buttons"""
-    update.callback_query.edit_message_text(parse_mode="HTML",
-                                            text=f"Se ha editado la tarea")
+    query = update.callback_query
+
+    data = context.user_data["data"]
+    all_tareas = context.user_data["all_tareas"]
+    pos_tarea = int(query.data.replace("EDITAR", ""))
+    tarea = all_tareas.iloc[pos_tarea]
+    texto = f"{update.effective_user.first_name} ha editado la tarea \n<b>{tarea_to_text(tarea, data)}</b>"
+    keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR")),
+                 InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))]]
+
+    update.callback_query.edit_message_text(parse_mode="HTML", text=texto, reply_markup=InlineKeyboardMarkup(keyboard))
+    context.user_data["ediciones"].append("\n" + texto)
     return FINAL_OPTION
 
 
 def eliminar_tarea(update: Update, context: CallbackContext):
     query = update.callback_query
-    keyboard = []
 
     all_tareas = context.user_data["all_tareas"]
-    pos_tarea = int(update.callback_query.data.replace("ELIMINAR", ""))
+    pos_tarea = int(query.data.replace("ELIMINAR", ""))
     tarea = all_tareas.iloc[pos_tarea]
     db.delete("tareas", tarea.id)
     data = context.user_data["data"]
@@ -197,7 +208,7 @@ def eliminar_tarea(update: Update, context: CallbackContext):
     keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR")),
                  InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))]]
 
-    update.callback_query.edit_message_text(parse_mode="HTML", text=texto, reply_markup=InlineKeyboardMarkup(keyboard))
+    query.edit_message_text(parse_mode="HTML", text=texto, reply_markup=InlineKeyboardMarkup(keyboard))
     return FINAL_OPTION
 
 

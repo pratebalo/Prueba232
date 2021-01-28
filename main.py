@@ -7,6 +7,7 @@ from telegram.ext import (
     CallbackContext,
     PollAnswerHandler,
     MessageHandler,
+    PollHandler,
     Filters,
     Updater
 )
@@ -95,7 +96,6 @@ def muditos(context: CallbackContext):
 
 def echo(update: Update, context: CallbackContext):
     data = db.select("data")
-    print(update)
     user_id = int(update.effective_user.id)
     chat_id = int(update.effective_chat.id)
     conversacion_id = int(update.message.message_id)
@@ -259,8 +259,6 @@ def culos2(update: Update, context: CallbackContext):
     # Tell ConversationHandler that we're in state `FIRST` now
     return ConversationHandler.END
 
-def encuesta(update: Update, context: CallbackContext):
-    print(update)
 
 if __name__ == "__main__":
     load_dotenv()
@@ -299,7 +297,6 @@ if __name__ == "__main__":
 
     dp.add_handler(CommandHandler("random", random_number))
     dp.add_handler(MessageHandler(Filters.all, echo))
-    dp.add_handler(PollAnswerHandler(encuesta))
 
     job.run_daily(birthday, time(6, 0, 00, 000000), days=(0, 1, 2, 3, 4, 5, 6))
     job.run_daily(muditos, time(17, 45, 00, 000000), days=(0, 1, 2, 3, 4, 5, 6))
