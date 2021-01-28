@@ -94,7 +94,7 @@ def muditos(context: CallbackContext):
 
 def echo(update: Update, context: CallbackContext):
     data = db.select("data")
-    print(update.effective_chat.id)
+    print(update)
     user_id = int(update.effective_user.id)
     chat_id = int(update.effective_chat.id)
     conversacion_id = int(update.message.message_id)
