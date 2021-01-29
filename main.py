@@ -99,13 +99,12 @@ def echo(update: Update, context: CallbackContext):
     data = db.select("data")
     user_id = int(update.effective_user.id)
     chat_id = int(update.effective_chat.id)
-    conversacion_id = int(update.message.message_id)
     if chat_id == ID_CONVERSACIONES:
         conversaciones = db.select("conversaciones")
         if user_id == ID_TELEGRAM:
             mensaje = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                               text=f"Se ha iniciado una conversacion: <b>{update.message.text}</b>")
-            db.insert_conversacion(conversacion_id, mensaje.message_id, update.message.text)
+            db.insert_conversacion(chat_id, mensaje.message_id, update.message.text)
         else:
             reply_id = update.message.reply_to_message.message_id
             conversacion = conversaciones[conversaciones.id == reply_id].iloc[0]
