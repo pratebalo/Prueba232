@@ -34,7 +34,7 @@ logging.basicConfig(
 logger = logging.getLogger()
 
 LOQUENDO_1, LOQUENDO_2 = range(2)
-CULOS_1 = range(1)
+ESTADO_UNICO = range(1)
 
 ID_MANITOBA = -1001255856526
 ID_CONVERSACIONES = -1001462256012
@@ -94,6 +94,7 @@ def muditos(context: CallbackContext):
         context.bot.sendMessage(ID_PRUEBAS, parse_mode="HTML",
                                 text=f"""Te echamos de menos <a href="tg://user?id=persona.id">{persona.apodo}</a>""")
 
+
 def echo(update: Update, context: CallbackContext):
     data = db.select("data")
     user_id = int(update.effective_user.id)
@@ -121,12 +122,20 @@ def echo(update: Update, context: CallbackContext):
         fila = fila.iloc[0]
         fila.total_mensajes += 1
         fila.ultimo_mensaje = datetime.today().strftime('%d/%m/%Y %H:%M:S')
+
+        if update.message.sticker:
+            fila.sticker += 1
+            logger.info(
+                f"{fila.apodo} ha enviado el sticker {update.message.sticker.emoji}. Con un total de {fila.total_mensajes} mensajes")
+        elif update.message.text:
+            logger.info(
+                f"{fila.apodo} ha enviado {update.message.text}. Con un total de {fila.total_mensajes} mensajes")
+        else:
+            logger.info(update)
+
         db.update_data(fila)
-        logger.info(
-            f"{fila.apodo} ha enviado {update.message.text}. Con un total de {fila.total_mensajes} mensajes")
     else:
         logger.info(f"{nombre} con id: {user_id} ha enviado {update.message.text}")
-
 
 
 def loquendo(update: Update, context: CallbackContext):
@@ -208,7 +217,7 @@ def culos(update: Update, context: CallbackContext):
     context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, "Enviame la imagen sin bordes")
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
     # Tell ConversationHandler that we're in state `FIRST` now
-    return CULOS_1
+    return ESTADO_UNICO
 
 
 def culos2(update: Update, context: CallbackContext):
@@ -260,6 +269,20 @@ def culos2(update: Update, context: CallbackContext):
     return ConversationHandler.END
 
 
+def pietrobot(update: Update, context: CallbackContext):
+    chat_id=update.effective_chat.id
+    context.bot.deleteMessage(chat_id,update.message.message_id)
+    if not chat_id==ID_MANITOBA:
+        context.bot.sendMessage(chat_id, text="¿Qué texto quieres enviar?")
+        return ESTADO_UNICO
+    else:
+        return ConversationHandler.END
+
+
+def end_pietrobot(update: Update, context: CallbackContext):
+    context.bot.sendMessage(ID_MANITOBA,text="Me ha parecido oir que "+update.message.text)
+    return ConversationHandler.END
+
 if __name__ == "__main__":
     load_dotenv()
     my_bot = Bot(token=TOKEN)
@@ -283,14 +306,22 @@ if __name__ == "__main__":
     conv_handler_culos = ConversationHandler(
         entry_points=[CommandHandler('culos', culos)],
         states={
-            CULOS_1: [MessageHandler(Filters.photo & ~Filters.command, culos2)]
+            ESTADO_UNICO: [MessageHandler(Filters.photo & ~Filters.command, culos2)]
 
         },
         fallbacks=[CommandHandler('culos', culos)],
     )
+    conv_handler_pietrobot = ConversationHandler(
+        entry_points=[CommandHandler('pietrobot', pietrobot)],
+        states={
+            ESTADO_UNICO: [MessageHandler(Filters.text & ~Filters.command, end_pietrobot)]
 
+        },
+        fallbacks=[CommandHandler('pietrobot', pietrobot)],
+    )
     dp.add_handler(listas.conv_handler_listas)
     dp.add_handler(conv_handler_loquendo)
+    dp.add_handler(conv_handler_pietrobot)
     dp.add_handler(conv_handler_culos)
     dp.add_handler(tareas.conv_handler_tareas)
     dp.add_handler(CommandHandler("check", check))
@@ -301,4 +332,3 @@ if __name__ == "__main__":
     job.run_daily(birthday, time(6, 0, 00, 000000), days=(0, 1, 2, 3, 4, 5, 6))
     job.run_daily(muditos, time(17, 45, 00, 000000), days=(0, 1, 2, 3, 4, 5, 6))
     run(updater)
-
