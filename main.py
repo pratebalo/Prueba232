@@ -17,6 +17,7 @@ from PIL import Image, ImageDraw
 import pandas as pd
 from dotenv import load_dotenv
 import random
+import coloredlogs
 import os
 import sys
 import logging
@@ -280,6 +281,7 @@ def pietrobot(update: Update, context: CallbackContext):
 
 
 def end_pietrobot(update: Update, context: CallbackContext):
+
     context.bot.sendMessage(ID_MANITOBA,text="Me ha parecido oir que "+update.message.text)
     return ConversationHandler.END
 
