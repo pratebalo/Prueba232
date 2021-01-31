@@ -5,9 +5,7 @@ from telegram.ext import (
     CallbackQueryHandler,
     ConversationHandler,
     CallbackContext,
-    PollAnswerHandler,
     MessageHandler,
-    PollHandler,
     Filters,
     Updater
 )
@@ -26,6 +24,7 @@ from io import BytesIO
 import database as db
 import listas
 import tareas
+import tesoreria
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -61,20 +60,6 @@ else:
     sys.exit()
 
 
-def end(update: Update, context: CallbackContext):
-    logger.info("PersonaEnd", update.message.text)
-    query = update.callback_query
-    query.answer()
-    query.edit_message_text(text="See you next time!")
-    return ConversationHandler.END
-
-
-def random_number(update: Update, context: CallbackContext):
-    user_id = update.effective_user['id']
-    logger.info(f"El usuario {user_id} ha solicitado un numero aleatorio")
-    number = random.randint(0, 10)
-    context.bot.sendMessage(chat_id=user_id, parse_mode="HTML", text=f"<b>Numero</b> aleatorio:\n{number}")
-
 
 def birthday(context: CallbackContext):
     data = db.select("data")
@@ -102,8 +87,12 @@ def echo(update: Update, context: CallbackContext):
     if chat_id == ID_CONVERSACIONES:
         conversaciones = db.select("conversaciones")
         if user_id == ID_TELEGRAM:
-            mensaje = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
-                                              text=f"Se ha iniciado una conversacion: <b>{update.message.text}</b>")
+            if update.message:
+                mensaje = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
+                                                  text=f"Se ha iniciado una conversacion: <b>{update.message.text}</b>")
+            else:
+                mensaje = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
+                                                  text=f"Se ha iniciado una conversacion: <b>{update.poll.question}</b>")
             db.insert_conversacion(chat_id, mensaje.message_id, update.message.text)
         else:
             reply_id = update.message.reply_to_message.message_id
@@ -202,10 +191,6 @@ def end_loquendo(update: Update, context: CallbackContext):
 
     # Tell ConversationHandler that we're in state `FIRST` now
     return ConversationHandler.END
-
-
-def check(update: Update, context: CallbackContext):
-    context.bot.sendMessage(chat_id=2, text="Estoy probando cosas, os van a llegar un par")
 
 
 def culos(update: Update, context: CallbackContext):
@@ -320,13 +305,12 @@ if __name__ == "__main__":
         fallbacks=[CommandHandler('pietrobot', pietrobot)],
     )
     dp.add_handler(listas.conv_handler_listas)
+    dp.add_handler(tesoreria.conv_handler_tesoreria)
     dp.add_handler(conv_handler_loquendo)
     dp.add_handler(conv_handler_pietrobot)
     dp.add_handler(conv_handler_culos)
     dp.add_handler(tareas.conv_handler_tareas)
-    dp.add_handler(CommandHandler("check", check))
 
-    dp.add_handler(CommandHandler("random", random_number))
     dp.add_handler(MessageHandler(Filters.all, echo))
 
     job.run_daily(birthday, time(6, 0, 00, 000000), days=(0, 1, 2, 3, 4, 5, 6))

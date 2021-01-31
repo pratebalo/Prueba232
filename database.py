@@ -13,12 +13,7 @@ def insert_lista(lista):
         INSERT INTO listas
         (nombre, elementos, tipo_elementos, fecha, creador)
         VALUES ( '{lista.nombre}', ARRAY{lista.elementos}, ARRAY{list(map(int, lista.tipo_elementos))}, '{lista.fecha}',{lista.creador});"""
-    connection = psycopg2.connect(DATABASE_URL)
-    cursor = connection.cursor()
-    cursor.execute(query)
-    connection.commit()
-    cursor.close()
-    connection.close()
+    connect(query)
 
 
 def insert_tarea(tarea):
@@ -26,12 +21,7 @@ def insert_tarea(tarea):
         INSERT INTO tareas
         (descripcion, personas, fecha, creador)
         VALUES ( '{tarea.descripcion}', ARRAY{list(map(int, tarea.personas))}, '{tarea.fecha}',{tarea.creador});"""
-    connection = psycopg2.connect(DATABASE_URL)
-    cursor = connection.cursor()
-    cursor.execute(query)
-    connection.commit()
-    cursor.close()
-    connection.close()
+    connect(query)
 
 
 def insert_conversacion(id, mensaje_id, nombre):
@@ -39,12 +29,7 @@ def insert_conversacion(id, mensaje_id, nombre):
                 (id, mensaje_id,nombre, total_mensajes)
                 VALUES ({id},{mensaje_id},'{nombre}',{0});"""
 
-    connection = psycopg2.connect(DATABASE_URL)
-    cursor = connection.cursor()
-    cursor.execute(query)
-    connection.commit()
-    cursor.close()
-    connection.close()
+    connect(query)
 
 
 def update_conversacion(conversacion):
@@ -54,12 +39,7 @@ def update_conversacion(conversacion):
             total_mensajes ={conversacion.total_mensajes},
             mensaje_id = {conversacion.mensaje_id}
         WHERE id={conversacion.id};"""
-    connection = psycopg2.connect(DATABASE_URL)
-    cursor = connection.cursor()
-    cursor.execute(query)
-    connection.commit()
-    cursor.close()
-    connection.close()
+    connect(query)
 
 
 def select(table):
@@ -87,12 +67,7 @@ def update_tarea(tarea):
         (descripcion, personas, fecha, creador)
         VALUES ( '{tarea.descripcion}', ARRAY{list(map(int, tarea.personas))}, '{tarea.fecha}',{tarea.creador})
         WHERE id = {tarea.id};"""
-    connection = psycopg2.connect(DATABASE_URL)
-    cursor = connection.cursor()
-    cursor.execute(query)
-    connection.commit()
-    cursor.close()
-    connection.close()
+    connect(query)
 
 
 def update_lista(lista):
@@ -101,12 +76,7 @@ def update_lista(lista):
         SET (nombre, elementos, tipo_elementos, fecha, creador) =
         ( '{lista.nombre}', ARRAY{lista.elementos}, ARRAY{list(map(int, lista.tipo_elementos))}, '{lista.fecha}',{lista.creador})
         WHERE id = {lista.id};"""
-    connection = psycopg2.connect(DATABASE_URL)
-    cursor = connection.cursor()
-    cursor.execute(query)
-    connection.commit()
-    cursor.close()
-    connection.close()
+    connect(query)
 
 
 def update_data(data):
@@ -114,6 +84,26 @@ def update_data(data):
         UPDATE data
         SET ultimo_mensaje='{data.ultimo_mensaje}', total_mensajes={data.total_mensajes}, sticker={data.sticker}
         WHERE id={data.id};"""
+    connect(query)
+
+
+def insert_bote(persona,cantidad,total,motivo):
+    query = f"""INSERT INTO bote
+        (persona, cantidad, total, motivo)
+         VALUES ({persona}, {cantidad}, {total}, '{motivo}');"""
+
+    connect(query)
+
+
+def insert_gastos(persona, motivo, cantidad):
+    query = f"""INSERT INTO gastos    
+    (persona, motivo, cantidad, fecha)
+         VALUES ({persona}, '{motivo}', {cantidad});"""
+
+    connect(query)
+
+
+def connect(query):
     connection = psycopg2.connect(DATABASE_URL)
     cursor = connection.cursor()
     cursor.execute(query)
