@@ -70,11 +70,11 @@ def bote3(update: Update, context: CallbackContext):
                        bote_actual,
                        update.message.text)
         if context.user_data["tipo"] == "+":
-            mensaje_tesorera = f"{update.effective_user.first_name} ha metido {context.user_data['cantidad']}€ en el bote.\n" \
-                               f"Hay {bote_actual}€ en el bote"
+            mensaje_tesorera = f"{update.effective_user.first_name} ha metido {context.user_data['cantidad']}€ " \
+                               f"en el bote con el concepto '{update.message.text}'.\nHay {bote_actual}€ en el bote"
         else:
-            mensaje_tesorera = f"{update.effective_user.first_name} ha sacado {context.user_data['cantidad']}€ en el bote.\n" \
-                               f"Hay {bote_actual}€ en el bote"
+            mensaje_tesorera = f"{update.effective_user.first_name} ha sacado {context.user_data['cantidad']}€ " \
+                               f"en el bote con el concepto '{update.message.text}'.\nHay {bote_actual}€ en el bote"
         mensaje_usuario = f"Bote actualizado.\nHay  {bote_actual}€ en el bote"
 
     context.bot.deleteMessage(update.effective_chat.id, context.user_data["oldMessage"].message_id)
