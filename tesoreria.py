@@ -7,12 +7,9 @@ from telegram.ext import (
     MessageHandler,
     Filters
 )
-import pandas as pd
 import logging
 import database as db
-import random
-from datetime import date
-from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
+import re
 
 # Stages
 OPCION, BOTE, BOTE2, FINAL_OPTION = range(4)
@@ -49,7 +46,7 @@ def bote(update: Update, context: CallbackContext):
 
 
 def bote2(update: Update, context: CallbackContext):
-    context.user_data["cantidad"] = update.message.text.replace(",", ".")
+    context.user_data["cantidad"] = re.sub('[^\d.]', '', update.message.text.replace(",", "."))
     context.bot.deleteMessage(update.effective_chat.id, context.user_data["oldMessage"].message_id)
     context.bot.deleteMessage(update.effective_chat.id, update.message.message_id)
     context.user_data["oldMessage"] = context.bot.sendMessage(update.effective_chat.id, "¿Cúal es el motivo?")
