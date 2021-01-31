@@ -87,14 +87,9 @@ def echo(update: Update, context: CallbackContext):
     if chat_id == ID_CONVERSACIONES:
         conversaciones = db.select("conversaciones")
         if user_id == ID_TELEGRAM:
-            if update.message.poll:
-                mensaje = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
-                                                  text=f"Se ha iniciado una conversacion: <b>{update.message.poll.question}</b>")
-                db.insert_conversacion(chat_id, mensaje.message_id, update.message.poll.question)
-            else:
-                mensaje = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
-                                                  text=f"Se ha iniciado una conversacion: <b>{update.message.text}</b>")
-                db.insert_conversacion(chat_id, mensaje.message_id, update.message.text)
+            mensaje = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
+                                              text=f"Se ha iniciado una conversacion: <b>{update.message.text}</b>")
+            db.insert_conversacion(update.message.message_id, mensaje.message_id, update.message.text)
         else:
             reply_id = update.message.reply_to_message.message_id
             conversacion = conversaciones[conversaciones.id == reply_id].iloc[0]
