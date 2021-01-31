@@ -58,7 +58,7 @@ def bote2(update: Update, context: CallbackContext):
 
 
 def bote3(update: Update, context: CallbackContext):
-    if context.user_data["tipo"] == "gasto":
+    if context.user_data["tipo"] == "GASTO":
         cantidad = float(context.user_data["cantidad"])
         db.insert_gastos(update.effective_user.id,
                          update.message.text,
@@ -74,10 +74,10 @@ def bote3(update: Update, context: CallbackContext):
                        update.message.text)
         if context.user_data["tipo"] == "+":
             mensaje_tesorera = f"{update.effective_user.first_name} ha metido {context.user_data['cantidad']}€ en el bote.\n" \
-                               f"Hay  {bote_actual}€ en el bote"
+                               f"Hay {bote_actual}€ en el bote"
         else:
             mensaje_tesorera = f"{update.effective_user.first_name} ha sacado {context.user_data['cantidad']}€ en el bote.\n" \
-                               f"Hay  {bote_actual}€ en el bote"
+                               f"Hay {bote_actual}€ en el bote"
         mensaje_usuario = f"Bote actualizado.\nHay  {bote_actual}€ en el bote"
 
     context.bot.deleteMessage(update.effective_chat.id, context.user_data["oldMessage"].message_id)

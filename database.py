@@ -97,7 +97,7 @@ def insert_bote(persona,cantidad,total,motivo):
 
 def insert_gastos(persona, motivo, cantidad):
     query = f"""INSERT INTO gastos    
-    (persona, motivo, cantidad, fecha)
+    (persona, motivo, cantidad)
          VALUES ({persona}, '{motivo}', {cantidad});"""
 
     connect(query)
