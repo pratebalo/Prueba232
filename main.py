@@ -71,11 +71,11 @@ def birthday(context: CallbackContext):
                         Cumpleaños felicc""", lang="it")
         tts.save("audio.mp3")
 
-        context.bot.sendMessage(chat_id=ID_PRUEBAS, parse_mode="HTML",
+        context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                 text=f"Felicidades <b>{cumpleanero.apodo}</b>!!!!!")
-        context.bot.sendSticker(chat_id=ID_PRUEBAS, sticker="CAACAgIAAx0CTey1gAACBjlgGZSaKItIUqHqSeZaeMll-cdb-QACHQADr8ZRGlyO-uEKz2-8HgQ")
-        context.bot.sendAudio(chat_id=ID_PRUEBAS, audio=open("audio.mp3", "rb"))
-        context.bot.sendMessage(chat_id=ID_PRUEBAS, parse_mode="HTML",
+        context.bot.sendSticker(chat_id=ID_MANITOBA, sticker="CAACAgIAAx0CTey1gAACBjlgGZSaKItIUqHqSeZaeMll-cdb-QACHQADr8ZRGlyO-uEKz2-8HgQ")
+        context.bot.sendAudio(chat_id=ID_MANITOBA, audio=open("audio.mp3", "rb"))
+        context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                 text=f"Por seeeeerrrr tan bueeeennaa muchaaaaachaaaaa 🎉🎊🎈")
 
 
