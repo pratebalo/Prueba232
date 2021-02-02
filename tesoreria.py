@@ -22,18 +22,18 @@ logger = logging.getLogger()
 
 
 def tesoreria(update: Update, context: CallbackContext):
-    context.user_data["bote"] = db.select("bote")
+    context.user_data["bote"] = db.select("botes")
     gastos = db.select("gastos")
     logger.warning(f"{update.effective_user.first_name} entro en el comando tesoreria")
     # data = db.select("data")
     update.message.delete()
-    text = "¿Qué quieres hacer?\n"
+    text = "<b>Tesoreria</b>\n¿Qué quieres hacer?\n"
     keyboard = [[InlineKeyboardButton("Meter dinero en el bote", callback_data="+")],
                 [InlineKeyboardButton("Sacar dinero del bote", callback_data="-")],
                 [InlineKeyboardButton("Comunicar un gasto", callback_data="GASTO")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    context.bot.sendMessage(update.effective_chat.id, text, reply_markup=reply_markup)
+    context.bot.sendMessage(update.effective_chat.id, text, parse_mode="HTML", reply_markup=reply_markup)
     return OPCION
 
 
@@ -74,8 +74,8 @@ def bote3(update: Update, context: CallbackContext):
                                f"en el bote con el concepto '{update.message.text}'.\nHay {bote_actual}€ en el bote"
         else:
             mensaje_tesorera = f"{update.effective_user.first_name} ha sacado {context.user_data['cantidad']}€ " \
-                               f"en el bote con el concepto '{update.message.text}'.\nHay {bote_actual}€ en el bote"
-        mensaje_usuario = f"Bote actualizado.\nHay  {bote_actual}€ en el bote"
+                               f"del bote con el concepto '{update.message.text}'.\nHay {bote_actual}€ en el bote"
+        mensaje_usuario = f"Bote actualizado.\nHay {bote_actual}€ en el bote"
 
     context.bot.deleteMessage(update.effective_chat.id, context.user_data["oldMessage"].message_id)
     context.bot.deleteMessage(update.effective_chat.id, update.message.message_id)

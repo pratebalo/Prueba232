@@ -82,13 +82,13 @@ def update_lista(lista):
 def update_data(data):
     query = f"""set DateStyle='ISO, DMY';
         UPDATE data
-        SET ultimo_mensaje='{data.ultimo_mensaje}', total_mensajes={data.total_mensajes}, sticker={data.sticker}
+        SET ultimo_mensaje='{data.ultimo_mensaje}', total_mensajes={data.total_mensajes}, sticker={data.sticker}, gif={data.gif}
         WHERE id={data.id};"""
     connect(query)
 
 
 def insert_bote(persona,cantidad,total,motivo):
-    query = f"""INSERT INTO bote
+    query = f"""INSERT INTO botes
         (persona, cantidad, total, motivo)
          VALUES ({persona}, {cantidad}, {total}, '{motivo}');"""
 

@@ -43,7 +43,6 @@ load_dotenv()
 TOKEN = os.environ.get("TOKEN")
 mode = os.environ.get("mode")
 
-
 if mode == "dev":
     def run(updater):
         updater.start_polling()
@@ -58,7 +57,6 @@ elif mode == "prod":
         updater.bot.set_webhook(f"https://{HEROKU_APP_NAME}.herokuapp.com/{TOKEN}")
 else:
     sys.exit()
-
 
 
 def birthday(context: CallbackContext):
@@ -106,18 +104,26 @@ def echo(update: Update, context: CallbackContext):
         fila = fila.iloc[0]
         fila.total_mensajes += 1
         fila.ultimo_mensaje = datetime.today().strftime('%d/%m/%Y %H:%M:S')
-
-        if update.message.sticker:
-            fila.sticker += 1
-            logger.info(
-                f"{fila.apodo} ha enviado el sticker {update.message.sticker.emoji}. Con un total de {fila.total_mensajes} mensajes")
-        elif update.message.text:
-            logger.info(
-                f"{fila.apodo} ha enviado {update.message.text}. Con un total de {fila.total_mensajes} mensajes")
+        if update.message:
+            db.update_data(fila)
+            if update.message.sticker:
+                fila.sticker += 1
+                logger.info(
+                    f"{fila.apodo} ha enviado el sticker {update.message.sticker.emoji}. Con un total de {fila.total_mensajes} mensajes")
+            elif update.message.text:
+                logger.info(
+                    f"{fila.apodo} ha enviado {update.message.text}. Con un total de {fila.total_mensajes} mensajes")
+            elif update.message.animation:
+                fila.gif += 1
+                logger.info(f"{fila.apodo} ha enviado un gif. Con un total de {fila.total_mensajes} mensajes")
+            else:
+                logger.info(update.message)
+        elif update.edited_message:
+            logger.info(f"{fila.apodo} ha editado el mensaje por {update.edited_message.text}. Con un total de {fila.total_mensajes} mensajes")
         else:
             logger.info(update)
 
-        db.update_data(fila)
+
     else:
         logger.info(f"{nombre} con id: {user_id} ha enviado {update.message.text}")
 
@@ -250,9 +256,9 @@ def culos2(update: Update, context: CallbackContext):
 
 
 def pietrobot(update: Update, context: CallbackContext):
-    chat_id=update.effective_chat.id
-    context.bot.deleteMessage(chat_id,update.message.message_id)
-    if not chat_id==ID_MANITOBA:
+    chat_id = update.effective_chat.id
+    context.bot.deleteMessage(chat_id, update.message.message_id)
+    if not chat_id == ID_MANITOBA:
         context.bot.sendMessage(chat_id, text="¿Qué texto quieres enviar?")
         return ESTADO_UNICO
     else:
@@ -260,9 +266,9 @@ def pietrobot(update: Update, context: CallbackContext):
 
 
 def end_pietrobot(update: Update, context: CallbackContext):
-
-    context.bot.sendMessage(ID_MANITOBA,text="Me ha parecido oir que "+update.message.text)
+    context.bot.sendMessage(ID_MANITOBA, text="Me ha parecido oir que " + update.message.text)
     return ConversationHandler.END
+
 
 if __name__ == "__main__":
     load_dotenv()
