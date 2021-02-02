@@ -65,8 +65,19 @@ def birthday(context: CallbackContext):
     cumpleaneros = data[data.cumple == fecha]
 
     for _, cumpleanero in cumpleaneros.iterrows():
-        context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
-                                text=f"Felicidades <b>{cumpleanero.nombre}</b>")
+        tts = gTTS("""Cumpleaños felicc
+                        Cumpleaños felicc
+                        Te deseamos todos
+                        Cumpleaños felicc""", lang="it")
+        tts.save("audio.mp3")
+
+        context.bot.sendMessage(chat_id=ID_PRUEBAS, parse_mode="HTML",
+                                text=f"Felicidades <b>{cumpleanero.apodo}</b>!!!!!")
+        context.bot.sendSticker(chat_id=ID_PRUEBAS, sticker="CAACAgIAAx0CTey1gAACBjlgGZSaKItIUqHqSeZaeMll-cdb-QACHQADr8ZRGlyO-uEKz2-8HgQ")
+        context.bot.sendAudio(chat_id=ID_PRUEBAS, audio=open("audio.mp3", "rb"))
+        context.bot.sendMessage(chat_id=ID_PRUEBAS, parse_mode="HTML",
+                                text=f"Por seeeeerrrr tan bueeeennaa muchaaaaachaaaaa 🎉🎊🎈")
+
 
 
 def muditos(context: CallbackContext):
@@ -76,6 +87,7 @@ def muditos(context: CallbackContext):
     for _, persona in data[data.ultimo_mensaje < (hoy - timedelta(23))].iterrows():
         context.bot.sendMessage(ID_PRUEBAS, parse_mode="HTML",
                                 text=f"""Te echamos de menos <a href="tg://user?id=persona.id">{persona.apodo}</a>""")
+
 
 
 def echo(update: Update, context: CallbackContext):
@@ -119,7 +131,8 @@ def echo(update: Update, context: CallbackContext):
             else:
                 logger.info(update.message)
         elif update.edited_message:
-            logger.info(f"{fila.apodo} ha editado el mensaje por {update.edited_message.text}. Con un total de {fila.total_mensajes} mensajes")
+            logger.info(
+                f"{fila.apodo} ha editado el mensaje por {update.edited_message.text}. Con un total de {fila.total_mensajes} mensajes")
         else:
             logger.info(update)
 
@@ -315,6 +328,7 @@ if __name__ == "__main__":
 
     dp.add_handler(MessageHandler(Filters.all, echo))
 
-    job.run_daily(birthday, time(6, 0, 00, 000000), days=(0, 1, 2, 3, 4, 5, 6))
-    job.run_daily(muditos, time(17, 45, 00, 000000), days=(0, 1, 2, 3, 4, 5, 6))
+    job.run_daily(birthday, time(18, 18, 12, 000000))
+    job.run_daily(muditos, time(17, 54, 00, 000000))
+    job.run_daily(tareas.recoradar_tareas, time(9, 00, 00, 000000), days=(1,))
     run(updater)

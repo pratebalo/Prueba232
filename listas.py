@@ -13,15 +13,12 @@ import logging
 import database as db
 
 ELEGIR_LISTA, CREAR_LISTA1, CREAR_LISTA2, EDITAR_LISTA1, EDITAR_LISTA2, EDITAR_LISTA_A, EDITAR_LISTA_E, \
-EDITAR_LISTA_O, FINAL_OPTION = range(9)
+FINAL_OPTION = range(8)
 ID_MANITOBA = -1001255856526
 logger = logging.getLogger()
 
 
 def listas(update: Update, context: CallbackContext):
-    if not update.callback_query:
-        context.user_data["ediciones"] = []
-
     all_listas = db.select("listas")
     context.user_data["all_listas"] = all_listas
     if update.message:
@@ -125,7 +122,7 @@ def end_crear_lista(update: Update, context: CallbackContext):
 
 def editar_lista(update: Update, context: CallbackContext):
     query = update.callback_query
-    all_listas = context.user_data["all_listas"]
+    all_listas = db.select("listas")
     id_lista = int(update.callback_query.data.replace("EDITAR", ""))
     lista = all_listas[all_listas.id == id_lista].iloc[0]
     context.user_data["lista"] = lista
@@ -155,34 +152,6 @@ def editar_lista(update: Update, context: CallbackContext):
     return EDITAR_LISTA2
 
 
-def editar_lista_o(update: Update, context: CallbackContext):
-    query = update.callback_query
-    lista = context.user_data["lista"]
-
-    logger.info(f"""{update.effective_user.first_name} ha elegido editar la lista '{lista.nombre}'""")
-
-    keyboard = []
-    for i, (elem, tipo) in enumerate(zip(lista.elementos, lista.tipo_elementos)):
-        line_keyboard = [InlineKeyboardButton(str(i + 1), callback_data="NADA"),
-                         InlineKeyboardButton("📝", callback_data="EDITAR" + str(i))]
-        if tipo == 0:
-            line_keyboard.append(InlineKeyboardButton("✅", callback_data="MARCAR" + str(i)))
-        else:
-            line_keyboard.append(InlineKeyboardButton("👌🏽", callback_data="NADA"))
-        line_keyboard.append(InlineKeyboardButton("🗑", callback_data="ELIMINAR" + str(i)))
-        keyboard.append(line_keyboard)
-    keyboard.append([InlineKeyboardButton("Añadir nuevo elemento", callback_data=str("AÑADIR"))])
-    keyboard.append([InlineKeyboardButton("Atras", callback_data=str("ATRAS")),
-                     InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))])
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    query.delete_message()
-
-    texto = f"{update.effective_user.first_name}: ¿Que quieres hacer?:\n{lista_to_text(lista)}"
-    context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML", text=texto,
-                            reply_markup=reply_markup)
-
-    return EDITAR_LISTA2
-
 
 def editar_lista_anadir(update: Update, context: CallbackContext):
     # Añadir elementos
@@ -206,6 +175,7 @@ def end_editar_lista_anadir(update: Update, context: CallbackContext):
 
     logger.info(f"""{update.effective_user.first_name} ha editado la lista '{lista.nombre}'""")
     db.update_lista(lista)
+    context.user_data["lista"] = lista
     keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR_EDITAR")),
                  InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))]]
 
@@ -218,19 +188,18 @@ def end_editar_lista_anadir(update: Update, context: CallbackContext):
 def end_editar_lista_eliminar(update: Update, context: CallbackContext):
     lista = context.user_data["lista"]
     pos_elemento = int(update.callback_query.data.replace("ELIMINAR", ""))
-    texto = f"{update.effective_user.first_name} ha eliminado '{lista.elementos[pos_elemento]}' de la lista:\n{lista_to_text(lista)}"
-    lista.elementos.pop(pos_elemento)
-    lista.tipo_elementos.pop(pos_elemento)
-
     logger.info(
         f"""{update.effective_user.first_name} ha eliminado '{lista.elementos[pos_elemento]}' de la lista '{lista.nombre}'""")
+    elemento_eliminado = lista.elementos[pos_elemento]
+    lista.elementos.pop(pos_elemento)
+    lista.tipo_elementos.pop(pos_elemento)
     db.update_lista(lista)
-
+    context.user_data["lista"] = lista
+    texto = f"{update.effective_user.first_name} ha eliminado '{elemento_eliminado}' de la lista:\n{lista_to_text(lista)}"
     keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR_EDITAR")),
                  InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))]]
 
-    context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML", text=texto,
-                            reply_markup=InlineKeyboardMarkup(keyboard))
+    update.callback_query.edit_message_text(parse_mode="HTML", text=texto, reply_markup=InlineKeyboardMarkup(keyboard))
     context.user_data["ediciones"].append("\n" + texto)
     return FINAL_OPTION
 
@@ -243,6 +212,7 @@ def end_editar_lista_marcar(update: Update, context: CallbackContext):
     texto = f"{update.effective_user.first_name} ha editado la lista:\n{lista_to_text(lista)}"
 
     db.update_lista(lista)
+    context.user_data["lista"] = lista
 
     keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR_EDITAR")),
                  InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))]]
@@ -272,7 +242,7 @@ def end_editar_lista_editar(update: Update, context: CallbackContext):
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
     texto = f"{update.effective_user.first_name} ha editado el elemento {pos_elemento} de la lista:\n {lista_to_text(lista)}"
     db.update_lista(lista)
-
+    context.user_data["lista"] = lista
     keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR")),
                  InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))]]
 
@@ -299,6 +269,9 @@ def terminar(update: Update, context: CallbackContext):
     update.callback_query.delete_message()
     context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML", text="\n".join(context.user_data["ediciones"]))
     context.user_data["ediciones"] = []
+    context.user_data["lista"] = []
+    context.user_data["all_listas"] = []
+    context.user_data["data"] = []
     return ConversationHandler.END
 
 

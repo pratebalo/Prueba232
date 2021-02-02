@@ -23,6 +23,15 @@ ID_MANITOBA = -1001255856526
 logger = logging.getLogger()
 
 
+def recoradar_tareas(context: CallbackContext):
+    all_tareas = db.select("tareas")
+    data = db.select("data")
+    for _, tarea in all_tareas.iterrows():
+        for persona in tarea.personas:
+            context.bot.sendMessage(chat_id=persona, parse_mode="HTML",
+                                    text=f"Tienes esta tarea pendiente:\n{tarea_to_text(tarea, data)}")
+
+
 def tareas(update: Update, context: CallbackContext):
     if update.message:
         context.bot.deleteMessage(update.effective_chat.id, update.message.message_id)
