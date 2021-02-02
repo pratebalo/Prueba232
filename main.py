@@ -79,7 +79,6 @@ def birthday(context: CallbackContext):
                                 text=f"Por seeeeerrrr tan bueeeennaa muchaaaaachaaaaa 🎉🎊🎈")
 
 
-
 def muditos(context: CallbackContext):
     data = db.select("data")
     hoy = datetime.today()
@@ -158,9 +157,7 @@ def loquendo2(update: Update, context: CallbackContext):
     idi = ['af', 'ar', 'bn', 'bs', 'ca', 'cs', 'cy', 'da', 'de', 'el', 'en', 'eo', 'es', 'et', 'fi', 'fr', 'gu',
            'hi', 'hr', 'hu', 'hy', 'id', 'is', 'it', 'ja', 'jw', 'km', 'kn', 'ko', 'la', 'lv', 'mk', 'ml', 'mr',
            'my', 'ne', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'si', 'sk', 'sq', 'sr', 'su', 'sv', 'sw', 'ta', 'te',
-           'th', 'tl', 'tr', 'uk', 'ur', 'vi', 'zh-CN', 'zh-cn', 'zh-tw', 'en-us', 'en-ca', 'en-uk', 'en-gb',
-           'en-au', 'en-gh', 'en-in', 'en-ie', 'en-nz', 'en-ng', 'en-ph', 'en-za', 'en-tz', 'fr-ca', 'fr-fr',
-           'pt-br', 'pt-pt', 'es-es', 'es-us', ]
+           'th', 'tl', 'tr', 'uk', 'ur', 'vi']
     idiomas = ['Afrikaans', 'Arabic', 'Bengali', 'Bosnian', 'Catalan', 'Czech', 'Welsh', 'Danish', 'German', 'Greek',
                'English', 'Esperanto', 'Spanish', 'Estonian', 'Finnish', 'French', 'Gujarati', 'Hindi', 'Croatian',
                'Hungarian', 'Armenian', 'Indonesian', 'Icelandic', 'Italian', 'Japanese', 'Javanese', 'Khmer',
@@ -168,12 +165,7 @@ def loquendo2(update: Update, context: CallbackContext):
                'Korean', 'Latin', 'Latvian', 'Macedonian', 'Malayalam', 'Marathi', 'Myanmar', 'Nepali', 'Dutch',
                'Norwegian', 'Polish', 'Portuguese', 'Romanian', 'Russian', 'Sinhala', 'Slovak', 'Albanian', 'Serbian',
                'Sundanese', 'Swedish', 'Swahili', 'Tamil', 'Telugu', 'Thai', 'Filipino', 'Turkish', 'Ukrainian', 'Urdu',
-               'Vietnamese', 'Chinese', 'Mandarin Ch', 'Mandarin Tw', '(US)',
-               '(Canada)', '(UK)', '(UK)', '(Australia)', '(Ghana)',
-               '(India)', 'English (Ireland)', 'English (New Zealand)', 'English (Nigeria)',
-               '(Philippines)', '(South Africa)', '(Tanzania)', 'French CAN',
-               'French', 'Portuguese Br', 'Portuguese Pt', 'Español',
-               'Spanish USA', ]
+               'Vietnamese']
     part_keyboard = []
     keyboard = []
     for i, (lang, lg) in enumerate(zip(idiomas, idi)):
@@ -328,7 +320,7 @@ if __name__ == "__main__":
 
     dp.add_handler(MessageHandler(Filters.all, echo))
 
-    job.run_daily(birthday, time(18, 18, 12, 000000))
+    job.run_daily(birthday, time(6, 00, 00, 000000))
     job.run_daily(muditos, time(17, 54, 00, 000000))
     job.run_daily(tareas.recoradar_tareas, time(9, 00, 00, 000000), days=(1,))
     run(updater)
