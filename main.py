@@ -84,7 +84,7 @@ def muditos(context: CallbackContext):
     hoy = datetime.today()
     data.ultimo_mensaje = pd.to_datetime(data.ultimo_mensaje)
     for _, persona in data[data.ultimo_mensaje < (hoy - timedelta(23))].iterrows():
-        context.bot.sendMessage(ID_PRUEBAS, parse_mode="HTML",
+        context.bot.sendMessage(ID_MANITOBA, parse_mode="HTML",
                                 text=f"""Te echamos de menos <a href="tg://user?id=persona.id">{persona.apodo}</a>""")
 
 

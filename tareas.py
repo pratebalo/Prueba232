@@ -17,9 +17,9 @@ from telegram_bot_calendar import DetailedTelegramCalendar, DAY
 # Stages
 ELEGIR_TAREA, CREAR_TAREA1, CREAR_TAREA2, CREAR_TAREA3, CREAR_TAREA4, CREAR_TAREA5, FINAL_OPTION = range(7)
 # pruebas
-ID_MANITOBA = -1001307358592
+# ID_MANITOBA = -1001307358592
 # llavens
-# ID_MANITOBA = -1001255856526
+ID_MANITOBA = -1001255856526
 logger = logging.getLogger()
 
 your_translation_months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre",
