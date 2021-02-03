@@ -132,13 +132,12 @@ def echo(update: Update, context: CallbackContext):
                     f"{fila.apodo} ha enviado el documento {update.message.document.file_name} tipo "
                     f"{update.message.document.mime_type}. Con un total de {fila.total_mensajes} mensajes")
             else:
-
-                logger.info("update.message desconocido: ", update.message)
+                logger.info("update.message desconocido:  {update.message}")
         elif update.edited_message:
             logger.info(
                 f"{fila.apodo} ha editado el mensaje por {update.edited_message.text}. Con un total de {fila.total_mensajes} mensajes")
         else:
-            logger.info("update desconocido: ",update)
+            logger.info("update desconocido: {update}")
 
     else:
         logger.info(f"{nombre} con id: {user_id} ha enviado {update.message.text}")
@@ -209,7 +208,7 @@ def culos(update: Update, context: CallbackContext):
     user = update.effective_user
     logger.info(f"User {user.first_name} entro en el comando culos")
     # Send message with text and appended InlineKeyboard
-    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, "Enviame la imagen sin bordes")
+    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, "Enviame la imagen de una cara sin bordes")
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
     # Tell ConversationHandler that we're in state `FIRST` now
     return ESTADO_UNICO

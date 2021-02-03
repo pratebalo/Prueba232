@@ -39,10 +39,6 @@ class MyTranslationCalendar(DetailedTelegramCalendar):
 
     empty_nav_button = "❌"
     middle_button_day = "{month}"
-    # prev_button = "🔙"
-    # next_button = "🔜"
-    # prev_button = "⬅"
-    # next_button = "➡"
     prev_button = "⏪"
     next_button = "⏩"
 
