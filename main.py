@@ -88,12 +88,12 @@ def birthday(context: CallbackContext):
                     clap clap clapnsnsns clap clapppppp clapsssss 
                     plassss Plassss plasssss
                     """, lang="it")
-        tts.save(f"felicitacion de su majestad para {cumpleanero.apodo}.mp3")
+        tts.save(f"Felicitacion de su majestad para {cumpleanero.apodo}.mp3")
 
         context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                 text=f"Felicidades <b>{cumpleanero.apodo}</b>!!!!!")
         context.bot.sendSticker(chat_id=ID_MANITOBA, sticker="CAACAgIAAx0CTey1gAACBjlgGZSaKItIUqHqSeZaeMll-cdb-QACHQADr8ZRGlyO-uEKz2-8HgQ")
-        context.bot.sendAudio(chat_id=ID_MANITOBA, audio=open(f"felicitacion de su majestad para {cumpleanero.apodo}.mp3", "rb"))
+        context.bot.sendAudio(chat_id=ID_MANITOBA, audio=open(f"Felicitacion de su majestad para {cumpleanero.apodo}.mp3", "rb"))
         context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                 text=f"Por seeeeerrrr tan bueeeennaa muchaaaaachaaaaa 🎉🎊🎈")
 
@@ -236,41 +236,41 @@ def culos(update: Update, context: CallbackContext):
 
 def culos2(update: Update, context: CallbackContext):
 
-    # im1 = Image.open('mono.jpg')
-    # url = context.bot.get_file(file_id=update.message.photo[-1].file_id).file_path
-    # response = requests.get(url)
-    # im2 = Image.open(BytesIO(response.content))
-    # size = 150, 150
-    # im2.thumbnail(size, Image.ANTIALIAS)
-    # x, y = im2.size
-    # eX, eY = 90, 130  # Size of Bounding Box for ellipse
-    # bbox = (x / 2 - eX / 2, y / 2 - eY / 2, x / 2 + eX / 2, y / 2 + eY / 2)
-    #
-    # mask_im = Image.new("L", im2.size, 0)
-    # draw = ImageDraw.Draw(mask_im)
-    # draw.ellipse(bbox, fill=255)
-    # back_im = im1.copy()
-    # back_im.paste(im2, (260, 350), mask_im)
-    # back_im.save('culo_final.jpg', quality=95)
-
     im1 = Image.open('mono.jpg')
     url = context.bot.get_file(file_id=update.message.photo[-1].file_id).file_path
     response = requests.get(url)
     im2 = Image.open(BytesIO(response.content))
-    size = 160, 160
+    size = 150, 150
     im2.thumbnail(size, Image.ANTIALIAS)
     x, y = im2.size
-    eX, eY = 80, 120  # Size of Bounding Box for ellipse
+    eX, eY = 90, 130  # Size of Bounding Box for ellipse
     bbox = (x / 2 - eX / 2, y / 2 - eY / 2, x / 2 + eX / 2, y / 2 + eY / 2)
 
     mask_im = Image.new("L", im2.size, 0)
     draw = ImageDraw.Draw(mask_im)
     draw.ellipse(bbox, fill=255)
-
     back_im = im1.copy()
-    back_im.paste(im2, (680, 90), mask_im)
-    back_im.show()
+    back_im.paste(im2, (260, 350), mask_im)
     back_im.save('culo_final.jpg', quality=95)
+
+    # im1 = Image.open('mono.jpg')
+    # url = context.bot.get_file(file_id=update.message.photo[-1].file_id).file_path
+    # response = requests.get(url)
+    # im2 = Image.open(BytesIO(response.content))
+    # size = 160, 160
+    # im2.thumbnail(size, Image.ANTIALIAS)
+    # x, y = im2.size
+    # eX, eY = 80, 120  # Size of Bounding Box for ellipse
+    # bbox = (x / 2 - eX / 2, y / 2 - eY / 2, x / 2 + eX / 2, y / 2 + eY / 2)
+    #
+    # mask_im = Image.new("L", im2.size, 0)
+    # draw = ImageDraw.Draw(mask_im)
+    # draw.ellipse(bbox, fill=255)
+    #
+    # back_im = im1.copy()
+    # back_im.paste(im2, (680, 90), mask_im)
+    # back_im.show()
+    # back_im.save('culo_final.jpg', quality=95)
 
     chat_id = update.message.chat_id
     user = update.effective_user
@@ -344,7 +344,7 @@ if __name__ == "__main__":
 
     dp.add_handler(MessageHandler(Filters.all, echo))
 
-    job.run_daily(birthday, time(21, 35, 00, 000000))
+    job.run_daily(birthday, time(6, 00, 00, 000000))
     job.run_daily(muditos, time(17, 54, 00, 000000))
     job.run_daily(tareas.recoradar_tareas, time(9, 00, 00, 000000), days=(1,))
     run(updater)
