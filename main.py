@@ -243,7 +243,7 @@ def culos2(update: Update, context: CallbackContext):
     size = 150, 150
     im2.thumbnail(size, Image.ANTIALIAS)
     print(im2.size)
-    x, y = im2.size
+    x, y = 150,150
     eX, eY = 90, 130  # Size of Bounding Box for ellipse
     bbox = (x / 2 - eX / 2, y / 2 - eY / 2, x / 2 + eX / 2, y / 2 + eY / 2)
 
@@ -275,7 +275,7 @@ def culos2(update: Update, context: CallbackContext):
 
     chat_id = update.message.chat_id
     user = update.effective_user
-    logger.info(f"User {user.first_name} mando el idioma:\n {update.message.text}")
+    logger.info(f"User {user.first_name} mando la foto")
     # Send message with text and appended InlineKeyboard
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
