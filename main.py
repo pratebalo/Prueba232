@@ -65,16 +65,35 @@ def birthday(context: CallbackContext):
     cumpleaneros = data[data.cumple == fecha]
 
     for _, cumpleanero in cumpleaneros.iterrows():
-        tts = gTTS("""Cumpleaños felicc
-                        Cumpleaños felicc
-                        Te deseamos todos
-                        Cumpleaños felicc""", lang="it")
-        tts.save("audio.mp3")
+        tts = gTTS("""Cumpleaños feliz
+                    Te deseamos todos.
+                    Cumpleaños feliz
+                    
+                    Desde el día que naciste
+                    Has sido siempre y serás
+                    Una dicha para todos
+                    De inmensa felicidad
+                    
+                    Tu fiesta de cumpleaños
+                    ya vamos a celebrar
+                    unimos a tu familia
+                    todos vamos a cantar
+                    
+                    Cumpleaños feliz
+                    cumpleaños feliz
+                    te desean tus amigos de Parchís
+                    plas plans plansnsnsns plas plas
+                    palmada palmada palmada
+                    no te vayas todavia
+                    clap clap clapnsnsns clap clapppppp clapsssss 
+                    plassss Plassss plasssss
+                    """, lang="it")
+        tts.save(f"felicitacion de su majestad para {cumpleanero.apodo}.mp3")
 
         context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                 text=f"Felicidades <b>{cumpleanero.apodo}</b>!!!!!")
         context.bot.sendSticker(chat_id=ID_MANITOBA, sticker="CAACAgIAAx0CTey1gAACBjlgGZSaKItIUqHqSeZaeMll-cdb-QACHQADr8ZRGlyO-uEKz2-8HgQ")
-        context.bot.sendAudio(chat_id=ID_MANITOBA, audio=open("audio.mp3", "rb"))
+        context.bot.sendAudio(chat_id=ID_MANITOBA, audio=open(f"felicitacion de su majestad para {cumpleanero.apodo}.mp3", "rb"))
         context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                 text=f"Por seeeeerrrr tan bueeeennaa muchaaaaachaaaaa 🎉🎊🎈")
 
@@ -155,6 +174,7 @@ def loquendo(update: Update, context: CallbackContext):
 
 
 def loquendo2(update: Update, context: CallbackContext):
+
     chat_id = update.message.chat_id
     user = update.effective_user
     idi = ['af', 'ar', 'bn', 'bs', 'ca', 'cs', 'cy', 'da', 'de', 'el', 'en', 'eo', 'es', 'et', 'fi', 'fr', 'gu',
@@ -324,7 +344,7 @@ if __name__ == "__main__":
 
     dp.add_handler(MessageHandler(Filters.all, echo))
 
-    job.run_daily(birthday, time(6, 00, 00, 000000))
+    job.run_daily(birthday, time(21, 35, 00, 000000))
     job.run_daily(muditos, time(17, 54, 00, 000000))
     job.run_daily(tareas.recoradar_tareas, time(9, 00, 00, 000000), days=(1,))
     run(updater)
