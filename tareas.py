@@ -76,7 +76,7 @@ def tareas(update: Update, context: CallbackContext):
             part_keyboard.append(InlineKeyboardButton("🏁", callback_data="NADA"))
         else:
             if user.id in tarea.personas or user.id == tarea.creador:
-                part_keyboard.append(InlineKeyboardButton("⬜", callback_data="COMPLETAR" + str(i)))
+                part_keyboard.append(InlineKeyboardButton("‼", callback_data="COMPLETAR" + str(i)))
             else:
                 part_keyboard.append(InlineKeyboardButton(" ", callback_data="NADA"))
         # part_keyboard.append(InlineKeyboardButton("🖋", callback_data="EDITAR" + str(i)))
