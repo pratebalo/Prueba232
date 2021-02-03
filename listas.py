@@ -149,7 +149,6 @@ def editar_lista(update: Update, context: CallbackContext):
     context.user_data["query_elementos"] = context.bot.sendMessage(update.effective_chat.id,
                                                                    parse_mode="HTML", text=texto,
                                                                    reply_markup=reply_markup)
-
     return EDITAR_LISTA2
 
 
@@ -305,7 +304,7 @@ conv_handler_listas = ConversationHandler(
         EDITAR_LISTA_A: [MessageHandler(Filters.text & ~Filters.command, end_editar_lista_anadir)],
         EDITAR_LISTA_E: [MessageHandler(Filters.text & ~Filters.command, end_editar_lista_editar)],
         FINAL_OPTION: [
-            CallbackQueryHandler(listas, pattern='^CONTINUAR'),
+            CallbackQueryHandler(listas, pattern='^CONTINUAR$'),
             CallbackQueryHandler(editar_lista, pattern='^CONTINUAR_EDITAR'),
             CallbackQueryHandler(terminar, pattern='^TERMINAR')],
 

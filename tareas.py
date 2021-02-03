@@ -97,7 +97,6 @@ def tareas(update: Update, context: CallbackContext):
 
 
 def ver_tarea(update: Update, context: CallbackContext):
-    print("ver")
     all_tareas = context.user_data["all_tareas"]
     data = context.user_data["data"]
     pos_tarea = int(update.callback_query.data.replace("VER", ""))
