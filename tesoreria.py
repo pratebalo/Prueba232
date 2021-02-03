@@ -13,10 +13,7 @@ import re
 
 # Stages
 OPCION, BOTE, BOTE2, FINAL_OPTION = range(4)
-# pruebas
-# ID_MANITOBA = -1001307358592
-# llavens
-ID_MANITOBA = -1001255856526
+ID_MANITOBA = -1001166480838
 ID_TESORERIA = 1206605156
 logger = logging.getLogger()
 
