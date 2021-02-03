@@ -242,11 +242,12 @@ def culos2(update: Update, context: CallbackContext):
     im2 = Image.open(BytesIO(response.content))
     size = 150, 150
     im2.thumbnail(size, Image.ANTIALIAS)
-    print(im2.size)
-    x, y = 150,150
-    eX, eY = 90, 130  # Size of Bounding Box for ellipse
-    bbox = (x / 2 - eX / 2, y / 2 - eY / 2, x / 2 + eX / 2, y / 2 + eY / 2)
 
+    x, y = im2.size
+    print(im2.size)
+    eX, eY = 130, 130  # Size of Bounding Box for ellipse
+    bbox = (x / 2 - eX / 2, y / 2 - eY / 2, x / 2 + eX / 2, y / 2 + eY / 2)
+    print(bbox)
     mask_im = Image.new("L", im2.size, 0)
     draw = ImageDraw.Draw(mask_im)
     draw.ellipse(bbox, fill=255)
