@@ -124,9 +124,13 @@ def end_crear_lista(update: Update, context: CallbackContext):
 def editar_lista(update: Update, context: CallbackContext):
     query = update.callback_query
     all_listas = db.select("listas")
-    id_lista = int(update.callback_query.data.replace("EDITAR", ""))
-    lista = all_listas[all_listas.id == id_lista].iloc[0]
-    context.user_data["lista"] = lista
+    if query.data=="CONTINUAR_EDITAR":
+        lista = all_listas[all_listas.id == context.user_data["id_lista"]].iloc[0]
+    else:
+        id_lista = int(query.data.replace("EDITAR", ""))
+        lista = all_listas[all_listas.id == id_lista].iloc[0]
+        context.user_data["lista"] = lista
+        context.user_data["id_lista"] = id_lista
 
     logger.info(f"""{update.effective_user.first_name} ha elegido editar la lista '{lista.nombre}'""")
 
@@ -304,8 +308,8 @@ conv_handler_listas = ConversationHandler(
         EDITAR_LISTA_A: [MessageHandler(Filters.text & ~Filters.command, end_editar_lista_anadir)],
         EDITAR_LISTA_E: [MessageHandler(Filters.text & ~Filters.command, end_editar_lista_editar)],
         FINAL_OPTION: [
-            CallbackQueryHandler(listas, pattern='^CONTINUAR'),
-            CallbackQueryHandler(editar_lista, pattern='^CONTINUAR_EDITAR'),
+            CallbackQueryHandler(listas, pattern='^CONTINUAR$'),
+            CallbackQueryHandler(editar_lista, pattern='^CONTINUAR_EDITAR$'),
             CallbackQueryHandler(terminar, pattern='^TERMINAR')],
 
     },
