@@ -36,10 +36,15 @@ class MyTranslationCalendar(DetailedTelegramCalendar):
         self.first_step = DAY
         self.min_date = date.today()
         self.locale = "es"
+
     empty_nav_button = "❌"
     middle_button_day = "{month}"
-    prev_button = "👈"
-    next_button = "➡"
+    # prev_button = "🔙"
+    # next_button = "🔜"
+    # prev_button = "⬅"
+    # next_button = "➡"
+    prev_button = "⏪"
+    next_button = "⏩"
 
 
 def recoradar_tareas(context: CallbackContext):
@@ -71,6 +76,13 @@ def tareas(update: Update, context: CallbackContext):
         text += f"{i + 1}. {tarea.descripcion}\n"
         part_keyboard.append(InlineKeyboardButton(str(i + 1), callback_data="NADA"))
         part_keyboard.append(InlineKeyboardButton("👀", callback_data="VER" + str(i)))
+        if tarea.completada:
+            part_keyboard.append(InlineKeyboardButton("👌🏽", callback_data="NADA"))
+        else:
+            if user.id in tarea.personas or user.id == tarea.creador:
+                part_keyboard.append(InlineKeyboardButton("⬜", callback_data="COMPLETAR" + str(i)))
+            else:
+                part_keyboard.append(InlineKeyboardButton(" ", callback_data="NADA"))
         # part_keyboard.append(InlineKeyboardButton("🖋", callback_data="EDITAR" + str(i)))
         part_keyboard.append(InlineKeyboardButton("🗑", callback_data="ELIMINAR" + str(i)))
         keyboard.append(part_keyboard)
@@ -240,6 +252,30 @@ def eliminar_tarea(update: Update, context: CallbackContext):
     return FINAL_OPTION
 
 
+def completar_tarea(update: Update, context: CallbackContext):
+    query = update.callback_query
+    all_tareas = context.user_data["all_tareas"]
+    pos_tarea = int(query.data.replace("COMPLETAR", ""))
+    tarea = all_tareas.iloc[pos_tarea]
+    tarea.completada = True
+    db.update_tarea(tarea)
+    data = context.user_data["data"]
+    logger.warning(f"{update.effective_user.first_name}  ha completado la tarea \n{tarea_to_text(tarea, data)}")
+    texto = f"{update.effective_user.first_name} ha completado la tarea!!!!!! \n<b>{tarea_to_text(tarea, data)}</b>"
+
+    query.delete_message()
+    if context.user_data["ediciones"]:
+        context.bot.sendMessage(ID_MANITOBA, parse_mode="HTML",
+                                text="\n".join(context.user_data["ediciones"]))
+    context.bot.sendMessage(ID_MANITOBA, parse_mode="HTML", text=texto)
+    stickers=["CAACAgIAAxkBAAICXmAasBQ2GrCJTRmfjzDArpTLXfVtAAJJAQACVp29CnVtIjfXzilUHgQ",
+              "CAACAgIAAxkBAAICX2AasB6gnf_gqA3c8s00wW3AFj5QAAJNAANZu_wlKIGgbd0bgvceBA",
+              "CAACAgIAAxkBAAICYGAasCfRVfZcMOVWzZiuX2pFuZC7AAJXAAPBnGAMxgL9s1SbpjQeBA",
+              "CAACAgIAAxkBAAICYWAasDPbxJKIINhcFeiQsiYvVEGpAAJjAANOXNIpRcBzCXnlr_AeBA"]
+    context.bot.sendSticker(ID_MANITOBA,sticker=random.choice(stickers))
+    return ConversationHandler.END
+
+
 def tarea_to_text(tarea, data):
     text = f"-<b>{tarea.descripcion}</b>:\n" \
            f"-<b>{tarea.fecha}</b>\n"
@@ -253,7 +289,7 @@ def terminar(update: Update, context: CallbackContext):
     update.callback_query.delete_message()
     logger.warning(f"{update.effective_user.first_name} ha salido de tareas")
     if context.user_data["ediciones"]:
-        context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML",
+        context.bot.sendMessage(ID_MANITOBA, parse_mode="HTML",
                                 text="\n".join(context.user_data["ediciones"]))
     return ConversationHandler.END
 
@@ -266,6 +302,7 @@ conv_handler_tareas = ConversationHandler(
             CallbackQueryHandler(crear_tarea, pattern='^CREAR'),
             CallbackQueryHandler(editar_tarea, pattern='^EDITAR'),
             CallbackQueryHandler(eliminar_tarea, pattern='^ELIMINAR'),
+            CallbackQueryHandler(completar_tarea, pattern='^COMPLETAR'),
             CallbackQueryHandler(terminar, pattern='^TERMINAR')
         ],
         CREAR_TAREA1: [MessageHandler(Filters.text & ~Filters.command, elegir_fecha)],

@@ -135,7 +135,7 @@ def editar_lista(update: Update, context: CallbackContext):
         line_keyboard = [InlineKeyboardButton(str(i + 1), callback_data="NADA"),
                          InlineKeyboardButton("📝", callback_data="EDITAR" + str(i))]
         if tipo == 0:
-            line_keyboard.append(InlineKeyboardButton("✅", callback_data="MARCAR" + str(i)))
+            line_keyboard.append(InlineKeyboardButton("⬜", callback_data="MARCAR" + str(i)))
         else:
             line_keyboard.append(InlineKeyboardButton("👌🏽", callback_data="NADA"))
         line_keyboard.append(InlineKeyboardButton("🗑", callback_data="ELIMINAR" + str(i)))
@@ -269,7 +269,7 @@ def eliminar_lista(update: Update, context: CallbackContext):
 def terminar(update: Update, context: CallbackContext):
     update.callback_query.delete_message()
     if context.user_data["ediciones"]:
-        context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML", text="\n".join(context.user_data["ediciones"]))
+        context.bot.sendMessage(ID_MANITOBA, parse_mode="HTML", text="\n".join(context.user_data["ediciones"]))
     return ConversationHandler.END
 
 

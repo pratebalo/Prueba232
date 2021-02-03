@@ -127,14 +127,18 @@ def echo(update: Update, context: CallbackContext):
             elif update.message.animation:
                 fila.gif += 1
                 logger.info(f"{fila.apodo} ha enviado un gif. Con un total de {fila.total_mensajes} mensajes")
+            elif update.message.document:
+                logger.info(
+                    f"{fila.apodo} ha enviado el documento {update.message.document.file_name} tipo "
+                    f"{update.message.document.mime_type}. Con un total de {fila.total_mensajes} mensajes")
             else:
-                logger.info(update.message)
+
+                logger.info("update.message desconocido: ", update.message)
         elif update.edited_message:
             logger.info(
                 f"{fila.apodo} ha editado el mensaje por {update.edited_message.text}. Con un total de {fila.total_mensajes} mensajes")
         else:
-            logger.info(update)
-
+            logger.info("update desconocido: ",update)
 
     else:
         logger.info(f"{nombre} con id: {user_id} ha enviado {update.message.text}")
@@ -212,6 +216,7 @@ def culos(update: Update, context: CallbackContext):
 
 
 def culos2(update: Update, context: CallbackContext):
+
     # im1 = Image.open('mono.jpg')
     # url = context.bot.get_file(file_id=update.message.photo[-1].file_id).file_path
     # response = requests.get(url)

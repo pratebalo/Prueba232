@@ -63,10 +63,11 @@ def delete(table, id):
 
 def update_tarea(tarea):
     query = f"""set DateStyle='ISO, DMY';
-        INSERT INTO tareas
-        (descripcion, personas, fecha, creador)
-        VALUES ( '{tarea.descripcion}', ARRAY{list(map(int, tarea.personas))}, '{tarea.fecha}',{tarea.creador})
+        UPDATE tareas
+        SET(descripcion, personas, fecha, creador,completada) =
+        ( '{tarea.descripcion}', ARRAY{list(map(int, tarea.personas))}, '{tarea.fecha}',{tarea.creador},{tarea.completada})
         WHERE id = {tarea.id};"""
+    print(query)
     connect(query)
 
 
