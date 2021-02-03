@@ -287,6 +287,7 @@ def culos2(update: Update, context: CallbackContext):
 def pietrobot(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     context.bot.deleteMessage(chat_id, update.message.message_id)
+    logger.warning(f"{update.effective_user.first_name} ha entrado en pietrobot")
     if not chat_id == ID_MANITOBA:
         context.bot.sendMessage(chat_id, text="¿Qué texto quieres enviar?")
         return ESTADO_UNICO
@@ -295,6 +296,7 @@ def pietrobot(update: Update, context: CallbackContext):
 
 
 def end_pietrobot(update: Update, context: CallbackContext):
+    logger.warning(f"{update.effective_user.first_name} ha escrito {update.message.text}")
     context.bot.sendMessage(ID_MANITOBA, text="Me ha parecido oir que " + update.message.text)
     return ConversationHandler.END
 
