@@ -304,7 +304,7 @@ conv_handler_listas = ConversationHandler(
         EDITAR_LISTA_A: [MessageHandler(Filters.text & ~Filters.command, end_editar_lista_anadir)],
         EDITAR_LISTA_E: [MessageHandler(Filters.text & ~Filters.command, end_editar_lista_editar)],
         FINAL_OPTION: [
-            CallbackQueryHandler(listas, pattern='^CONTINUAR$'),
+            CallbackQueryHandler(listas, pattern='^CONTINUAR'),
             CallbackQueryHandler(editar_lista, pattern='^CONTINUAR_EDITAR'),
             CallbackQueryHandler(terminar, pattern='^TERMINAR')],
 
