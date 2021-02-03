@@ -23,6 +23,7 @@ def listas(update: Update, context: CallbackContext):
     context.user_data["all_listas"] = all_listas
     if update.message:
         id_mensaje = update.message.message_id
+        context.user_data["ediciones"]=[]
     else:
         id_mensaje = update.callback_query.message.message_id
 
@@ -267,11 +268,8 @@ def eliminar_lista(update: Update, context: CallbackContext):
 
 def terminar(update: Update, context: CallbackContext):
     update.callback_query.delete_message()
-    context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML", text="\n".join(context.user_data["ediciones"]))
-    context.user_data["ediciones"] = []
-    context.user_data["lista"] = []
-    context.user_data["all_listas"] = []
-    context.user_data["data"] = []
+    if context.user_data["ediciones"]:
+        context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML", text="\n".join(context.user_data["ediciones"]))
     return ConversationHandler.END
 
 

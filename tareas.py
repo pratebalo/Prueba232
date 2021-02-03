@@ -12,14 +12,14 @@ import logging
 import database as db
 import random
 from datetime import date
-from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP, DAY
+from telegram_bot_calendar import DetailedTelegramCalendar, DAY
 
 # Stages
 ELEGIR_TAREA, CREAR_TAREA1, CREAR_TAREA2, CREAR_TAREA3, CREAR_TAREA4, CREAR_TAREA5, FINAL_OPTION = range(7)
 # pruebas
-# ID_MANITOBA = -1001307358592
+ID_MANITOBA = -1001307358592
 # llavens
-ID_MANITOBA = -1001255856526
+# ID_MANITOBA = -1001255856526
 logger = logging.getLogger()
 
 your_translation_months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre",
@@ -36,6 +36,10 @@ class MyTranslationCalendar(DetailedTelegramCalendar):
         self.first_step = DAY
         self.min_date = date.today()
         self.locale = "es"
+    empty_nav_button = "❌"
+    middle_button_day = "{month}"
+    prev_button = "👈"
+    next_button = "➡"
 
 
 def recoradar_tareas(context: CallbackContext):
@@ -49,6 +53,7 @@ def recoradar_tareas(context: CallbackContext):
 
 def tareas(update: Update, context: CallbackContext):
     if update.message:
+        context.user_data["ediciones"] = []
         context.bot.deleteMessage(update.effective_chat.id, update.message.message_id)
     else:
         context.bot.deleteMessage(update.effective_chat.id, update.callback_query.message.message_id)
@@ -103,6 +108,7 @@ def crear_tarea(update: Update, context: CallbackContext):
 
 
 def elegir_fecha(update: Update, context: CallbackContext):
+    logger.warning(f"{update.effective_user.first_name} ha introducido la descripcion: {update.message.text}")
     context.user_data["descripcion"] = update.message.text
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
@@ -223,6 +229,7 @@ def eliminar_tarea(update: Update, context: CallbackContext):
     tarea = all_tareas.iloc[pos_tarea]
     db.delete("tareas", tarea.id)
     data = context.user_data["data"]
+    logger.warning(f"{update.effective_user.first_name}  ha eliminado la tarea \n{tarea_to_text(tarea, data)}")
     texto = f"{update.effective_user.first_name} ha eliminado la tarea \n<b>{tarea_to_text(tarea, data)}</b>"
 
     keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR")),
@@ -244,10 +251,10 @@ def tarea_to_text(tarea, data):
 
 def terminar(update: Update, context: CallbackContext):
     update.callback_query.delete_message()
+    logger.warning(f"{update.effective_user.first_name} ha salido de tareas")
     if context.user_data["ediciones"]:
         context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML",
                                 text="\n".join(context.user_data["ediciones"]))
-    context.user_data["ediciones"]=""
     return ConversationHandler.END
 
 
