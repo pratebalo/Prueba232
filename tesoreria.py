@@ -79,7 +79,7 @@ def bote3(update: Update, context: CallbackContext):
     context.bot.deleteMessage(update.effective_chat.id, context.user_data["oldMessage"].message_id)
     context.bot.deleteMessage(update.effective_chat.id, update.message.message_id)
     context.bot.sendMessage(update.effective_chat.id, mensaje_usuario)
-    context.bot.sendMessage(8469898, mensaje_tesorera)
+    context.bot.sendMessage(ID_TESORERIA, mensaje_tesorera)
 
     return ConversationHandler.END
 
