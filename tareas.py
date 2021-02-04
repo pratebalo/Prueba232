@@ -142,7 +142,7 @@ def elegir_fecha2(update: Update, context: CallbackContext):
         data = context.user_data["data"]
         for i, persona in data.sort_values(by="apodo", ignore_index=True).iterrows():
             part_keyboard.append(InlineKeyboardButton(persona.apodo, callback_data=str(persona.id)))
-            if i % 3 == 2 or i == len(data):
+            if i % 3 == 2 or i == len(data)-1:
                 keyboard.append(part_keyboard)
                 part_keyboard = []
 
