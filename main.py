@@ -172,7 +172,7 @@ def loquendo(update: Update, context: CallbackContext):
     logger.warning(f"User {user.first_name} entro en el comando loquendo")
     # Send message with text and appended InlineKeyboard
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
-    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, "¿Qué texto quieres convertir?")
+    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, f"{update.effective_user.first_name}: ¿Qué texto quieres convertir?")
     # Tell ConversationHandler that we're in state `FIRST` now
     return LOQUENDO_1
 
@@ -205,7 +205,7 @@ def loquendo2(update: Update, context: CallbackContext):
     # Send message with text and appended InlineKeyboard
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
     context.bot.deleteMessage(update.effective_chat.id,update.message.message_id)
-    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, text="¿Qué idioma quieres poner?",
+    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, text=f"{update.effective_user.first_name}: ¿Qué idioma quieres poner?",
                                                               reply_markup=reply_markup)
 
     context.user_data["texto"] = update.message.text
@@ -233,7 +233,7 @@ def culos(update: Update, context: CallbackContext):
     user = update.effective_user
     logger.warning(f"User {user.first_name} entro en el comando culos")
     # Send message with text and appended InlineKeyboard
-    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, "Enviame la imagen de una cara sin bordes")
+    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, f"{update.effective_user.first_name}: Enviame una imagen cuadrada de una cara sin bordes")
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
     # Tell ConversationHandler that we're in state `FIRST` now
     return ESTADO_UNICO
