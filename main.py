@@ -220,8 +220,9 @@ def end_loquendo(update: Update, context: CallbackContext):
     # Send message with text and appended InlineKeyboard
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
     tts = gTTS(context.user_data["texto"], lang=update.callback_query.data)
-    tts.save("audio.mp3")
-    context.bot.sendAudio(chat_id, audio=open("audio.mp3", "rb"))
+    file_name="Mensajito de Baden Powell.mp3"
+    tts.save(file_name)
+    context.bot.sendAudio(chat_id,timeout=60, audio=open(file_name, "rb"))
 
     # Tell ConversationHandler that we're in state `FIRST` now
     return ConversationHandler.END
@@ -292,7 +293,7 @@ def pietrobot(update: Update, context: CallbackContext):
     context.bot.deleteMessage(chat_id, update.message.message_id)
     logger.warning(f"{update.effective_user.first_name} ha entrado en pietrobot")
     if not chat_id == ID_MANITOBA:
-        context.bot.sendMessage(chat_id, text="¿Qué texto quieres enviar?")
+        context.bot.sendMessage(chat_id, text="¿Qué texto quieres enviar?\nMe ha parecido oir que...")
         return ESTADO_UNICO
     else:
         return ConversationHandler.END
