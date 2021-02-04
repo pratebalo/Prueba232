@@ -63,7 +63,7 @@ def tareas(update: Update, context: CallbackContext):
     data = db.select("data")
     context.user_data["data"] = data
     context.user_data["all_tareas"] = all_tareas
-    text = "¿Qué quieres hacer?\n"
+    text = f"{update.effective_user.first_name}: ¿Qué quieres hacer?\n"
     keyboard = []
     for i, tarea in all_tareas.iterrows():
         part_keyboard = []

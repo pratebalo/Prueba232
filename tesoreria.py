@@ -24,7 +24,7 @@ def tesoreria(update: Update, context: CallbackContext):
     logger.warning(f"{update.effective_user.first_name} entro en el comando tesoreria")
     # data = db.select("data")
     update.message.delete()
-    text = "<b>Tesoreria</b>\n¿Qué quieres hacer?\n"
+    text = f"<b>Tesoreria</b>\n{update.effective_user.first_name}: ¿Qué quieres hacer?\n"
     keyboard = [[InlineKeyboardButton("Meter dinero en el bote", callback_data="+")],
                 [InlineKeyboardButton("Sacar dinero del bote", callback_data="-")],
                 [InlineKeyboardButton("Comunicar un gasto", callback_data="GASTO")]]
@@ -37,7 +37,7 @@ def tesoreria(update: Update, context: CallbackContext):
 def bote(update: Update, context: CallbackContext):
     context.user_data["tipo"] = update.callback_query.data
     # context.user_data["oldMessage"] = context.bot.sendMessage(update.effective_chat.id, "¿Cuánto dinero?")
-    context.user_data["oldMessage"] = update.callback_query.edit_message_text("¿Cuánto dinero?")
+    context.user_data["oldMessage"] = update.callback_query.edit_message_text(f"{update.effective_user.first_name}: ¿Cuánto dinero?")
 
     return BOTE
 
@@ -47,7 +47,7 @@ def bote2(update: Update, context: CallbackContext):
     context.user_data["cantidad"] = re.sub('[^\d.]', '', update.message.text.replace(",", "."))
     context.bot.deleteMessage(update.effective_chat.id, context.user_data["oldMessage"].message_id)
     context.bot.deleteMessage(update.effective_chat.id, update.message.message_id)
-    context.user_data["oldMessage"] = context.bot.sendMessage(update.effective_chat.id, "¿Cúal es el motivo?")
+    context.user_data["oldMessage"] = context.bot.sendMessage(update.effective_chat.id, f"{update.effective_user.first_name}: ¿Cúal es el motivo?")
 
     return BOTE2
 
