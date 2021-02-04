@@ -91,10 +91,16 @@ def birthday(context: CallbackContext):
 
         context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                 text=f"Felicidades <b>{cumpleanero.apodo}</b>!!!!!")
-        context.bot.sendSticker(chat_id=ID_MANITOBA, sticker="CAACAgIAAx0CTey1gAACBjlgGZSaKItIUqHqSeZaeMll-cdb-QACHQADr8ZRGlyO-uEKz2-8HgQ")
-        context.bot.sendAudio(chat_id=ID_MANITOBA, audio=open(f"Felicitacion de su majestad para {cumpleanero.apodo}.mp3", "rb"))
-        context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
-                                text=f"Por seeeeerrrr tan bueeeennaa muchaaaaachaaaaa 🎉🎊🎈")
+        context.bot.sendSticker(chat_id=ID_MANITOBA,
+                                sticker="CAACAgIAAx0CTey1gAACBjlgGZSaKItIUqHqSeZaeMll-cdb-QACHQADr8ZRGlyO-uEKz2-8HgQ")
+        context.bot.sendAudio(chat_id=ID_MANITOBA,
+                              audio=open(f"Felicitacion de su majestad para {cumpleanero.apodo}.mp3", "rb"))
+        if cumpleanero.genero == "M":
+            context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
+                                    text=f"Por seeeeerrrr tan bueeeennaa muchaaaaachaaaaa 🎉🎊🎈")
+        else:
+            context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
+                                    text=f"Por seeeeerrrr tan bueeeenn muchaaaaachaooooo 🎉🎊🎈")
 
 
 def muditos(context: CallbackContext):
@@ -104,7 +110,6 @@ def muditos(context: CallbackContext):
     for _, persona in data[data.ultimo_mensaje < (hoy - timedelta(23))].iterrows():
         context.bot.sendMessage(ID_MANITOBA, parse_mode="HTML",
                                 text=f"""Te echamos de menos <a href="tg://user?id=persona.id">{persona.apodo}</a>""")
-
 
 
 def echo(update: Update, context: CallbackContext):
@@ -173,7 +178,6 @@ def loquendo(update: Update, context: CallbackContext):
 
 
 def loquendo2(update: Update, context: CallbackContext):
-
     chat_id = update.message.chat_id
     user = update.effective_user
     idi = ['af', 'ar', 'bn', 'bs', 'ca', 'cs', 'cy', 'da', 'de', 'el', 'en', 'eo', 'es', 'et', 'fi', 'fr', 'gu',
@@ -200,6 +204,7 @@ def loquendo2(update: Update, context: CallbackContext):
     logger.info(f"User {user.first_name} mando el texto:\n {update.message.text}")
     # Send message with text and appended InlineKeyboard
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
+    context.bot.deleteMessage(update.effective_chat.id,update.message.message_id)
     context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, text="¿Qué idioma quieres poner?",
                                                               reply_markup=reply_markup)
 
@@ -234,7 +239,6 @@ def culos(update: Update, context: CallbackContext):
 
 
 def culos2(update: Update, context: CallbackContext):
-
     im1 = Image.open('mono.jpg')
     url = context.bot.get_file(file_id=update.message.photo[-1].file_id).file_path
     response = requests.get(url)
