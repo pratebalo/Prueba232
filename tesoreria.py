@@ -20,7 +20,7 @@ logger = logging.getLogger()
 
 def tesoreria(update: Update, context: CallbackContext):
     context.user_data["bote"] = db.select("botes")
-    gastos = db.select("gastos")
+    # gastos = db.select("gastos")
     logger.warning(f"{update.effective_user.first_name} entro en el comando tesoreria")
     # data = db.select("data")
     update.message.delete()
@@ -37,7 +37,6 @@ def tesoreria(update: Update, context: CallbackContext):
 
 def bote(update: Update, context: CallbackContext):
     context.user_data["tipo"] = update.callback_query.data
-    # context.user_data["oldMessage"] = context.bot.sendMessage(update.effective_chat.id, "¿Cuánto dinero?")
     context.user_data["oldMessage"] = update.callback_query.edit_message_text(f"{update.effective_user.first_name}: ¿Cuánto dinero?")
 
     return BOTE
@@ -94,8 +93,9 @@ def terminar(update: Update, context: CallbackContext):
 conv_handler_tesoreria = ConversationHandler(
     entry_points=[CommandHandler('tesoreria', tesoreria)],
     states={
-        OPCION: [CallbackQueryHandler(bote),
-                 CallbackQueryHandler(terminar, pattern='^TERMINAR$')],
+        OPCION: [CallbackQueryHandler(terminar, pattern='^TERMINAR$'),
+                 CallbackQueryHandler(bote),
+                 ],
         BOTE: [MessageHandler(Filters.text & ~Filters.command, bote2)],
         BOTE2: [MessageHandler(Filters.text & ~Filters.command, bote3)],
     },
