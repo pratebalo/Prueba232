@@ -27,7 +27,8 @@ def tesoreria(update: Update, context: CallbackContext):
     text = f"<b>Tesoreria</b>\n{update.effective_user.first_name}: ¿Qué quieres hacer?\n"
     keyboard = [[InlineKeyboardButton("Meter dinero en el bote", callback_data="+")],
                 [InlineKeyboardButton("Sacar dinero del bote", callback_data="-")],
-                [InlineKeyboardButton("Comunicar un gasto", callback_data="GASTO")]]
+                [InlineKeyboardButton("Comunicar un gasto", callback_data="GASTO")],
+                [InlineKeyboardButton("Terminar", callback_data="TERMINAR")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     context.bot.sendMessage(update.effective_chat.id, text, parse_mode="HTML", reply_markup=reply_markup)
@@ -84,10 +85,17 @@ def bote3(update: Update, context: CallbackContext):
     return ConversationHandler.END
 
 
+def terminar(update: Update, context: CallbackContext):
+    update.callback_query.delete_message()
+    logger.warning(f"{update.effective_user.first_name} ha salido de tesoreria")
+    return ConversationHandler.END
+
+
 conv_handler_tesoreria = ConversationHandler(
     entry_points=[CommandHandler('tesoreria', tesoreria)],
     states={
-        OPCION: [CallbackQueryHandler(bote)],
+        OPCION: [CallbackQueryHandler(bote),
+                 CallbackQueryHandler(terminar, pattern='^TERMINAR$')],
         BOTE: [MessageHandler(Filters.text & ~Filters.command, bote2)],
         BOTE2: [MessageHandler(Filters.text & ~Filters.command, bote3)],
     },
