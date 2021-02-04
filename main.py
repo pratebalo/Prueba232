@@ -157,7 +157,7 @@ def echo(update: Update, context: CallbackContext):
             else:
                 logger.info("update.message desconocido:  {update.message}")
         elif update.edited_message:
-            logger.info(
+            logger.warning(
                 f"{fila.apodo} ha editado el mensaje por {update.edited_message.text}. Con un total de {fila.total_mensajes} mensajes")
         else:
             logger.info("update desconocido: {update}")
@@ -169,7 +169,7 @@ def echo(update: Update, context: CallbackContext):
 def loquendo(update: Update, context: CallbackContext):
     chat_id = update.message.chat_id
     user = update.effective_user
-    logger.info(f"User {user.first_name} entro en el comando loquendo")
+    logger.warning(f"User {user.first_name} entro en el comando loquendo")
     # Send message with text and appended InlineKeyboard
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
     context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, "¿Qué texto quieres convertir?")
@@ -201,7 +201,7 @@ def loquendo2(update: Update, context: CallbackContext):
             part_keyboard = []
 
     reply_markup = InlineKeyboardMarkup(keyboard)
-    logger.info(f"User {user.first_name} mando el texto:\n {update.message.text}")
+    logger.warning(f"User {user.first_name} mando el texto:\n {update.message.text}")
     # Send message with text and appended InlineKeyboard
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
     context.bot.deleteMessage(update.effective_chat.id,update.message.message_id)
@@ -216,7 +216,7 @@ def loquendo2(update: Update, context: CallbackContext):
 def end_loquendo(update: Update, context: CallbackContext):
     chat_id = update.callback_query.message.chat_id
     user = update.effective_user
-    logger.info(f"User {user.first_name} mando el idioma:\n {update.callback_query.data}")
+    logger.warning(f"User {user.first_name} mando el idioma:\n {update.callback_query.data}")
     # Send message with text and appended InlineKeyboard
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
     tts = gTTS(context.user_data["texto"], lang=update.callback_query.data)
@@ -231,7 +231,7 @@ def end_loquendo(update: Update, context: CallbackContext):
 def culos(update: Update, context: CallbackContext):
     chat_id = update.message.chat_id
     user = update.effective_user
-    logger.info(f"User {user.first_name} entro en el comando culos")
+    logger.warning(f"User {user.first_name} entro en el comando culos")
     # Send message with text and appended InlineKeyboard
     context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, "Enviame la imagen de una cara sin bordes")
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
@@ -278,7 +278,7 @@ def culos2(update: Update, context: CallbackContext):
 
     chat_id = update.message.chat_id
     user = update.effective_user
-    logger.info(f"User {user.first_name} mando la foto")
+    logger.warning(f"User {user.first_name} mando la foto")
     # Send message with text and appended InlineKeyboard
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)

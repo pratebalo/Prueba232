@@ -43,6 +43,7 @@ def bote(update: Update, context: CallbackContext):
 
 
 def bote2(update: Update, context: CallbackContext):
+    logger.warning(f"{update.effective_user.first_name} ha enviado la cantidad {update.message.text}")
     context.user_data["cantidad"] = re.sub('[^\d.]', '', update.message.text.replace(",", "."))
     context.bot.deleteMessage(update.effective_chat.id, context.user_data["oldMessage"].message_id)
     context.bot.deleteMessage(update.effective_chat.id, update.message.message_id)
@@ -52,6 +53,7 @@ def bote2(update: Update, context: CallbackContext):
 
 
 def bote3(update: Update, context: CallbackContext):
+    logger.warning(f"{update.effective_user.first_name} ha enviado el motivo {update.message.text}")
     if context.user_data["tipo"] == "GASTO":
         cantidad = float(context.user_data["cantidad"])
         db.insert_gastos(update.effective_user.id,
