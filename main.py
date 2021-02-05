@@ -164,7 +164,6 @@ def echo(update: Update, context: CallbackContext):
 
     else:
         logger.info(f"{update.effective_chat.type} -> {nombre} con id: {user_id} ha enviado {update.message.text}")
-    print()
 
 
 def loquendo(update: Update, context: CallbackContext):
