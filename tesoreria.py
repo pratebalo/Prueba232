@@ -21,7 +21,7 @@ logger = logging.getLogger()
 def tesoreria(update: Update, context: CallbackContext):
     context.user_data["bote"] = db.select("botes")
     # gastos = db.select("gastos")
-    logger.warning(f"{update.effective_user.first_name} entro en el comando tesoreria")
+    logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name} entro en el comando tesoreria")
     # data = db.select("data")
     update.message.delete()
     text = f"<b>Tesoreria</b>\n{update.effective_user.first_name}: ¿Qué quieres hacer?\n"
@@ -43,7 +43,7 @@ def bote(update: Update, context: CallbackContext):
 
 
 def bote2(update: Update, context: CallbackContext):
-    logger.warning(f"{update.effective_user.first_name} ha enviado la cantidad {update.message.text}")
+    logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name} ha enviado la cantidad {update.message.text}")
     context.user_data["cantidad"] = re.sub('[^\d.]', '', update.message.text.replace(",", "."))
     context.bot.deleteMessage(update.effective_chat.id, context.user_data["oldMessage"].message_id)
     context.bot.deleteMessage(update.effective_chat.id, update.message.message_id)
@@ -53,7 +53,7 @@ def bote2(update: Update, context: CallbackContext):
 
 
 def bote3(update: Update, context: CallbackContext):
-    logger.warning(f"{update.effective_user.first_name} ha enviado el motivo {update.message.text}")
+    logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name} ha enviado el motivo {update.message.text}")
     if context.user_data["tipo"] == "GASTO":
         cantidad = float(context.user_data["cantidad"])
         db.insert_gastos(update.effective_user.id,
@@ -83,10 +83,9 @@ def bote3(update: Update, context: CallbackContext):
 
     return ConversationHandler.END
 
-
 def terminar(update: Update, context: CallbackContext):
     update.callback_query.delete_message()
-    logger.warning(f"{update.effective_user.first_name} ha salido de tesoreria")
+    logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name} ha salido de tesoreria")
     return ConversationHandler.END
 
 

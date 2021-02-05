@@ -58,7 +58,7 @@ def tareas(update: Update, context: CallbackContext):
         context.bot.deleteMessage(update.effective_chat.id, update.callback_query.message.message_id)
     user = update.effective_user
     context.user_data["creador_tarea"] = user["id"]
-    logger.warning(f"{user.first_name} entro en el comando tareas")
+    logger.warning(f"{update.effective_chat.type} -> {user.first_name} entro en el comando tareas")
     all_tareas = db.select("tareas")
     data = db.select("data")
     context.user_data["data"] = data
@@ -95,7 +95,7 @@ def ver_tarea(update: Update, context: CallbackContext):
     data = context.user_data["data"]
     pos_tarea = int(update.callback_query.data.replace("VER", ""))
     tarea = all_tareas.iloc[pos_tarea]
-    logger.warning(f"{update.effective_user.first_name} seleccionó ver la tarea '{tarea.descripcion}'")
+    logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name} seleccionó ver la tarea '{tarea.descripcion}'")
     texto = f"{update.effective_user.first_name} ha solicitado ver la tarea:\n" + tarea_to_text(tarea, data)
 
     keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR")),
@@ -108,12 +108,12 @@ def ver_tarea(update: Update, context: CallbackContext):
 def crear_tarea(update: Update, context: CallbackContext):
     context.user_data["oldMessage"] = update.callback_query.edit_message_text(parse_mode="HTML",
                                                                               text="<b>Creando tarea</b>\nIntroduce la descripción")
-    logger.warning(f"{update.effective_user.first_name} ha seleccionado crear tarea")
+    logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name} ha seleccionado crear tarea")
     return CREAR_TAREA1
 
 
 def elegir_fecha(update: Update, context: CallbackContext):
-    logger.warning(f"{update.effective_user.first_name} ha introducido la descripcion: {update.message.text}")
+    logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name} ha introducido la descripcion: {update.message.text}")
     context.user_data["descripcion"] = update.message.text
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
@@ -136,7 +136,7 @@ def elegir_fecha2(update: Update, context: CallbackContext):
         result = result.strftime("%d/%m/%Y")
         context.user_data["fecha"] = result
 
-        logger.warning(f"{update.effective_user.first_name} ha elegido la fecha {result}")
+        logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name} ha elegido la fecha {result}")
         keyboard = []
         part_keyboard = []
         data = context.user_data["data"]
@@ -170,7 +170,7 @@ def asignar_persona2(update: Update, context: CallbackContext):
 
     query.edit_message_text(parse_mode="HTML", reply_markup=reply_markup,
                             text="<b>Creando tarea</b>\nPersona asignada. ¿Quieres asignarla a alguien más?")
-    logger.warning(f"{update.effective_user.first_name} ha asignado a {query.data} a la tarea")
+    logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name} ha asignado a {query.data} a la tarea")
     return CREAR_TAREA4
 
 
@@ -198,7 +198,7 @@ def end_creacion(update: Update, context: CallbackContext):
         except:
             context.bot.sendMessage(ID_MANITOBA, text=f"{persona.apodo} no me tiene activado")
             context.bot.sendSticker(ID_MANITOBA, sticker=sticker[random.randint(0, len(sticker) - 1)])
-    logger.warning(f"Se ha creado la tarea {tarea.descripcion}")
+    logger.warning(f"{update.effective_chat.type} -> Se ha creado la tarea {tarea.descripcion}")
 
     keyboard = [[InlineKeyboardButton("Continuar", callback_data="CONTINUAR"),
                  InlineKeyboardButton("Terminar", callback_data="TERMINAR")]]
@@ -234,7 +234,7 @@ def eliminar_tarea(update: Update, context: CallbackContext):
     tarea = all_tareas.iloc[pos_tarea]
     db.delete("tareas", tarea.id)
     data = context.user_data["data"]
-    logger.warning(f"{update.effective_user.first_name}  ha eliminado la tarea \n{tarea_to_text(tarea, data)}")
+    logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name}  ha eliminado la tarea \n{tarea_to_text(tarea, data)}")
     texto = f"{update.effective_user.first_name} ha eliminado la tarea \n<b>{tarea_to_text(tarea, data)}</b>"
 
     keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR")),
@@ -253,7 +253,7 @@ def completar_tarea(update: Update, context: CallbackContext):
     tarea.completada = True
     db.update_tarea(tarea)
     data = context.user_data["data"]
-    logger.warning(f"{update.effective_user.first_name}  ha completado la tarea \n{tarea_to_text(tarea, data)}")
+    logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name}  ha completado la tarea \n{tarea_to_text(tarea, data)}")
     texto = f"{update.effective_user.first_name} ha completado la tarea!!!!!! \n<b>{tarea_to_text(tarea, data)}</b>"
 
     query.delete_message()
@@ -280,7 +280,7 @@ def tarea_to_text(tarea, data):
 
 def terminar(update: Update, context: CallbackContext):
     update.callback_query.delete_message()
-    logger.warning(f"{update.effective_user.first_name} ha salido de tareas")
+    logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name} ha salido de tareas")
     if context.user_data["ediciones"]:
         context.bot.sendMessage(ID_MANITOBA, parse_mode="HTML",
                                 text="\n".join(context.user_data["ediciones"]))
