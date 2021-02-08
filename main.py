@@ -149,7 +149,8 @@ def echo(update: Update, context: CallbackContext):
                     f"{update.effective_chat.type} -> {fila.apodo} ha enviado {update.message.text}. Con un total de {fila.total_mensajes} mensajes")
             elif update.message.animation:
                 fila.gif += 1
-                logger.info(f"{update.effective_chat.type} -> {fila.apodo} ha enviado un gif. Con un total de {fila.total_mensajes} mensajes")
+                logger.info(
+                    f"{update.effective_chat.type} -> {fila.apodo} ha enviado un gif. Con un total de {fila.total_mensajes} mensajes")
             elif update.message.document:
                 logger.info(
                     f"{update.effective_chat.type} -> {fila.apodo} ha enviado el documento {update.message.document.file_name} tipo "
@@ -172,7 +173,8 @@ def loquendo(update: Update, context: CallbackContext):
     logger.warning(f"{update.effective_chat.type} -> User {user.first_name} entro en el comando loquendo")
     # Send message with text and appended InlineKeyboard
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
-    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, f"{update.effective_user.first_name}: ¿Qué texto quieres convertir?")
+    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id,
+                                                              f"{update.effective_user.first_name}: ¿Qué texto quieres convertir?")
     # Tell ConversationHandler that we're in state `FIRST` now
     return LOQUENDO_1
 
@@ -204,8 +206,9 @@ def loquendo2(update: Update, context: CallbackContext):
     logger.warning(f"{update.effective_chat.type} -> User {user.first_name} mando el texto:\n {update.message.text}")
     # Send message with text and appended InlineKeyboard
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
-    context.bot.deleteMessage(update.effective_chat.id,update.message.message_id)
-    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, text=f"{update.effective_user.first_name}: ¿Qué idioma quieres poner?",
+    context.bot.deleteMessage(update.effective_chat.id, update.message.message_id)
+    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id,
+                                                              text=f"{update.effective_user.first_name}: ¿Qué idioma quieres poner?",
                                                               reply_markup=reply_markup)
 
     context.user_data["texto"] = update.message.text
@@ -216,13 +219,14 @@ def loquendo2(update: Update, context: CallbackContext):
 def end_loquendo(update: Update, context: CallbackContext):
     chat_id = update.callback_query.message.chat_id
     user = update.effective_user
-    logger.warning(f"{update.effective_chat.type} -> User {user.first_name} mando el idioma:\n {update.callback_query.data}")
+    logger.warning(
+        f"{update.effective_chat.type} -> User {user.first_name} mando el idioma:\n {update.callback_query.data}")
     # Send message with text and appended InlineKeyboard
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
     tts = gTTS(context.user_data["texto"], lang=update.callback_query.data)
-    file_name="Mensajito de Baden Powell.mp3"
+    file_name = "Mensajito de Baden Powell.mp3"
     tts.save(file_name)
-    context.bot.sendAudio(chat_id,timeout=60, audio=open(file_name, "rb"))
+    context.bot.sendAudio(chat_id, timeout=60, audio=open(file_name, "rb"))
 
     # Tell ConversationHandler that we're in state `FIRST` now
     return ConversationHandler.END
@@ -233,7 +237,8 @@ def culos(update: Update, context: CallbackContext):
     user = update.effective_user
     logger.warning(f"{update.effective_chat.type} -> User {user.first_name} entro en el comando culos")
     # Send message with text and appended InlineKeyboard
-    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, f"{update.effective_user.first_name}: Enviame una imagen cuadrada de una cara sin bordes")
+    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id,
+                                                              f"{update.effective_user.first_name}: Enviame una imagen cuadrada de una cara sin bordes")
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
     # Tell ConversationHandler that we're in state `FIRST` now
     return ESTADO_UNICO
@@ -300,10 +305,34 @@ def pietrobot(update: Update, context: CallbackContext):
 
 
 def end_pietrobot(update: Update, context: CallbackContext):
-    logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name} ha escrito {update.message.text}")
+    logger.warning(
+        f"{update.effective_chat.type} -> {update.effective_user.first_name} ha escrito {update.message.text}")
     context.bot.sendMessage(ID_MANITOBA, text="Me ha parecido oir que " + update.message.text)
     return ConversationHandler.END
 
+
+def start(update: Update, context: CallbackContext):
+    data = db.select("data")
+    user_id = int(update.effective_user.id)
+    chat_id = int(update.effective_chat.id)
+
+    nombre = update.effective_user.first_name
+    fila = data.loc[data.id == user_id]
+    if len(fila) == 1:
+        fila = fila.iloc[0]
+        logger.info(f"{update.effective_chat.type} -> {fila.apodo} ha iniciado el bot")
+        context.bot.sendMessage(chat_id,f"Bienvenido {fila.apodo}\nPuedes probar a usar los comandos poniendo / seguido del nombre del comando")
+    else:
+        logger.info(f"{update.effective_chat.type} -> {nombre} con id: {user_id} ha iniciado el bot")
+        context.bot.sendMessage(chat_id,f"Bienvenido {nombre}\nPuedes probar a usar los comandos poniendo / seguido del nombre del comando")
+
+    context.bot.sendMessage(chat_id,"Los comandos son:\n"
+                                    "  ·listas - Crea, edita o borra una lista\n"
+                                    "  ·tareas - Crea, edita o borra una tarea\n"
+                                    "  ·loquendo - Envíame un texto y te reenvío un audio\n"
+                                    "  ·tesoreria - Tesorería\n"
+                                    "  ·pietrobot -  Envíame un mensaje por privado y lo envío por el grupo\n"
+                                    "  ·culos - Inserta la cara de alguien en un culo")
 
 if __name__ == "__main__":
     load_dotenv()
@@ -347,6 +376,7 @@ if __name__ == "__main__":
     dp.add_handler(conv_handler_pietrobot)
     dp.add_handler(conv_handler_culos)
     dp.add_handler(tareas.conv_handler_tareas)
+    dp.add_handler(CommandHandler('start', start))
 
     dp.add_handler(MessageHandler(Filters.all, echo))
 
