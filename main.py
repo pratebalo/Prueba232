@@ -116,7 +116,6 @@ def echo(update: Update, context: CallbackContext):
     data = db.select("data")
     user_id = int(update.effective_user.id)
     chat_id = int(update.effective_chat.id)
-    print(update)
     if chat_id == ID_CONVERSACIONES:
         conversaciones = db.select("conversaciones")
         if user_id == ID_TELEGRAM:
