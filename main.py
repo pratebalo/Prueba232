@@ -129,7 +129,8 @@ def echo(update: Update, context: CallbackContext):
             db.update_conversacion(conversacion)
             context.bot.deleteMessage(chat_id=ID_MANITOBA, message_id=int(conversacion.mensaje_id))
             mensaje = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
-                                              text=f"La conversación <b>{conversacion.nombre}</b> tiene un total de {conversacion.total_mensajes} mensajes")
+                                              text=f"La conversacion <a href='https://t.me/c/1462256012/{conversacion.id}?thread={conversacion.id}'>{conversacion.nombre}</a> tiene un total de {conversacion.total_mensajes} mensajes")
+
             conversacion.mensaje_id = mensaje.message_id
             db.update_conversacion(conversacion)
     nombre = update.effective_user.first_name
@@ -335,6 +336,8 @@ def start(update: Update, context: CallbackContext):
                                      "  ·tesoreria - Tesorería\n"
                                      "  ·pietrobot -  Envíame un mensaje por privado y lo envío por el grupo\n"
                                      "  ·culos - Inserta la cara de alguien en un culo")
+
+    context.bot.sendMessage(chat_id,parse_mode="HTML",text=f"<a href='https://t.me/c/1462256012/109?thread=109'>{update.effective_user.first_name}</a>")
 
 
 if __name__ == "__main__":
