@@ -254,7 +254,7 @@ def completar_tarea(update: Update, context: CallbackContext):
     db.update_tarea(tarea)
     data = context.user_data["data"]
     logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name}  ha completado la tarea \n{tarea_to_text(tarea, data)}")
-    texto = f"{update.effective_user.first_name} ha completado la tarea!!!!!! \n<b>{tarea_to_text(tarea, data)}</b>"
+    texto = f"<a href='tg://user?id={update.effective_user.id}'>{update.effective_user.first_name}</a> ha completado la tarea!!!!!! \n<b>{tarea_to_text(tarea, data)}</b>"
 
     query.delete_message()
     if context.user_data["ediciones"]:
