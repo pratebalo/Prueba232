@@ -141,13 +141,16 @@ def echo(update: Update, context: CallbackContext):
         fila.ultimo_mensaje = datetime.today().strftime('%d/%m/%Y %H:%M:S')
         if update.message:
             db.update_data(fila)
-            if update.message.sticker:
+            if update.message.text:
+                logger.info(
+                    f"{update.effective_chat.type} -> {fila.apodo} ha enviado {update.message.text}. Con un total de {fila.total_mensajes} mensajes")
+            elif update.message.sticker:
                 fila.sticker += 1
                 logger.info(
                     f"{update.effective_chat.type} -> {fila.apodo} ha enviado el sticker {update.message.sticker.emoji}. Con un total de {fila.total_mensajes} mensajes")
-            elif update.message.text:
+            elif update.message.photo:
                 logger.info(
-                    f"{update.effective_chat.type} -> {fila.apodo} ha enviado {update.message.text}. Con un total de {fila.total_mensajes} mensajes")
+                    f"{update.effective_chat.type} -> {fila.apodo} ha enviado una foto. Con un total de {fila.total_mensajes} mensajes")
             elif update.message.animation:
                 fila.gif += 1
                 logger.info(
