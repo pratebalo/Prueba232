@@ -321,18 +321,21 @@ def start(update: Update, context: CallbackContext):
     if len(fila) == 1:
         fila = fila.iloc[0]
         logger.info(f"{update.effective_chat.type} -> {fila.apodo} ha iniciado el bot")
-        context.bot.sendMessage(chat_id,f"Bienvenido {fila.apodo}\nPuedes probar a usar los comandos poniendo / seguido del nombre del comando")
+        context.bot.sendMessage(chat_id,
+                                f"Bienvenido {fila.apodo}\nPuedes probar a usar los comandos poniendo / seguido del nombre del comando")
     else:
         logger.info(f"{update.effective_chat.type} -> {nombre} con id: {user_id} ha iniciado el bot")
-        context.bot.sendMessage(chat_id,f"Bienvenido {nombre}\nPuedes probar a usar los comandos poniendo / seguido del nombre del comando")
+        context.bot.sendMessage(chat_id,
+                                f"Bienvenido {nombre}\nPuedes probar a usar los comandos poniendo / seguido del nombre del comando")
 
-    context.bot.sendMessage(chat_id,"Los comandos son:\n"
-                                    "  ·listas - Crea, edita o borra una lista\n"
-                                    "  ·tareas - Crea, edita o borra una tarea\n"
-                                    "  ·loquendo - Envíame un texto y te reenvío un audio\n"
-                                    "  ·tesoreria - Tesorería\n"
-                                    "  ·pietrobot -  Envíame un mensaje por privado y lo envío por el grupo\n"
-                                    "  ·culos - Inserta la cara de alguien en un culo")
+    context.bot.sendMessage(chat_id, "Los comandos son:\n"
+                                     "  ·listas - Crea, edita o borra una lista\n"
+                                     "  ·tareas - Crea, edita o borra una tarea\n"
+                                     "  ·loquendo - Envíame un texto y te reenvío un audio\n"
+                                     "  ·tesoreria - Tesorería\n"
+                                     "  ·pietrobot -  Envíame un mensaje por privado y lo envío por el grupo\n"
+                                     "  ·culos - Inserta la cara de alguien en un culo")
+
 
 if __name__ == "__main__":
     load_dotenv()
