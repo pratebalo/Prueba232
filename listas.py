@@ -182,7 +182,7 @@ def end_editar_lista_anadir(update: Update, context: CallbackContext):
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
 
     logger.warning(
-        f"{update.effective_chat.type} -> {update.effective_user.first_name} ha añadido {context.user_data['lista']}")
+        f"{update.effective_chat.type} -> {update.effective_user.first_name} ha añadido {update.message.text}")
     lista = context.user_data["lista"]
     for line in update.message.text.splitlines():
         lista.elementos.append(line)
