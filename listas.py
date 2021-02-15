@@ -54,7 +54,6 @@ def listas(update: Update, context: CallbackContext):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     context.user_data["query_listas"] = context.bot.sendMessage(chat_id, text, reply_markup=reply_markup)
-    print(context.user_data["query_listas"].message_id)
     context.bot.deleteMessage(chat_id, id_mensaje)
     return ELEGIR_LISTA
 
@@ -195,7 +194,6 @@ def end_editar_lista_anadir(update: Update, context: CallbackContext):
 
     context.bot.deleteMessage(chat_id=ID_MANITOBA, message_id=lista.id_mensaje)
     new_message = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML", text=texto)
-    print(new_message.message_id)
     lista.id_mensaje = new_message.message_id
     db.update_lista(lista)
     context.user_data["lista"] = lista
