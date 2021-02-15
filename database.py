@@ -74,8 +74,8 @@ def update_tarea(tarea):
 def update_lista(lista):
     query = f"""set DateStyle='ISO, DMY';
         UPDATE listas
-        SET (nombre, elementos, tipo_elementos, fecha, creador) =
-        ( '{lista.nombre}', ARRAY{lista.elementos}, ARRAY{list(map(int, lista.tipo_elementos))}, '{lista.fecha}',{lista.creador})
+        SET (nombre, elementos, tipo_elementos, fecha, creador, id_mensaje) =
+        ( '{lista.nombre}', ARRAY{lista.elementos}, ARRAY{list(map(int, lista.tipo_elementos))}, '{lista.fecha}',{lista.creador}, {lista.id_mensaje})
         WHERE id = {lista.id};"""
     connect(query)
 

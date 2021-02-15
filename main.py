@@ -22,6 +22,7 @@ import requests
 from io import BytesIO
 
 import database as db
+import os
 import listas
 import tareas
 import tesoreria
@@ -34,8 +35,9 @@ logger = logging.getLogger()
 LOQUENDO_1, LOQUENDO_2 = range(2)
 ESTADO_UNICO = range(1)
 
-ID_MANITOBA = -1001166480838
-ID_CONVERSACIONES = -1001462256012
+ID_MANITOBA = os.environ.get("ID_MANITOBA")
+ID_CONVERSACIONES = os.environ.get("ID_CONVERSACIONES")
+
 ID_TELEGRAM = 777000
 
 load_dotenv()
