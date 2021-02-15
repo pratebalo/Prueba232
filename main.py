@@ -159,6 +159,9 @@ def echo(update: Update, context: CallbackContext):
                 logger.info(
                     f"{update.effective_chat.type} -> {fila.apodo} ha enviado el documento {update.message.document.file_name} tipo "
                     f"{update.message.document.mime_type}. Con un total de {fila.total_mensajes} mensajes")
+            elif update.message.new_chat_members:
+                logger.info(
+                    f"{update.effective_chat.type} -> {update.message.new_chat_members} ha entrado al grupo ")
             else:
                 logger.info(f"{update.effective_chat.type} -> update.message desconocido:  {update.message}")
         elif update.edited_message:
@@ -340,7 +343,8 @@ def start(update: Update, context: CallbackContext):
                                      "  ·pietrobot -  Envíame un mensaje por privado y lo envío por el grupo\n"
                                      "  ·culos - Inserta la cara de alguien en un culo")
 
-    context.bot.sendMessage(chat_id,parse_mode="HTML",text=f"<a href='https://t.me/c/1462256012/109?thread=109'>{update.effective_user.first_name}</a>")
+    context.bot.sendMessage(chat_id, parse_mode="HTML",
+                            text=f"<a href='https://t.me/c/1462256012/109?thread=109'>{update.effective_user.first_name}</a>")
 
 
 if __name__ == "__main__":

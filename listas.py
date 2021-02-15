@@ -132,7 +132,7 @@ def editar_lista(update: Update, context: CallbackContext):
         context.user_data["lista"] = lista
         context.user_data["id_lista"] = id_lista
 
-    logger.warning(f"{update.effective_chat.type} -> ""{update.effective_user.first_name} ha elegido editar la lista '{lista.nombre}'""")
+    logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name} ha elegido editar la lista '{lista.nombre}'")
 
     keyboard = []
     for i, (elem, tipo) in enumerate(zip(lista.elementos, lista.tipo_elementos)):
@@ -177,7 +177,7 @@ def end_editar_lista_anadir(update: Update, context: CallbackContext):
 
     texto = f"{update.effective_user.first_name} ha añadido elementos a la lista:\n{lista_to_text(lista)}"
 
-    logger.warning(f"{update.effective_chat.type} -> ""{update.effective_user.first_name} ha editado la lista '{lista.nombre}'""")
+    logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name} ha editado la lista '{lista.nombre}'")
     db.update_lista(lista)
     context.user_data["lista"] = lista
     keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR_EDITAR")),
@@ -272,7 +272,8 @@ def eliminar_lista(update: Update, context: CallbackContext):
 def terminar(update: Update, context: CallbackContext):
     update.callback_query.delete_message()
     if context.user_data["ediciones"]:
-        context.bot.sendMessage(ID_MANITOBA, parse_mode="HTML", text="\n".join(context.user_data["ediciones"]))
+        mensaje = context.bot.sendMessage(ID_MANITOBA, parse_mode="HTML", text="\n".join(context.user_data["ediciones"]))
+        print(mensaje)
     return ConversationHandler.END
 
 
