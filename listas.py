@@ -43,11 +43,11 @@ def listas(update: Update, context: CallbackContext):
         keyboardline.append(InlineKeyboardButton(i + 1, callback_data="NADA"))
         keyboardline.append(InlineKeyboardButton("👀", callback_data="VER" + str(lista.id)))
         keyboardline.append(InlineKeyboardButton("🖋", callback_data="EDITAR" + str(lista.id)))
-
-        if lista.creador == user.id:
-            keyboardline.append(InlineKeyboardButton("🗑", callback_data="ELIMINAR" + str(lista.id)))
-        else:
-            keyboardline.append(InlineKeyboardButton(" ", callback_data="NADA"))
+        if user.id in list(all_listas.creador):
+            if lista.creador == user.id:
+                keyboardline.append(InlineKeyboardButton("🗑", callback_data="ELIMINAR" + str(lista.id)))
+            else:
+                keyboardline.append(InlineKeyboardButton(" ", callback_data="NADA"))
         keyboard.append(keyboardline)
     keyboard.append([InlineKeyboardButton("Crear nueva lista", callback_data=str("CREAR"))])
     keyboard.append([InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))])
