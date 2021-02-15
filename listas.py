@@ -196,7 +196,7 @@ def end_editar_lista_anadir(update: Update, context: CallbackContext):
     keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR_EDITAR")),
                  InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))]]
 
-    # context.bot.deleteMessage(chat_id=ID_MANITOBA, message_id=int(lista.id_mensaje))
+    context.bot.deleteMessage(chat_id=ID_MANITOBA, message_id=int(lista.id_mensaje))
     new_message = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML", text=texto)
     lista.id_mensaje = new_message.message_id
     db.update_lista(lista)
