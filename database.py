@@ -8,19 +8,30 @@ load_dotenv()
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 
-def insert_lista(lista):
-    query = f"""set DateStyle='ISO, DMY';
-        INSERT INTO listas
-        (nombre, elementos, tipo_elementos, fecha, creador)
-        VALUES ( '{lista.nombre}', ARRAY{lista.elementos}, ARRAY{list(map(int, lista.tipo_elementos))}, '{lista.fecha}',{lista.creador});"""
-    connect(query)
+def select(table):
+    query = f"SELECT * FROM {table}"
+    connection = psycopg2.connect(DATABASE_URL)
+    result = pd.read_sql(query, connection).sort_values(by="id", ignore_index=True)
+    connection.close()
+    return result
 
 
-def insert_tarea(tarea):
+def delete(table, id):
+    query = f"""DELETE FROM {table}
+            WHERE ID = {id}
+            RETURNING *;"""
+    connection = psycopg2.connect(DATABASE_URL)
+    result = pd.read_sql(query, connection)
+    connection.commit()
+    connection.close()
+    return result
+
+
+def update_data(data):
     query = f"""set DateStyle='ISO, DMY';
-        INSERT INTO tareas
-        (descripcion, personas, fecha, creador)
-        VALUES ( '{tarea.descripcion}', ARRAY{list(map(int, tarea.personas))}, '{tarea.fecha}',{tarea.creador});"""
+        UPDATE data
+        SET ultimo_mensaje='{data.ultimo_mensaje}', total_mensajes={data.total_mensajes}, sticker={data.sticker}, gif={data.gif}
+        WHERE id={data.id};"""
     connect(query)
 
 
@@ -42,23 +53,12 @@ def update_conversacion(conversacion):
     connect(query)
 
 
-def select(table):
-    query = f"SELECT * FROM {table}"
-    connection = psycopg2.connect(DATABASE_URL)
-    result = pd.read_sql(query, connection).sort_values(by="id", ignore_index=True)
-    connection.close()
-    return result
-
-
-def delete(table, id):
-    query = f"""DELETE FROM {table}
-            WHERE ID = {id}
-            RETURNING *;"""
-    connection = psycopg2.connect(DATABASE_URL)
-    result = pd.read_sql(query, connection)
-    connection.commit()
-    connection.close()
-    return result
+def insert_tarea(tarea):
+    query = f"""set DateStyle='ISO, DMY';
+        INSERT INTO tareas
+        (descripcion, personas, fecha, creador)
+        VALUES ( '{tarea.descripcion}', ARRAY{list(map(int, tarea.personas))}, '{tarea.fecha}',{tarea.creador});"""
+    connect(query)
 
 
 def update_tarea(tarea):
@@ -71,6 +71,14 @@ def update_tarea(tarea):
     connect(query)
 
 
+def insert_lista(lista):
+    query = f"""set DateStyle='ISO, DMY';
+        INSERT INTO listas
+        (nombre, elementos, tipo_elementos, fecha, creador, mensaje_id)
+        VALUES ( '{lista.nombre}', ARRAY{lista.elementos}, ARRAY{list(map(int, lista.tipo_elementos))}, '{lista.fecha}',{lista.creador}), {lista.mensaje_id};"""
+    connect(query)
+
+
 def update_lista(lista):
     query = f"""set DateStyle='ISO, DMY';
         UPDATE listas
@@ -80,15 +88,7 @@ def update_lista(lista):
     connect(query)
 
 
-def update_data(data):
-    query = f"""set DateStyle='ISO, DMY';
-        UPDATE data
-        SET ultimo_mensaje='{data.ultimo_mensaje}', total_mensajes={data.total_mensajes}, sticker={data.sticker}, gif={data.gif}
-        WHERE id={data.id};"""
-    connect(query)
-
-
-def insert_bote(persona,cantidad,total,motivo):
+def insert_bote(persona, cantidad, total, motivo):
     query = f"""INSERT INTO botes
         (persona, cantidad, total, motivo)
          VALUES ({persona}, {cantidad}, {total}, '{motivo}');"""
