@@ -345,8 +345,7 @@ def start(update: Update, context: CallbackContext):
                                      "  ·pietrobot -  Envíame un mensaje por privado y lo envío por el grupo\n"
                                      "  ·culos - Inserta la cara de alguien en un culo")
 
-    context.bot.sendMessage(chat_id, parse_mode="HTML",
-                            text=f"<a href='https://t.me/c/1462256012/109?thread=109'>{update.effective_user.first_name}</a>")
+
 
 
 if __name__ == "__main__":
