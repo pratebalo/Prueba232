@@ -64,10 +64,9 @@ def insert_tarea(tarea):
 def update_tarea(tarea):
     query = f"""set DateStyle='ISO, DMY';
         UPDATE tareas
-        SET(descripcion, personas, fecha, creador,completada) =
+        SET(descripcion, personas, fecha, creador, completada) =
         ( '{tarea.descripcion}', ARRAY{list(map(int, tarea.personas))}, '{tarea.fecha}',{tarea.creador},{tarea.completada})
         WHERE id = {tarea.id};"""
-    print(query)
     connect(query)
 
 
@@ -89,18 +88,28 @@ def update_lista(lista):
 
 
 def insert_bote(persona, cantidad, total, motivo):
-    query = f"""INSERT INTO botes
+    query = f"""set DateStyle='ISO, DMY';
+    INSERT INTO botes
         (persona, cantidad, total, motivo)
          VALUES ({persona}, {cantidad}, {total}, '{motivo}');"""
 
     connect(query)
 
 
-def insert_gastos(persona, motivo, cantidad):
-    query = f"""INSERT INTO gastos    
-    (persona, motivo, cantidad)
-         VALUES ({persona}, '{motivo}', {cantidad});"""
+def insert_gastos(id, motivo, cantidad, fecha, nombre):
+    query = f"""set DateStyle='ISO, DMY';
+    INSERT INTO gastos    
+    (id_persona, motivo, cantidad, fecha, nombre)
+         VALUES ({id}, '{motivo}', {cantidad}, {fecha}, {nombre});"""
 
+    connect(query)
+
+
+def update_gasto(id_gasto):
+    query = f"""
+        UPDATE gastos
+        SET pagado = True
+        WHERE id = {id_gasto};"""
     connect(query)
 
 

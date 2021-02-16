@@ -64,7 +64,7 @@ def birthday(context: CallbackContext):
     data = db.select("data")
     fecha = datetime.today().strftime('%d/%m')
     cumpleaneros = data[data.cumple == fecha]
-
+    stickers=["CAACAgIAAx0CTey1gAACBjlgGZSaKItIUqHqSeZaeMll-cdb-QACHQADr8ZRGlyO-uEKz2-8HgQ"]
     for _, cumpleanero in cumpleaneros.iterrows():
         tts = gTTS("""Cumpleaños feliz
                     Te deseamos todos.
@@ -94,7 +94,7 @@ def birthday(context: CallbackContext):
         context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                 text=f"Felicidades <b>{cumpleanero.apodo}</b>!!!!!")
         context.bot.sendSticker(chat_id=ID_MANITOBA,
-                                sticker="CAACAgIAAx0CTey1gAACBjlgGZSaKItIUqHqSeZaeMll-cdb-QACHQADr8ZRGlyO-uEKz2-8HgQ")
+                                sticker=random.choice(stickers))
         context.bot.sendAudio(chat_id=ID_MANITOBA,
                               audio=open(f"Felicitacion de su majestad para {cumpleanero.apodo}.mp3", "rb"))
         if cumpleanero.genero == "M":
@@ -182,8 +182,8 @@ def loquendo(update: Update, context: CallbackContext):
     logger.warning(f"{update.effective_chat.type} -> User {user.first_name} entro en el comando loquendo")
     # Send message with text and appended InlineKeyboard
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
-    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id,
-                                                              f"{update.effective_user.first_name}: ¿Qué texto quieres convertir?")
+    context.user_data["oldMessage"] = \
+        context.bot.sendMessage(chat_id, f"{update.effective_user.first_name}: ¿Qué texto quieres convertir?")
     # Tell ConversationHandler that we're in state `FIRST` now
     return LOQUENDO_1
 
@@ -198,11 +198,10 @@ def loquendo2(update: Update, context: CallbackContext):
     idiomas = ['Afrikaans', 'Arabic', 'Bengali', 'Bosnian', 'Catalan', 'Czech', 'Welsh', 'Danish', 'German', 'Greek',
                'English', 'Esperanto', 'Spanish', 'Estonian', 'Finnish', 'French', 'Gujarati', 'Hindi', 'Croatian',
                'Hungarian', 'Armenian', 'Indonesian', 'Icelandic', 'Italian', 'Japanese', 'Javanese', 'Khmer',
-               'Kannada',
-               'Korean', 'Latin', 'Latvian', 'Macedonian', 'Malayalam', 'Marathi', 'Myanmar', 'Nepali', 'Dutch',
-               'Norwegian', 'Polish', 'Portuguese', 'Romanian', 'Russian', 'Sinhala', 'Slovak', 'Albanian', 'Serbian',
-               'Sundanese', 'Swedish', 'Swahili', 'Tamil', 'Telugu', 'Thai', 'Filipino', 'Turkish', 'Ukrainian', 'Urdu',
-               'Vietnamese']
+               'Kannada', 'Korean', 'Latin', 'Latvian', 'Macedonian', 'Malayalam', 'Marathi', 'Myanmar', 'Nepali',
+               'Dutch', 'Norwegian', 'Polish', 'Portuguese', 'Romanian', 'Russian', 'Sinhala', 'Slovak', 'Albanian',
+               'Serbian', 'Sundanese', 'Swedish', 'Swahili', 'Tamil', 'Telugu', 'Thai', 'Filipino', 'Turkish',
+               'Ukrainian', 'Urdu', 'Vietnamese']
     part_keyboard = []
     keyboard = []
     for i, (lang, lg) in enumerate(zip(idiomas, idi)):
@@ -344,8 +343,6 @@ def start(update: Update, context: CallbackContext):
                                      "  ·tesoreria - Tesorería\n"
                                      "  ·pietrobot -  Envíame un mensaje por privado y lo envío por el grupo\n"
                                      "  ·culos - Inserta la cara de alguien en un culo")
-
-
 
 
 if __name__ == "__main__":
