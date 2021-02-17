@@ -15,23 +15,22 @@ import os
 
 # Stages
 OPCION, BOTE, BOTE2, PAGAR, FINAL_OPTION = range(5)
-ID_MANITOBA = os.environ.get("ID_MANITOBA")
-ID_TESORERIA = os.environ.get("ID_TESORERIA")
+ID_MANITOBA = int(os.environ.get("ID_MANITOBA"))
+ID_TESORERIA = int(os.environ.get("ID_TESORERIA"))
 logger = logging.getLogger()
 
 
 def tesoreria(update: Update, context: CallbackContext):
-    context.user_data["bote"] = db.select("botes")
-    # gastos = db.select("gastos")
     logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name} entro en el comando tesoreria")
-    # data = db.select("data")
+
     update.message.delete()
     text = f"<b>Tesoreria</b>\n{update.effective_user.first_name}: ¿Qué quieres hacer?\n"
     keyboard = [[InlineKeyboardButton("Meter dinero en el bote", callback_data="+")],
                 [InlineKeyboardButton("Sacar dinero del bote", callback_data="-")],
-                [InlineKeyboardButton("Comunicar un gasto", callback_data="GASTO")],
-                [InlineKeyboardButton("A PAGAR A PAGAR 🤑🤑", callback_data="PAGO")],
-                [InlineKeyboardButton("Terminar", callback_data="TERMINAR")]]
+                [InlineKeyboardButton("Comunicar un gasto", callback_data="GASTO")]]
+    if update.effective_user.id == ID_TESORERIA:
+        keyboard.append([InlineKeyboardButton("A PAGAR A PAGAR 🤑🤑", callback_data="PAGO")])
+    keyboard.append([InlineKeyboardButton("Terminar", callback_data="TERMINAR")])
     reply_markup = InlineKeyboardMarkup(keyboard)
     context.bot.sendMessage(update.effective_chat.id, text, parse_mode="HTML", reply_markup=reply_markup)
     return OPCION
@@ -59,6 +58,7 @@ def bote2(update: Update, context: CallbackContext):
 
 def bote3(update: Update, context: CallbackContext):
     data = db.select("data")
+    bote = db.select("botes")
     persona = data[data.id == update.effective_user.id].squeeze()
     logger.warning(
         f"{update.effective_chat.type} -> {update.effective_user.first_name} ha enviado el motivo {update.message.text}")
@@ -73,7 +73,7 @@ def bote3(update: Update, context: CallbackContext):
         mensaje_usuario = f"Has metido el gasto de {cantidad}€ con el concepto '{update.message.text}'"
     else:
         cantidad = float(context.user_data["tipo"] + context.user_data["cantidad"])
-        bote_actual = context.user_data["bote"].iloc[-1].total + cantidad
+        bote_actual = bote.iloc[-1].total + cantidad
         db.insert_bote(update.effective_user.id,
                        cantidad,
                        bote_actual,
@@ -95,7 +95,7 @@ def bote3(update: Update, context: CallbackContext):
 
 
 def pagar(update: Update, context: CallbackContext):
-    gastos = db.select("gastos").sort_values(by=["pagado","id_persona"],ignore_index=True)
+    gastos = db.select("gastos").sort_values(by=["pagado", "id_persona"], ignore_index=True)
 
     keyboard = []
     texto = f"A soltar el dinero polssssss 💰💶💵💷💸\n"
@@ -121,10 +121,14 @@ def terminar_pagar(update: Update, context: CallbackContext):
     gasto = gastos[gastos.id == id_gasto].squeeze()
     db.update_gasto(id_gasto)
     texto = f"Se te ha pagado el gasto '{gasto.motivo}' por valor de {gasto.cantidad}€ en la fecha {gasto.fecha.strftime('%d/%m/%Y')}"
-    print(type(gasto.id_persona))
     context.bot.sendMessage(chat_id=int(gasto.id_persona), text=texto)
+    update.callback_query.delete_message()
+    keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR")),
+                 InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))]]
 
-    return ConversationHandler.END
+    context.bot.sendMessage(update.effective_chat.id, text="Quieres pagar a alguien mas?",
+                            reply_markup=InlineKeyboardMarkup(keyboard))
+    return FINAL_OPTION
 
 
 def terminar(update: Update, context: CallbackContext):
@@ -144,6 +148,9 @@ conv_handler_tesoreria = ConversationHandler(
         BOTE2: [MessageHandler(Filters.text & ~Filters.command, bote3)],
         PAGAR: [CallbackQueryHandler(terminar, pattern='^TERMINAR$'),
                 CallbackQueryHandler(terminar_pagar, pattern='^PAGAR')],
+        FINAL_OPTION: [
+            CallbackQueryHandler(pagar, pattern='^CONTINUAR$'),
+            CallbackQueryHandler(terminar, pattern='^TERMINAR')],
     },
     fallbacks=[CommandHandler('tesoreria', tesoreria)],
 )

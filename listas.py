@@ -16,7 +16,7 @@ import os
 
 ELEGIR_LISTA, CREAR_LISTA1, CREAR_LISTA2, EDITAR_LISTA1, EDITAR_LISTA2, EDITAR_LISTA_A, EDITAR_LISTA_E, \
 FINAL_OPTION = range(8)
-ID_MANITOBA = os.environ.get("ID_MANITOBA")
+ID_MANITOBA = int(os.environ.get("ID_MANITOBA"))
 logger = logging.getLogger()
 
 
@@ -312,6 +312,7 @@ def eliminar_lista(update: Update, context: CallbackContext):
 
 def terminar(update: Update, context: CallbackContext):
     update.callback_query.delete_message()
+
     return ConversationHandler.END
 
 

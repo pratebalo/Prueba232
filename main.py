@@ -35,8 +35,8 @@ logger = logging.getLogger()
 LOQUENDO_1, LOQUENDO_2 = range(2)
 ESTADO_UNICO = range(1)
 
-ID_MANITOBA = os.environ.get("ID_MANITOBA")
-ID_CONVERSACIONES = os.environ.get("ID_CONVERSACIONES")
+ID_MANITOBA = int(os.environ.get("ID_MANITOBA"))
+ID_CONVERSACIONES = int(os.environ.get("ID_CONVERSACIONES"))
 
 ID_TELEGRAM = 777000
 
