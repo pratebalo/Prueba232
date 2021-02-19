@@ -158,8 +158,6 @@ def editar_lista(update: Update, context: CallbackContext):
     keyboard.append([InlineKeyboardButton("Atras", callback_data=str("ATRAS")),
                      InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))])
     reply_markup = InlineKeyboardMarkup(keyboard)
-    print(keyboard)
-    print(reply_markup)
     query.delete_message()
     texto = f"{update.effective_user.first_name}: ¿Que quieres hacer?:\n{lista_to_text(lista)}"
     context.user_data["query_elementos"] = context.bot.sendMessage(update.effective_chat.id,
