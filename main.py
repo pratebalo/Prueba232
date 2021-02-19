@@ -64,31 +64,77 @@ def birthday(context: CallbackContext):
     data = db.select("data")
     fecha = datetime.today().strftime('%d/%m')
     cumpleaneros = data[data.cumple == fecha]
-    stickers=["CAACAgIAAx0CTey1gAACBjlgGZSaKItIUqHqSeZaeMll-cdb-QACHQADr8ZRGlyO-uEKz2-8HgQ"]
+    stickers=["CAACAgIAAxkBAAIEO2AvpKPDrRqnQQ4VkXJuI_FYpTKdAALRAAP3AsgPsNUWIvohscweBA"]
     for _, cumpleanero in cumpleaneros.iterrows():
-        tts = gTTS("""Cumpleaños feliz
-                    Te deseamos todos.
-                    Cumpleaños feliz
-                    
-                    Desde el día que naciste
-                    Has sido siempre y serás
-                    Una dicha para todos
-                    De inmensa felicidad
-                    
-                    Tu fiesta de cumpleaños
-                    ya vamos a celebrar
-                    unimos a tu familia
-                    todos vamos a cantar
-                    
-                    Cumpleaños feliz
-                    cumpleaños feliz
-                    te desean tus amigos de Parchís
-                    plas plans plansnsnsns plas plas
-                    palmada palmada palmada
-                    no te vayas todavia
-                    clap clap clapnsnsns clap clapppppp clapsssss 
-                    plassss Plassss plasssss
-                    """, lang="it")
+        tts = gTTS("""Estas son las mañanitas
+
+                        De Jorgito del Mas Ojeis
+                        
+                        Para ti querida amiga
+                        
+                        Que cumples ya 106
+                        
+                        Despierta floja, despierta
+                        
+                        Mira que ya amaneció
+                        
+                        Ya los telocolotes cantan
+                        
+                        El burro ya rebuznó
+                        
+                        El día que tú naciste nacieron los dinosaurios,
+                        
+                        Las vacas no dieron leche
+                        
+                        Y lloraron los cavernarios
+                        Escuchen, listen Chicken
+                        Se vienens, ya comienza, 
+                        Abrid bien las orejas:
+                        
+                        Tú no eres tímida, tú no eres tibia
+                        Me das envidia, ah. Contigo quiero estar
+                        Eres mi amiga y mi maestra
+                        Lidya, mujer anfibia
+                        Contigo sé que no me voy a apalancar
+                        Mi Cleopatra, llévame a Nueva York
+                        Quiero pasear a tu lado, anónimo
+                        Como si fuéramos los últimos romanticistas
+                        Que bailan abrazados entre los turistas
+                        
+                        
+                        Perdona lo mal cantado
+                        
+                        Y también lo mal habido
+                        
+                        Si no te trajimos nada
+                        
+                        Es que estamos bien jodidos
+                        
+                        Ahí viene el Chupa cabras
+                        
+                        Y el hombre lobo también
+                        
+                        Ya se despertó la momia
+                        
+                        Que te va a jalar los pies
+                        
+                        Sapo verde eres tú
+                        
+                        Sapo verde eres tú
+                        
+                        Sapo verde eres tú con ganas
+                        
+                        Sapo verde eres tú
+                        
+                        
+                        Plas e plas i plas eoeoe plas plas plas 
+                        Currucutumtum currutas 
+                        Chova, chova, cada día me gustas más
+                        Plas plas plasenensensen
+                        Plas plas plis plas Plus ensnsensnesnsenene plas plas 
+                        Aplauso aplauso aplauso
+                        Trafullaaaaa porongondo gondronsons flurucato de menta pa ti
+                    """, lang="es")
         tts.save(f"Felicitacion de su majestad para {cumpleanero.apodo}.mp3")
 
         context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
