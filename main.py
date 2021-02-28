@@ -157,7 +157,7 @@ def muditos(context: CallbackContext):
     data.ultimo_mensaje = pd.to_datetime(data.ultimo_mensaje)
     for _, persona in data[data.ultimo_mensaje < (hoy - timedelta(23))].iterrows():
         context.bot.sendMessage(ID_MANITOBA, parse_mode="HTML",
-                                text=f"""Te echamos de menos <a href="tg://user?id=persona.id">{persona.apodo}</a>""")
+                                text=f"""Te echamos de menos <a href="tg://user?id={persona.id}">{persona.apodo}</a>""")
 
 
 def echo(update: Update, context: CallbackContext):
@@ -438,6 +438,6 @@ if __name__ == "__main__":
     dp.add_handler(MessageHandler(Filters.all, echo))
 
     job.run_daily(birthday, time(6, 00, 00, 000000))
-    job.run_daily(muditos, time(17, 54, 00, 000000))
+    # job.run_daily(muditos, time(17, 54, 00, 000000))
     job.run_daily(tareas.recoradar_tareas, time(9, 00, 00, 000000), days=(1,))
     run(updater)
