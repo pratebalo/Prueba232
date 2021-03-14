@@ -161,21 +161,29 @@ def muditos(context: CallbackContext):
 
 
 def echo(update: Update, context: CallbackContext):
+    print(update.poll.question)
     data = db.select("data")
     user_id = int(update.effective_user.id)
     chat_id = int(update.effective_chat.id)
     if chat_id == ID_CONVERSACIONES:
         conversaciones = db.select("conversaciones")
         if user_id == ID_TELEGRAM:
+            if update.message:
+                texto= update.message.text
+            elif update.poll:
+                texto= update.poll.question
             mensaje = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
-                                              text=f"Se ha iniciado una conversacion: <b>{update.message.text}</b>")
-            db.insert_conversacion(update.message.message_id, mensaje.message_id, update.message.text)
+                                              text=f"Se ha iniciado una conversacion: <a href='https://t.me/c/1462256012/{update.message.message_id}?thread={update.message.message_id}'>{texto}</a>")
+            db.insert_conversacion(update.message.message_id, mensaje.message_id, texto)
         else:
             reply_id = update.message.reply_to_message.message_id
             conversacion = conversaciones[conversaciones.id == reply_id].iloc[0]
             conversacion.total_mensajes += 1
             db.update_conversacion(conversacion)
-            context.bot.deleteMessage(chat_id=ID_MANITOBA, message_id=int(conversacion.mensaje_id))
+            try:
+                context.bot.deleteMessage(chat_id=ID_MANITOBA, message_id=int(conversacion.mensaje_id))
+            except:
+                print("Mensaje eliminado")
             mensaje = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                               text=f"La conversacion <a href='https://t.me/c/1462256012/{conversacion.id}?thread={conversacion.id}'>{conversacion.nombre}</a> tiene un total de {conversacion.total_mensajes} mensajes")
 
