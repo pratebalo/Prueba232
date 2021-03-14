@@ -184,6 +184,7 @@ def echo(update: Update, context: CallbackContext):
                 context.bot.deleteMessage(chat_id=ID_MANITOBA, message_id=int(conversacion.mensaje_id))
             except:
                 print("Mensaje eliminado")
+
             mensaje = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                               text=f"La conversacion <a href='https://t.me/c/1462256012/{conversacion.id}?thread={conversacion.id}'>{conversacion.nombre}</a> tiene un total de {conversacion.total_mensajes} mensajes")
 
