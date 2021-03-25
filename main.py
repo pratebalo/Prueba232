@@ -64,76 +64,52 @@ def birthday(context: CallbackContext):
     data = db.select("data")
     fecha = datetime.today().strftime('%d/%m')
     cumpleaneros = data[data.cumple == fecha]
-    stickers=["CAACAgIAAxkBAAIEO2AvpKPDrRqnQQ4VkXJuI_FYpTKdAALRAAP3AsgPsNUWIvohscweBA"]
+    stickers=["CAACAgIAAxkBAAIEQmBdG-BSJS-3H06hq0Zr-Qp05eloAAIxAAPBnGAMxg4yoItadaUeBA"]
     for _, cumpleanero in cumpleaneros.iterrows():
-        tts = gTTS("""Estas son las mañanitas
-
-                        De Jorgito del Mas Ojeis
-                        
-                        Para ti querida amiga
-                        
-                        Que cumples ya 106
-                        
-                        Despierta floja, despierta
-                        
-                        Mira que ya amaneció
-                        
-                        Ya los telocolotes cantan
-                        
-                        El burro ya rebuznó
-                        
-                        El día que tú naciste nacieron los dinosaurios,
-                        
-                        Las vacas no dieron leche
-                        
-                        Y lloraron los cavernarios
-                        Escuchen, listen Chicken
-                        Se vienens, ya comienza, 
-                        Abrid bien las orejas:
-                        
-                        Tú no eres tímida, tú no eres tibia
-                        Me das envidia, ah. Contigo quiero estar
-                        Eres mi amiga y mi maestra
-                        Lidya, mujer anfibia
-                        Contigo sé que no me voy a apalancar
-                        Mi Cleopatra, llévame a Nueva York
-                        Quiero pasear a tu lado, anónimo
-                        Como si fuéramos los últimos romanticistas
-                        Que bailan abrazados entre los turistas
-                        
-                        
-                        Perdona lo mal cantado
-                        
-                        Y también lo mal habido
-                        
-                        Si no te trajimos nada
-                        
-                        Es que estamos bien jodidos
-                        
-                        Ahí viene el Chupa cabras
-                        
-                        Y el hombre lobo también
-                        
-                        Ya se despertó la momia
-                        
-                        Que te va a jalar los pies
-                        
-                        Sapo verde eres tú
-                        
-                        Sapo verde eres tú
-                        
-                        Sapo verde eres tú con ganas
-                        
-                        Sapo verde eres tú
-                        
-                        
-                        Plas e plas i plas eoeoe plas plas plas 
-                        Currucutumtum currutas 
-                        Chova, chova, cada día me gustas más
-                        Plas plas plasenensensen
-                        Plas plas plis plas Plus ensnsensnesnsenene plas plas 
-                        Aplauso aplauso aplauso
-                        Trafullaaaaa porongondo gondronsons flurucato de menta pa ti
+        tts = gTTS("""En la sala de un hospital
+                        a las 16 nació Simón
+                        Es el verano del 90
+                        El orgullo de don Chusmi, por ser varón
+                        Fue criado como los demás
+                        Con mano dura, con severidad
+                        Cuando crezcas vas a estudiar
+                        La misma vaina que tu papá, óyelo bien
+                        Tendrás que ser un gran varón
+                        Al extranjero se fue Simón
+                        Lejos de casa, se le olvidó aquel sermón
+                        Cambio la forma de caminar
+                        Usaba falda, lápiz labial, y un carterón
+                        Cuenta la gente que un dia el papá
+                        Fue a visitarlo sin avisar
+                        Vaya que error
+                        Y una mujer le habló al pasar
+                        Le dijo hola, qué tal papá, ¿cómo te va?
+                        No me conoces yo soy Simón
+                        Simón, tu hijo, el gran varón
+                        No se puede corregir a la naturaleza
+                        Palo que nace doblado, jamás su tronco endereza
+                        Se dejó llevar de lo que dice la gente
+                        Su padre jamás le habló
+                        Lo abandonó para siempre
+                        Y no te quejes Chusmi, no te quejes por nada
+                        Si del cielo te caen limones
+                        Aprende a hacer limonada
+                        Y mientras pasan los años, el viejo cediendo un poco
+                        Simón ya ni le escribía, Chusmi estaba furioso
+                        Por fin hubo noticias de dónde su hijo estaba
+                        Chusmi nunca olvidó el día de esa triste llamada
+                        En la sala de un hospital
+                        De una extraña enfermedad murió Simón
+                        Es el verano del 2047
+                        Al enfermo de la cama 10 nadie lloró
+                        Simón, Simón
+                        Simón
+                        Hay que tener compasión, basta ya de moraleja
+                        El que esté libre de pecado, que tire la primera piedra
+                        No se puede corregir a la naturaleza
+                        Palo que nace doblado, jamás su tronco endereza
+                        plas plas plasensens plansasna plas plas aplausplas plas dragón campeóns plans pls ls pilsi plsis 
+                        plus pleisup plesiousaruss sarasa ndonga chipitimini cuchiviri plas plas eo eo eo
                     """, lang="es")
         tts.save(f"Felicitacion de su majestad para {cumpleanero.apodo}.mp3")
 
@@ -161,6 +137,7 @@ def muditos(context: CallbackContext):
 
 
 def echo(update: Update, context: CallbackContext):
+    print(update)
     data = db.select("data")
     user_id = int(update.effective_user.id)
     chat_id = int(update.effective_chat.id)
