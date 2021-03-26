@@ -64,59 +64,14 @@ def birthday(context: CallbackContext):
     data = db.select("data")
     fecha = datetime.today().strftime('%d/%m')
     cumpleaneros = data[data.cumple == fecha]
-    stickers=["CAACAgIAAxkBAAIEQmBdG-BSJS-3H06hq0Zr-Qp05eloAAIxAAPBnGAMxg4yoItadaUeBA"]
     for _, cumpleanero in cumpleaneros.iterrows():
-        tts = gTTS("""En la sala de un hospital
-                        a las 16 nació Simón
-                        Es el verano del 90
-                        El orgullo de don Chusmi, por ser varón
-                        Fue criado como los demás
-                        Con mano dura, con severidad
-                        Cuando crezcas vas a estudiar
-                        La misma vaina que tu papá, óyelo bien
-                        Tendrás que ser un gran varón
-                        Al extranjero se fue Simón
-                        Lejos de casa, se le olvidó aquel sermón
-                        Cambio la forma de caminar
-                        Usaba falda, lápiz labial, y un carterón
-                        Cuenta la gente que un dia el papá
-                        Fue a visitarlo sin avisar
-                        Vaya que error
-                        Y una mujer le habló al pasar
-                        Le dijo hola, qué tal papá, ¿cómo te va?
-                        No me conoces yo soy Simón
-                        Simón, tu hijo, el gran varón
-                        No se puede corregir a la naturaleza
-                        Palo que nace doblado, jamás su tronco endereza
-                        Se dejó llevar de lo que dice la gente
-                        Su padre jamás le habló
-                        Lo abandonó para siempre
-                        Y no te quejes Chusmi, no te quejes por nada
-                        Si del cielo te caen limones
-                        Aprende a hacer limonada
-                        Y mientras pasan los años, el viejo cediendo un poco
-                        Simón ya ni le escribía, Chusmi estaba furioso
-                        Por fin hubo noticias de dónde su hijo estaba
-                        Chusmi nunca olvidó el día de esa triste llamada
-                        En la sala de un hospital
-                        De una extraña enfermedad murió Simón
-                        Es el verano del 2047
-                        Al enfermo de la cama 10 nadie lloró
-                        Simón, Simón
-                        Simón
-                        Hay que tener compasión, basta ya de moraleja
-                        El que esté libre de pecado, que tire la primera piedra
-                        No se puede corregir a la naturaleza
-                        Palo que nace doblado, jamás su tronco endereza
-                        plas plas plasensens plansasna plas plas aplausplas plas dragón campeóns plans pls ls pilsi plsis 
-                        plus pleisup plesiousaruss sarasa ndonga chipitimini cuchiviri plas plas eo eo eo
-                    """, lang="es")
+        tts = gTTS(cumpleanero.cumple_song, lang=cumpleanero.cumple_lang)
         tts.save(f"Felicitacion de su majestad para {cumpleanero.apodo}.mp3")
 
         context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                 text=f"Felicidades <b>{cumpleanero.apodo}</b>!!!!!")
         context.bot.sendSticker(chat_id=ID_MANITOBA,
-                                sticker=random.choice(stickers))
+                                sticker=cumpleanero.cumple_sticker)
         context.bot.sendAudio(chat_id=ID_MANITOBA,
                               audio=open(f"Felicitacion de su majestad para {cumpleanero.apodo}.mp3", "rb"))
         if cumpleanero.genero == "M":
@@ -373,6 +328,7 @@ def start(update: Update, context: CallbackContext):
                                      "  ·tesoreria - Tesorería\n"
                                      "  ·pietrobot -  Envíame un mensaje por privado y lo envío por el grupo\n"
                                      "  ·culos - Inserta la cara de alguien en un culo")
+
 
 
 if __name__ == "__main__":
