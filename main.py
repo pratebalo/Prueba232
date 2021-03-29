@@ -98,10 +98,12 @@ def echo(update: Update, context: CallbackContext):
     if chat_id == ID_CONVERSACIONES:
         conversaciones = db.select("conversaciones")
         if user_id == ID_TELEGRAM:
-            if update.message:
+            if update.message.text:
                 texto= update.message.text
-            elif update.poll:
-                texto= update.poll.question
+            elif update.message.poll:
+                texto= update.message.poll.question
+            else:
+                texto = "Nueva conversación"
             mensaje = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                               text=f"Se ha iniciado una conversacion: <a href='https://t.me/c/1462256012/{update.message.message_id}?thread={update.message.message_id}'>{texto}</a>")
             db.insert_conversacion(update.message.message_id, mensaje.message_id, texto)
