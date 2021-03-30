@@ -379,7 +379,7 @@ if __name__ == "__main__":
 
     dp.add_handler(MessageHandler(Filters.all, echo))
 
-    job.run_daily(birthday, time(6, 00, 00, 000000))
+    job.run_daily(birthday, time(12, 30, 00, 000000))
     # job.run_daily(muditos, time(17, 54, 00, 000000))
     job.run_daily(tareas.recoradar_tareas, time(9, 00, 00, 000000), days=(1,))
     run(updater)
