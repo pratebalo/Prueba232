@@ -99,7 +99,7 @@ def insert_bote(persona, cantidad, total, motivo):
 def insert_gastos(id, motivo, cantidad, fecha, nombre):
     query = f"""set DateStyle='ISO, DMY';
     INSERT INTO gastos    
-    (id_persona, motivo, cantidad, fecha, nombre)
+    (id_persona, motivo, cantidad, fecha, nombre_persona)
          VALUES ({id}, '{motivo}', {cantidad}, {fecha}, {nombre});"""
 
     connect(query)
