@@ -99,9 +99,9 @@ def echo(update: Update, context: CallbackContext):
         conversaciones = db.select("conversaciones")
         if user_id == ID_TELEGRAM:
             if update.message.text:
-                texto= update.message.text
+                texto = update.message.text
             elif update.message.poll:
-                texto= update.message.poll.question
+                texto = update.message.poll.question
             else:
                 texto = "Nueva conversación"
             mensaje = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
@@ -332,6 +332,18 @@ def start(update: Update, context: CallbackContext):
                                      "  ·culos - Inserta la cara de alguien en un culo")
 
 
+def get_birthday(update: Update, context: CallbackContext):
+    data = db.select("data")
+    data.cumple = pd.to_datetime(data.cumple, format='%d/%m').apply(lambda dt: dt.replace(year=2021))
+
+    a = data[data.cumple > datetime.today()].sort_values("cumple")[0:4]
+    texto = ""
+    for _, persona in a.iterrows():
+        texto += persona.nombre_completo + " | " + persona.cumple.strftime('%d/%m') + "/" + str(persona.cumple_ano) + "\n"
+
+    context.bot.sendMessage(update.effective_chat.id, texto)
+
+
 
 if __name__ == "__main__":
     load_dotenv()
@@ -369,6 +381,8 @@ if __name__ == "__main__":
         },
         fallbacks=[CommandHandler('pietrobot', pietrobot)],
     )
+
+
     dp.add_handler(listas.conv_handler_listas)
     dp.add_handler(tesoreria.conv_handler_tesoreria)
     dp.add_handler(conv_handler_loquendo)
@@ -376,6 +390,7 @@ if __name__ == "__main__":
     dp.add_handler(conv_handler_culos)
     dp.add_handler(tareas.conv_handler_tareas)
     dp.add_handler(CommandHandler('start', start))
+    dp.add_handler(CommandHandler('cumples', get_birthday))
 
     dp.add_handler(MessageHandler(Filters.all, echo))
 
