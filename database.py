@@ -100,7 +100,7 @@ def insert_gastos(id, motivo, cantidad, fecha, nombre):
     query = f"""set DateStyle='ISO, DMY';
     INSERT INTO gastos    
     (id_persona, motivo, cantidad, fecha, nombre_persona)
-         VALUES ({id}, '{motivo}', {cantidad}, {fecha}, {nombre});"""
+         VALUES ({id}, '{motivo}', {cantidad}, '{fecha}', '{nombre}');"""
 
     connect(query)
 
@@ -120,3 +120,5 @@ def connect(query):
     connection.commit()
     cursor.close()
     connection.close()
+
+insert_gastos(3,"asd",70.0,"20/03/2020","asd")
