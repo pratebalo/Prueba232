@@ -51,7 +51,7 @@ if mode == "dev":
 
 elif mode == "prod":
     def run(updater):
-        PORT = int(os.environ.get("PORT", "80"))
+        PORT = int(os.environ.get("PORT", "8443"))
         HEROKU_APP_NAME = os.environ.get("HEROKU_APP_NAME")
 
         updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=TOKEN)
@@ -467,7 +467,7 @@ if __name__ == "__main__":
 
     dp.add_handler(MessageHandler(Filters.all, echo))
 
-    # job.run_daily(birthday, time(7, 00, 00, tzinfo=pytz.timezone('Europe/Madrid')))
+    job.run_daily(birthday, time(7, 00, 00, tzinfo=pytz.timezone('Europe/Madrid')))
     # job.run_daily(muditos, time(17, 54, 00, 000000))
-    # job.run_daily(tareas.recoradar_tareas, time(9, 00, 00, tzinfo=pytz.timezone('Europe/Madrid')), days=(1,))
+    job.run_daily(tareas.recoradar_tareas, time(9, 00, 00, tzinfo=pytz.timezone('Europe/Madrid')), days=(1,))
     run(updater)
