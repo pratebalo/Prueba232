@@ -54,8 +54,7 @@ elif mode == "prod":
         PORT = int(os.environ.get("PORT", "8443"))
         HEROKU_APP_NAME = os.environ.get("HEROKU_APP_NAME")
 
-        updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=TOKEN)
-        updater.bot.set_webhook(f"https://{HEROKU_APP_NAME}.herokuapp.com/{TOKEN}")
+        updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=TOKEN, webhook_url=f"https://{HEROKU_APP_NAME}.herokuapp.com/{TOKEN}")
 else:
     sys.exit()
 
@@ -375,7 +374,7 @@ def set_birthday3(update: Update, context: CallbackContext):
     context.user_data["cancion"] = update.message.text
     context.bot.deleteMessage(chat_id, context.user_data["oldMessage"].message_id)
     context.bot.deleteMessage(chat_id, update.message.message_id)
-    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id,"idioma")
+    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, "idioma")
 
     return CUMPLE3
 
@@ -385,7 +384,7 @@ def set_birthday4(update: Update, context: CallbackContext):
     context.user_data["idioma"] = update.message.text
     context.bot.deleteMessage(chat_id, context.user_data["oldMessage"].message_id)
     context.bot.deleteMessage(chat_id, update.message.message_id)
-    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id,"sticker")
+    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, "sticker")
 
     return CUMPLE4
 
