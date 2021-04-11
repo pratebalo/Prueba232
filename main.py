@@ -54,7 +54,7 @@ elif mode == "prod":
         PORT = int(os.environ.get("PORT", "8443"))
         HEROKU_APP_NAME = os.environ.get("HEROKU_APP_NAME")
 
-        updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=TOKEN, webhook_url=f"https://{HEROKU_APP_NAME}.herokuapp.com/{TOKEN}")
+        updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=TOKEN,webhook_url=f"https://{HEROKU_APP_NAME}.herokuapp.com/{TOKEN}")
 else:
     sys.exit()
 
@@ -128,7 +128,6 @@ def echo(update: Update, context: CallbackContext):
         fila.total_mensajes += 1
         fila.ultimo_mensaje = datetime.today().strftime('%d/%m/%Y %H:%M:S')
         if update.message:
-            db.update_data(fila)
             if update.message.text:
                 logger.info(
                     f"{update.effective_chat.type} -> {fila.apodo} ha enviado {update.message.text}. Con un total de {fila.total_mensajes} mensajes")
@@ -152,6 +151,7 @@ def echo(update: Update, context: CallbackContext):
                     f"{update.effective_chat.type} -> {update.message.new_chat_members} ha entrado al grupo ")
             else:
                 logger.info(f"{update.effective_chat.type} -> update.message desconocido:  {update.message}")
+            db.update_data(fila)
         elif update.edited_message:
             logger.warning(
                 f"{update.effective_chat.type} -> {fila.apodo} ha editado el mensaje por {update.edited_message.text}. Con un total de {fila.total_mensajes} mensajes")
@@ -374,7 +374,7 @@ def set_birthday3(update: Update, context: CallbackContext):
     context.user_data["cancion"] = update.message.text
     context.bot.deleteMessage(chat_id, context.user_data["oldMessage"].message_id)
     context.bot.deleteMessage(chat_id, update.message.message_id)
-    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, "idioma")
+    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id,"idioma")
 
     return CUMPLE3
 
@@ -384,7 +384,7 @@ def set_birthday4(update: Update, context: CallbackContext):
     context.user_data["idioma"] = update.message.text
     context.bot.deleteMessage(chat_id, context.user_data["oldMessage"].message_id)
     context.bot.deleteMessage(chat_id, update.message.message_id)
-    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id, "sticker")
+    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id,"sticker")
 
     return CUMPLE4
 
