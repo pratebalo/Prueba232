@@ -113,6 +113,14 @@ def update_gasto(id_gasto):
     connect(query)
 
 
+def update_cumple(id_persona, cancion, idioma, sticker):
+    query = f"""
+        UPDATE data
+        SET cumple_song = '{cancion}', cumple_lang='{idioma}', cumple_sticker='{sticker}'
+        WHERE id = {id_persona};"""
+    connect(query)
+
+
 def connect(query):
     connection = psycopg2.connect(DATABASE_URL)
     cursor = connection.cursor()
@@ -120,5 +128,3 @@ def connect(query):
     connection.commit()
     cursor.close()
     connection.close()
-
-insert_gastos(3,"asd",70.0,"20/03/2020","asd")

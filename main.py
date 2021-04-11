@@ -14,11 +14,10 @@ from gtts import gTTS
 from PIL import Image, ImageDraw
 import pandas as pd
 from dotenv import load_dotenv
-import random
-import os
 import sys
 import logging
 import requests
+import pytz
 from io import BytesIO
 
 import database as db
@@ -33,6 +32,7 @@ logging.basicConfig(
 logger = logging.getLogger()
 
 LOQUENDO_1, LOQUENDO_2 = range(2)
+CUMPLE1, CUMPLE2, CUMPLE3, CUMPLE4 = range(4)
 ESTADO_UNICO = range(1)
 
 ID_MANITOBA = int(os.environ.get("ID_MANITOBA"))
@@ -333,6 +333,8 @@ def start(update: Update, context: CallbackContext):
 
 
 def get_birthday(update: Update, context: CallbackContext):
+    chat_id = update.effective_chat.id
+    context.bot.deleteMessage(chat_id, update.message.message_id)
     data = db.select("data")
     data.cumple = pd.to_datetime(data.cumple, format='%d/%m').apply(lambda dt: dt.replace(year=2021))
 
@@ -341,8 +343,68 @@ def get_birthday(update: Update, context: CallbackContext):
     for _, persona in a.iterrows():
         texto += persona.nombre_completo + " | " + persona.cumple.strftime('%d/%m') + "/" + str(persona.cumple_ano) + "\n"
 
-    context.bot.sendMessage(update.effective_chat.id, texto)
+    context.bot.sendMessage(chat_id, texto)
 
+
+def set_birthday(update: Update, context: CallbackContext):
+    chat_id = update.effective_chat.id
+    data = db.select("data")
+    context.bot.deleteMessage(chat_id, update.message.message_id)
+    keyboard = []
+    part_keyboard = []
+    for i, persona in data.sort_values(by="apodo", ignore_index=True).iterrows():
+        part_keyboard.append(InlineKeyboardButton(persona.apodo, callback_data=str(persona.id)))
+        if i % 3 == 2 or i == len(data):
+            keyboard.append(part_keyboard)
+            part_keyboard = []
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    context.bot.sendMessage(chat_id, "Elige", reply_markup=reply_markup)
+    return CUMPLE1
+
+
+def set_birthday2(update: Update, context: CallbackContext):
+    context.user_data["personaId"] = update.callback_query.data
+    context.user_data["oldMessage"] = update.callback_query.edit_message_text(f"Cancion de cumpleaños")
+
+    return CUMPLE2
+
+
+def set_birthday3(update: Update, context: CallbackContext):
+    chat_id = update.effective_chat.id
+    context.user_data["cancion"] = update.message.text
+    context.bot.deleteMessage(chat_id, context.user_data["oldMessage"].message_id)
+    context.bot.deleteMessage(chat_id, update.message.message_id)
+    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id,"idioma")
+
+    return CUMPLE3
+
+
+def set_birthday4(update: Update, context: CallbackContext):
+    chat_id = update.effective_chat.id
+    context.user_data["idioma"] = update.message.text
+    context.bot.deleteMessage(chat_id, context.user_data["oldMessage"].message_id)
+    context.bot.deleteMessage(chat_id, update.message.message_id)
+    context.user_data["oldMessage"] = context.bot.sendMessage(chat_id,"sticker")
+
+    return CUMPLE4
+
+
+def set_birthday5(update: Update, context: CallbackContext):
+    chat_id = update.effective_chat.id
+    context.bot.deleteMessage(chat_id, context.user_data["oldMessage"].message_id)
+    context.bot.deleteMessage(chat_id, update.message.message_id)
+    tts = gTTS(context.user_data["cancion"], lang=context.user_data["idioma"])
+    tts.save(f"Felicitacion de su majestad para {context.user_data['personaId']}.mp3")
+
+    context.bot.sendMessage(chat_id=chat_id, parse_mode="HTML",
+                            text=f"Felicidades <b>{context.user_data['personaId']}</b>!!!!!")
+    context.bot.sendSticker(chat_id=chat_id,
+                            sticker=update.message.sticker.file_id)
+    context.bot.sendAudio(chat_id=chat_id,
+                          audio=open(f"Felicitacion de su majestad para {context.user_data['personaId']}.mp3", "rb"))
+    db.update_cumple(context.user_data["personaId"], context.user_data["cancion"], context.user_data["idioma"], update.message.sticker.file_id)
+    return ConversationHandler.END
 
 
 if __name__ == "__main__":
@@ -381,12 +443,23 @@ if __name__ == "__main__":
         },
         fallbacks=[CommandHandler('pietrobot', pietrobot)],
     )
+    conv_handler_birthday = ConversationHandler(
+        entry_points=[CommandHandler('setcumple', set_birthday)],
+        states={
+            CUMPLE1: [CallbackQueryHandler(set_birthday2)],
+            CUMPLE2: [MessageHandler(Filters.text & ~Filters.command, set_birthday3)],
+            CUMPLE3: [MessageHandler(Filters.text & ~Filters.command, set_birthday4)],
+            CUMPLE4: [MessageHandler(Filters.sticker & ~Filters.command, set_birthday5)],
 
+        },
+        fallbacks=[CommandHandler('setcumple', set_birthday)],
+    )
 
     dp.add_handler(listas.conv_handler_listas)
     dp.add_handler(tesoreria.conv_handler_tesoreria)
     dp.add_handler(conv_handler_loquendo)
     dp.add_handler(conv_handler_pietrobot)
+    dp.add_handler(conv_handler_birthday)
     dp.add_handler(conv_handler_culos)
     dp.add_handler(tareas.conv_handler_tareas)
     dp.add_handler(CommandHandler('start', start))
@@ -394,7 +467,7 @@ if __name__ == "__main__":
 
     dp.add_handler(MessageHandler(Filters.all, echo))
 
-    job.run_daily(birthday, time(21, 58, 15, 000000))
+    job.run_daily(birthday, time(7, 00, 00, tzinfo=pytz.timezone('Europe/Madrid')))
     # job.run_daily(muditos, time(17, 54, 00, 000000))
-    job.run_daily(tareas.recoradar_tareas, time(9, 00, 00, 000000), days=(1,))
+    job.run_daily(tareas.recoradar_tareas, time(9, 00, 00, tzinfo=pytz.timezone('Europe/Madrid')), days=(1,))
     run(updater)
