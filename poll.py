@@ -1,23 +1,17 @@
 import logging
 
-from telegram import (
-    Poll,
-    ParseMode,
-    KeyboardButton,
-    KeyboardButtonPollType,
-    ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
-    Update,
-)
+from telegram import Update
+
 from telegram.ext import (
     Updater,
     CommandHandler,
     PollAnswerHandler,
-    PollHandler,
     MessageHandler,
     Filters,
     CallbackContext,
 )
+import pandas as pd
+import database as db
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -25,152 +19,86 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def start(update: Update, context: CallbackContext) -> None:
-    """Inform user about what this bot can do"""
-    update.message.reply_text(
-        'Please select /poll to get a Poll, /quiz to get a Quiz or /preview'
-        ' to generate a preview for your poll'
-    )
-
-
-def poll(update: Update, context: CallbackContext) -> None:
-    """Sends a predefined poll"""
-    questions = ["Good", "Really good", "Fantastic", "Great"]
-    message = context.bot.send_poll(
-        update.effective_chat.id,
-        "How are you?",
-        questions,
-        is_anonymous=False,
-        allows_multiple_answers=True,
-    )
-
-    # # Save some info about the poll the bot_data for later use in receive_poll_answer
-    # payload = {
-    #     message.poll.id: {
-    #         "questions": questions,
-    #         "message_id": message.message_id,
-    #         "chat_id": update.effective_chat.id,
-    #         "answers": 0,
-    #     }
-    # }
-    # context.bot_data.update(payload)
-
-
 def receive_poll_answer(update: Update, context: CallbackContext) -> None:
     """Summarize a users poll vote"""
-    print(update.effective_user.first_name)
-    print(update.poll_answer.option_ids)
-    print(update)
-    answer = update.poll_answer
-    poll_id = answer.poll_id
-    try:
-        questions = context.bot_data[poll_id]["questions"]
-    # this means this poll answer update is from an old poll, we can't do our answering then
-    except KeyError:
-        return
-    selected_options = answer.option_ids
-    answer_string = ""
-    for question_id in selected_options:
-        if question_id != selected_options[-1]:
-            answer_string += questions[question_id] + " and "
-        else:
-            answer_string += questions[question_id]
-    context.bot.send_message(
-        context.bot_data[poll_id]["chat_id"],
-        f"{update.effective_user.mention_html()} feels {answer_string}!",
-        parse_mode=ParseMode.HTML,
-    )
-    context.bot_data[poll_id]["answers"] += 1
-    # Close poll after three participants voted
-    if context.bot_data[poll_id]["answers"] == 3:
-        context.bot.stop_poll(
-            context.bot_data[poll_id]["chat_id"], context.bot_data[poll_id]["message_id"]
-        )
-
-
-def quiz(update: Update, context: CallbackContext) -> None:
-    """Send a predefined poll"""
-    questions = ["1", "2", "4", "20"]
-    message = update.effective_message.reply_poll(
-        "How many eggs do you need for a cake?", questions, type=Poll.QUIZ, correct_option_id=2
-    )
-    # Save some info about the poll the bot_data for later use in receive_quiz_answer
-    payload = {
-        message.poll.id: {"chat_id": update.effective_chat.id, "message_id": message.message_id}
-    }
-    context.bot_data.update(payload)
-
-
-def receive_quiz_answer(update: Update, context: CallbackContext) -> None:
-    """Close quiz after three participants took it"""
-    # the bot can receive closed poll updates we don't care about
-
-    # print(update.effective_user.first_name)
-    # print(update.poll_answer.option_ids)
-    print(update)
-    if update.poll.is_closed:
-        return
-    if update.poll.total_voter_count == 3:
-        try:
-            quiz_data = context.bot_data[update.poll.id]
-        # this means this poll answer update is from an old poll, we can't stop it then
-        except KeyError:
-            return
-        context.bot.stop_poll(quiz_data["chat_id"], quiz_data["message_id"])
-
-
-def preview(update: Update, context: CallbackContext) -> None:
-    """Ask user to create a poll and display a preview of it"""
-    # using this without a type lets the user chooses what he wants (quiz or poll)
-    button = [[KeyboardButton("Press me!", request_poll=KeyboardButtonPollType())]]
-    message = "Press the button to let the bot generate a preview for your poll"
-    # using one_time_keyboard to hide the keyboard
-    update.effective_message.reply_text(
-        message, reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True)
-    )
+    polls = db.select("encuestas")
+    poll_id = update.poll_answer.poll_id
+    votes = polls[polls.id == poll_id].votes.iloc[0]
+    respuesta = update.poll_answer
+    if not respuesta.option_ids:
+        print("Voto retractado")
+        votes.remove(int(update.poll_answer.user.id))
+        db.update_poll(poll_id, votes)
+    else:
+        print(f"Ha votado  {respuesta.option_ids}")
+        votes.append(int(update.poll_answer.user.id))
+        db.update_poll(poll_id, votes)
 
 
 def receive_poll(update: Update, context: CallbackContext) -> None:
     """On receiving polls, reply to it by a closed poll copying the received poll"""
     actual_poll = update.effective_message.poll
-    # Only need to set the question and options, since all other parameters don't matter for
-    # a closed poll
-    print("asdasd")
-    context.bot.send_poll(
-        update.effective_chat.id,
-        question=actual_poll.question,
-        options=[o.text for o in actual_poll.options],
-        is_anonymous=True,
-        allows_multiple_answers=False,
-    )
-    update.effective_message.delete()
-    # update.effective_message.reply_poll(
-    #     question=actual_poll.question,
-    #     options=[o.text for o in actual_poll.options],
-    #     # with is_closed true, the poll/quiz is immediately closed
-    #     is_closed=False,
-    #     reply_markup=ReplyKeyboardRemove(),
-    # )
+    if not actual_poll.is_anonymous and not update.message.forward_from:
+
+        update.effective_message.delete()
+        options = [o.text for o in actual_poll.options]
+        if update.message.reply_to_message.forward_from_chat:
+            new_poll = context.bot.send_poll(
+                update.effective_chat.id,
+                question=actual_poll.question,
+                options=options,
+                is_anonymous=False,
+                allows_multiple_answers=actual_poll.allows_multiple_answers,
+                reply_to_message_id=update.message.reply_to_message.message_id
+            )
+
+            url = f"https://t.me/c/{str(new_poll.chat.id)[4:]}/{new_poll.message_id}?thread={update.message.reply_to_message.message_id}"
+        else:
+            new_poll = context.bot.send_poll(
+                update.effective_chat.id,
+                question=actual_poll.question,
+                options=options,
+                is_anonymous=False,
+                allows_multiple_answers=actual_poll.allows_multiple_answers
+            )
+            url = f"https://t.me/c/{str(new_poll.chat.id)[4:]}/{new_poll.message_id}"
+
+        db.insert_poll(new_poll.poll.id, new_poll.poll.question, options, new_poll.poll.is_anonymous, [], url)
 
 
-def help_handler(update: Update, context: CallbackContext) -> None:
-    """Display a help message"""
-    update.message.reply_text("Use /quiz, /poll or /preview to test this " "bot.")
+def democracia(update: Update, context: CallbackContext) -> None:
+    print(update)
+    data = db.select("data")
+    encuestas = db.select("encuestas")
+    encuestas = encuestas[~encuestas.end]
+    print(encuestas)
+    for _, persona in data.iterrows():
+        questions = ""
+        for _, encuesta in encuestas.iterrows():
+            if persona.id not in encuesta.votes:
+                questions += f"- <a href='{encuesta.url}'>{encuesta.question}</a>\n"
+
+        if questions and persona.id == 8469898:
+            text = f"{persona.apodo}, al vivir en una democracia tienes derecho a votar en las encuestas\n" + questions
+            context.bot.sendMessage(chat_id=update.effective_chat.id, parse_mode="HTML", text=text)
+
+
+def bot_activado(update: Update, context: CallbackContext) -> None:
+    data = db.select("data")
+    for _, persona in data.iterrows():
+        try:
+            mensaje = context.bot.sendMessage(chat_id=persona.id, parse_mode="HTML", text="prueba")
+            context.bot.deleteMessage(mensaje.chat_id, mensaje.message_id)
+            print(f"{persona.apodo} con id {persona.id} tiene activado el bot")
+        except:
+            print(f"{persona.apodo} con id {persona.id} NO tiene activado el bot")
 
 
 def main() -> None:
     # Create the Updater and pass it your bot's token.    load_dotenv()
     #     my_bot = Bot(token=TOKEN)
-    updater = Updater("1577490660:AAGQ_iWJc7t32h_DqGt17bcruTj0Z8Yf0cg")
+    updater = Updater("1577490660:AAF5u3tAjpSIe7HDR6Hbq6BUGhiGE2imZ_o")
     dispatcher = updater.dispatcher
-    dispatcher.add_handler(CommandHandler('start', start))
-    dispatcher.add_handler(CommandHandler('poll', poll))
-    dispatcher.add_handler(PollAnswerHandler(receive_poll_answer))
-    dispatcher.add_handler(CommandHandler('quiz', quiz))
-    dispatcher.add_handler(PollHandler(receive_quiz_answer))
-    dispatcher.add_handler(CommandHandler('preview', preview))
-    dispatcher.add_handler(MessageHandler(Filters.poll, receive_poll))
-    dispatcher.add_handler(CommandHandler('help', help_handler))
 
     # Start the Bot
     updater.start_polling()
@@ -181,4 +109,9 @@ def main() -> None:
 
 
 if __name__ == '__main__':
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.width', None)
+    pd.set_option('display.max_colwidth', None)
+
     main()

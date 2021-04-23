@@ -123,7 +123,7 @@ def end_crear_lista(update: Update, context: CallbackContext):
 
     logger.warning(
         f"{update.effective_chat.type} -> {update.effective_user.first_name} ha creado la lista {context.user_data['nombre_lista']}")
-    mensaje_crear = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML", text=texto)
+    mensaje_crear = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML", text=text)
     new_lista.id_mensaje = mensaje_crear.message_id
     db.insert_lista(new_lista)
     context.bot.sendMessage(update.effective_chat.id, text="Quieres hacer algo mas?",
@@ -252,7 +252,7 @@ def end_editar_lista_marcar(update: Update, context: CallbackContext):
         context.bot.deleteMessage(chat_id=ID_MANITOBA, message_id=int(lista.id_mensaje))
     except:
         print("Mensaje eliminado")
-                             
+
     new_message = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML", text=texto)
     lista.id_mensaje = new_message.message_id
     db.update_lista(lista)
@@ -316,7 +316,7 @@ def eliminar_lista(update: Update, context: CallbackContext):
         context.bot.deleteMessage(chat_id=ID_MANITOBA, message_id=int(lista.id_mensaje))
     except:
         print("Mensaje eliminado")
-        
+
     context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML", text=texto)
 
     context.bot.sendMessage(update.effective_chat.id, text="Quieres hacer algo mas?",

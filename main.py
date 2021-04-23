@@ -2,6 +2,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, Bot
 from telegram.ext import (
     Updater,
     CommandHandler,
+    PollAnswerHandler,
     CallbackQueryHandler,
     ConversationHandler,
     CallbackContext,
@@ -25,7 +26,7 @@ import os
 import listas
 import tareas
 import tesoreria
-
+import poll
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
@@ -126,7 +127,7 @@ def echo(update: Update, context: CallbackContext):
             else:
                 texto = "Nueva conversación"
             mensaje = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
-                                              text=f"Se ha iniciado una conversacion: <a href='https://t.me/c/1462256012/{update.message.message_id}?thread={update.message.message_id}'>{texto}</a>")
+                                              text=f"Se ha iniciado una conversacion: <a f='https://t.me/c/1462256012/{update.message.message_id}?thread={update.message.message_id}'>{texto}</a>")
             db.insert_conversacion(update.message.message_id, mensaje.message_id, texto)
         else:
             reply_id = update.message.reply_to_message.message_id
@@ -486,6 +487,10 @@ if __name__ == "__main__":
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CommandHandler('cumples', get_birthday))
     dp.add_handler(CommandHandler('felicitar', birthday2))
+    dp.add_handler(PollAnswerHandler(poll.receive_poll_answer))
+    dp.add_handler(MessageHandler(Filters.poll, poll.receive_poll))
+    dp.add_handler(CommandHandler('demo', poll.democracia))
+    dp.add_handler(CommandHandler('bot',poll. bot_activado))
 
     dp.add_handler(MessageHandler(Filters.all, echo))
 

@@ -74,7 +74,7 @@ def insert_lista(lista):
     query = f"""set DateStyle='ISO, DMY';
         INSERT INTO listas
         (nombre, elementos, tipo_elementos, fecha, creador, mensaje_id)
-        VALUES ( '{lista.nombre}', ARRAY{lista.elementos}, ARRAY{list(map(int, lista.tipo_elementos))}, '{lista.fecha}',{lista.creador}), {lista.id_mensaje};"""
+        VALUES ( '{lista.nombre}', ARRAY{lista.elementos}, ARRAY{list(map(int, lista.tipo_elementos))}, '{lista.fecha}',{lista.creador}, {lista.id_mensaje});"""
     connect(query)
 
 
@@ -118,6 +118,22 @@ def update_cumple(id_persona, cancion, idioma, sticker):
         UPDATE data
         SET cumple_song = '{cancion}', cumple_lang='{idioma}', cumple_sticker='{sticker}'
         WHERE id = {id_persona};"""
+    connect(query)
+
+
+def insert_poll(id, question, options, is_public, votes,url):
+    query = f"""set DateStyle='ISO, DMY';
+    INSERT INTO encuestas    
+    (id, question, options, is_public, votes, url)
+         VALUES ('{id}', '{question}', ARRAY{options}, {is_public},ARRAY{votes}::integer[], '{url}');"""
+    connect(query)
+
+
+def update_poll(id,votes):
+    query = f"""
+        UPDATE encuestas
+        SET votes = ARRAY{votes}::integer[]
+        WHERE id = '{id}';"""
     connect(query)
 
 
