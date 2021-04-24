@@ -487,9 +487,9 @@ if __name__ == "__main__":
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CommandHandler('cumples', get_birthday))
     dp.add_handler(CommandHandler('felicitar', birthday2))
-    dp.add_handler(PollAnswerHandler(poll.receive_poll_answer))
-    dp.add_handler(MessageHandler(Filters.poll, poll.receive_poll))
-    dp.add_handler(CommandHandler('demo', poll.democracia))
+    #dp.add_handler(PollAnswerHandler(poll.receive_poll_answer))
+    #dp.add_handler(MessageHandler(Filters.poll, poll.receive_poll))
+    #dp.add_handler(CommandHandler('demo', poll.democracia))
     dp.add_handler(CommandHandler('bot',poll. bot_activado))
 
     dp.add_handler(MessageHandler(Filters.all, echo))
