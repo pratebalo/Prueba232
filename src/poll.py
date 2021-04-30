@@ -3,15 +3,9 @@ import logging
 from telegram import Update
 
 from telegram.ext import (
-    Updater,
-    CommandHandler,
-    PollAnswerHandler,
-    MessageHandler,
-    Filters,
     CallbackContext,
 )
-import pandas as pd
-import database as db
+from utils import database as db
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -37,22 +31,33 @@ def receive_poll_answer(update: Update, context: CallbackContext) -> None:
 
 def receive_poll(update: Update, context: CallbackContext) -> None:
     """On receiving polls, reply to it by a closed poll copying the received poll"""
+    print(update)
     actual_poll = update.effective_message.poll
     if not actual_poll.is_anonymous and not update.message.forward_from:
 
         update.effective_message.delete()
         options = [o.text for o in actual_poll.options]
-        if update.message.reply_to_message.forward_from_chat:
-            new_poll = context.bot.send_poll(
-                update.effective_chat.id,
-                question=actual_poll.question,
-                options=options,
-                is_anonymous=False,
-                allows_multiple_answers=actual_poll.allows_multiple_answers,
-                reply_to_message_id=update.message.reply_to_message.message_id
-            )
+        if update.message.reply_to_message:
+            if update.message.reply_to_message.forward_from_chat:
+                new_poll = context.bot.send_poll(
+                    update.effective_chat.id,
+                    question=actual_poll.question,
+                    options=options,
+                    is_anonymous=False,
+                    allows_multiple_answers=actual_poll.allows_multiple_answers,
+                    reply_to_message_id=update.message.reply_to_message.message_id
+                )
 
-            url = f"https://t.me/c/{str(new_poll.chat.id)[4:]}/{new_poll.message_id}?thread={update.message.reply_to_message.message_id}"
+                url = f"https://t.me/c/{str(new_poll.chat.id)[4:]}/{new_poll.message_id}?thread={update.message.reply_to_message.message_id}"
+            else:
+                new_poll = context.bot.send_poll(
+                    update.effective_chat.id,
+                    question=actual_poll.question,
+                    options=options,
+                    is_anonymous=False,
+                    allows_multiple_answers=actual_poll.allows_multiple_answers
+                )
+                url = f"https://t.me/c/{str(new_poll.chat.id)[4:]}/{new_poll.message_id}"
         else:
             new_poll = context.bot.send_poll(
                 update.effective_chat.id,
@@ -92,26 +97,3 @@ def bot_activado(update: Update, context: CallbackContext) -> None:
             print(f"{persona.apodo} con id {persona.id} tiene activado el bot")
         except:
             print(f"{persona.apodo} con id {persona.id} NO tiene activado el bot")
-
-
-def main() -> None:
-    # Create the Updater and pass it your bot's token.    load_dotenv()
-    #     my_bot = Bot(token=TOKEN)
-    updater = Updater("1577490660:AAF5u3tAjpSIe7HDR6Hbq6BUGhiGE2imZ_o")
-    dispatcher = updater.dispatcher
-
-    # Start the Bot
-    updater.start_polling()
-
-    # Run the bot until the user presses Ctrl-C or the process receives SIGINT,
-    # SIGTERM or SIGABRT
-    updater.idle()
-
-
-if __name__ == '__main__':
-    pd.set_option('display.max_rows', None)
-    pd.set_option('display.max_columns', None)
-    pd.set_option('display.width', None)
-    pd.set_option('display.max_colwidth', None)
-
-    main()

@@ -10,8 +10,7 @@ from telegram.ext import (
 import pandas as pd
 from datetime import datetime
 import logging
-import database as db
-import numpy as np
+from utils import database as db
 import os
 
 ELEGIR_LISTA, CREAR_LISTA1, CREAR_LISTA2, EDITAR_LISTA1, EDITAR_LISTA2, EDITAR_LISTA_A, EDITAR_LISTA_E, \

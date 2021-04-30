@@ -9,7 +9,7 @@ from telegram.ext import (
 )
 import pandas as pd
 import logging
-import database as db
+from utils import database as db
 import random
 import os
 from datetime import date
@@ -143,7 +143,7 @@ def elegir_fecha2(update: Update, context: CallbackContext):
         data = context.user_data["data"]
         for i, persona in data.sort_values(by="apodo", ignore_index=True).iterrows():
             part_keyboard.append(InlineKeyboardButton(persona.apodo, callback_data=str(persona.id)))
-            if i % 3 == 2 or i == len(data)-1:
+            if i % 3 == 2 or i == len(data) - 1:
                 keyboard.append(part_keyboard)
                 part_keyboard = []
 
@@ -163,7 +163,7 @@ def asignar_persona2(update: Update, context: CallbackContext):
     for i, persona in data.sort_values(by="apodo", ignore_index=True).iterrows():
         if not persona.id in context.user_data["personas_asignadas"]:
             part_keyboard.append(InlineKeyboardButton(persona.apodo, callback_data=str(persona.id)))
-        if i % 3 == 2 or i == len(data):
+        if i % 3 == 2 or i == len(data) - 1:
             keyboard.append(part_keyboard)
             part_keyboard = []
     keyboard.append([InlineKeyboardButton("NO", callback_data="NO")])
@@ -262,11 +262,11 @@ def completar_tarea(update: Update, context: CallbackContext):
         context.bot.sendMessage(ID_MANITOBA, parse_mode="HTML",
                                 text="\n".join(context.user_data["ediciones"]))
     context.bot.sendMessage(ID_MANITOBA, parse_mode="HTML", text=texto)
-    stickers=["CAACAgIAAxkBAAICXmAasBQ2GrCJTRmfjzDArpTLXfVtAAJJAQACVp29CnVtIjfXzilUHgQ",
-              "CAACAgIAAxkBAAICX2AasB6gnf_gqA3c8s00wW3AFj5QAAJNAANZu_wlKIGgbd0bgvceBA",
-              "CAACAgIAAxkBAAICYGAasCfRVfZcMOVWzZiuX2pFuZC7AAJXAAPBnGAMxgL9s1SbpjQeBA",
-              "CAACAgIAAxkBAAICYWAasDPbxJKIINhcFeiQsiYvVEGpAAJjAANOXNIpRcBzCXnlr_AeBA"]
-    context.bot.sendSticker(ID_MANITOBA,sticker=random.choice(stickers))
+    stickers = ["CAACAgIAAxkBAAICXmAasBQ2GrCJTRmfjzDArpTLXfVtAAJJAQACVp29CnVtIjfXzilUHgQ",
+                "CAACAgIAAxkBAAICX2AasB6gnf_gqA3c8s00wW3AFj5QAAJNAANZu_wlKIGgbd0bgvceBA",
+                "CAACAgIAAxkBAAICYGAasCfRVfZcMOVWzZiuX2pFuZC7AAJXAAPBnGAMxgL9s1SbpjQeBA",
+                "CAACAgIAAxkBAAICYWAasDPbxJKIINhcFeiQsiYvVEGpAAJjAANOXNIpRcBzCXnlr_AeBA"]
+    context.bot.sendSticker(ID_MANITOBA, sticker=random.choice(stickers))
     return ConversationHandler.END
 
 
