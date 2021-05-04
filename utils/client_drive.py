@@ -94,8 +94,10 @@ def get_file(file):
         while not done:
             status, done = downloader.next_chunk()
             print("Download %d%%." % int(status.progress() * 100))
-
+    fh.seek(0, os.SEEK_END)
+    print(fh.tell())
     fh.seek(0)
+
     fh.name = file['name']
     # with open(os.path.join(f"./../Carpeta/{fh.name}"), "wb") as f:
     #     f.write(fh.read())

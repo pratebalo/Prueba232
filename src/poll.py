@@ -17,22 +17,24 @@ def receive_poll_answer(update: Update, context: CallbackContext) -> None:
     """Summarize a users poll vote"""
     polls = db.select("encuestas")
     poll_id = update.poll_answer.poll_id
-    votes = polls[polls.id == poll_id].votes.iloc[0]
+    poll = polls[polls.id == poll_id].squeeze()
+    votes = poll.votes
     respuesta = update.poll_answer
     if not respuesta.option_ids:
-        print("Voto retractado")
+        logger.warning(f"{update.effective_user.first_name} quito su voto de la encuesta {poll.question}")
         votes.remove(int(update.poll_answer.user.id))
         db.update_poll(poll_id, votes)
     else:
-        print(f"Ha votado  {respuesta.option_ids}")
+        votos = [poll.options[i] for i in respuesta.option_ids]
+        logger.warning(f"{update.effective_user.first_name} ha votado {votos} en la encuesta {poll.question}")
         votes.append(int(update.poll_answer.user.id))
         db.update_poll(poll_id, votes)
 
 
 def receive_poll(update: Update, context: CallbackContext) -> None:
     """On receiving polls, reply to it by a closed poll copying the received poll"""
-    print(update)
     actual_poll = update.effective_message.poll
+    logger.warning(f"{update.effective_user.first_name} ha creado la encuesta {actual_poll.question}")
     if not actual_poll.is_anonymous and not update.message.forward_from:
 
         update.effective_message.delete()
@@ -72,28 +74,29 @@ def receive_poll(update: Update, context: CallbackContext) -> None:
 
 
 def democracia(update: Update, context: CallbackContext) -> None:
-    print(update)
+    logger.warning(f"{update.effective_user.first_name} ha ejecutado el comando democracia")
     data = db.select("data")
     encuestas = db.select("encuestas")
     encuestas = encuestas[~encuestas.end]
-    print(encuestas)
     for _, persona in data.iterrows():
         questions = ""
         for _, encuesta in encuestas.iterrows():
             if persona.id not in encuesta.votes:
                 questions += f"- <a href='{encuesta.url}'>{encuesta.question}</a>\n"
 
-        if questions and persona.id == 8469898:
+        if questions:
             text = f"{persona.apodo}, al vivir en una democracia tienes derecho a votar en las encuestas\n" + questions
             context.bot.sendMessage(chat_id=update.effective_chat.id, parse_mode="HTML", text=text)
 
 
 def bot_activado(update: Update, context: CallbackContext) -> None:
+
+    logger.warning(f"{update.effective_user.first_name} ha ejecutado el comando bot_activado")
     data = db.select("data")
     for _, persona in data.iterrows():
         try:
             mensaje = context.bot.sendMessage(chat_id=persona.id, parse_mode="HTML", text="prueba")
             context.bot.deleteMessage(mensaje.chat_id, mensaje.message_id)
-            print(f"{persona.apodo} con id {persona.id} tiene activado el bot")
+            # print(f"{persona.apodo} con id {persona.id} tiene activado el bot")
         except:
             print(f"{persona.apodo} con id {persona.id} NO tiene activado el bot")

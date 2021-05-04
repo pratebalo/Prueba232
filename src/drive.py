@@ -24,10 +24,11 @@ logger = logging.getLogger()
 
 
 def drive(update: Update, context: CallbackContext):
+    logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name} entró en el comando drive")
+
     chat_id = update.effective_chat.id
     files = client_drive.get_all_files_description("0AHBcqK_64EhOUk9PVA")
     files.mimeType = files.mimeType.str.replace('application/', "").str.replace('vnd.google-apps.', "").str.replace('vnd.openxmlformats-officedocument.', "")
-    print(files)
     keyboard = []
     for i, file in files.iterrows():
         keyboardline = []
@@ -64,6 +65,7 @@ def drive2(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     file_id = update.callback_query.data.replace("ABRIR", "")
     files = client_drive.get_all_files_description(file_id)
+    logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name} selecciona la carpeta {file_id}")
     files.mimeType = files.mimeType.str.replace('application/', "").str.replace('vnd.google-apps.', "").str.replace('vnd.openxmlformats-officedocument.', "")
     keyboard = []
     for i, file in files.iterrows():
@@ -102,9 +104,10 @@ def drive2(update: Update, context: CallbackContext):
 def drive_descargar(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     file_id = update.callback_query.data.replace("DESCARGAR", "")
+    logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name} descargo el archivo {file_id}")
     file = client_drive.get_file_description(file_id)
     doc = client_drive.get_file(file)
-    context.bot.sendDocument(chat_id=chat_id, document=doc)
+    context.bot.sendDocument(chat_id=chat_id, document=doc, timeout=2000)
 
 
 conv_handler_drive = ConversationHandler(
