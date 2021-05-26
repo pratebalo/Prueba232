@@ -86,7 +86,10 @@ def democracia(update: Update, context: CallbackContext) -> None:
 
         if questions:
             text = f"{persona.apodo}, al vivir en una democracia tienes derecho a votar en las encuestas\n" + questions
-            context.bot.sendMessage(chat_id=update.effective_chat.id, parse_mode="HTML", text=text)
+            try:
+                context.bot.sendMessage(chat_id=persona.id, parse_mode="HTML", text=text)
+            except:
+                print(f"{persona.apodo} con id {persona.id} NO tiene activado el bot")
 
 
 def bot_activado(update: Update, context: CallbackContext) -> None:
