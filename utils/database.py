@@ -73,7 +73,7 @@ def update_tarea(tarea):
 def insert_lista(lista):
     query = f"""set DateStyle='ISO, DMY';
         INSERT INTO listas
-        (nombre, elementos, tipo_elementos, fecha, creador, mensaje_id)
+        (nombre, elementos, tipo_elementos, fecha, creador, id_mensaje)
         VALUES ( '{lista.nombre}', ARRAY{lista.elementos}, ARRAY{list(map(int, lista.tipo_elementos))}, '{lista.fecha}',{lista.creador}, {lista.id_mensaje});"""
     connect(query)
 
