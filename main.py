@@ -27,7 +27,7 @@ from src import poll, tareas, birthday, listas, tesoreria, drive
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 LOQUENDO_1, LOQUENDO_2 = range(2)
 ESTADO_UNICO = range(1)
@@ -341,6 +341,7 @@ if __name__ == "__main__":
 
         },
         fallbacks=[CommandHandler('pietrobot', pietrobot)],
+
     )
 
     dp.add_handler(listas.conv_handler_listas)
