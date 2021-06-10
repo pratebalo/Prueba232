@@ -366,3 +366,4 @@ if __name__ == "__main__":
     # job.run_daily(muditos, time(17, 54, 00, 000000))
     job.run_daily(tareas.recoradar_tareas, time(9, 00, 00, tzinfo=pytz.timezone('Europe/Madrid')), days=(1,))
     run(updater)
+    logger.info(f"Iniciando el bot")
