@@ -17,6 +17,7 @@ import os
 OPCION, BOTE, BOTE2, PAGAR, FINAL_OPTION = range(5)
 ID_MANITOBA = int(os.environ.get("ID_MANITOBA"))
 ID_TESORERIA = int(os.environ.get("ID_TESORERIA"))
+ID_ADMIN = int(os.environ.get("ID_ADMIN"))
 logger = logging.getLogger()
 
 
@@ -28,7 +29,7 @@ def tesoreria(update: Update, context: CallbackContext):
     keyboard = [[InlineKeyboardButton("Meter dinero en el bote", callback_data="+")],
                 [InlineKeyboardButton("Sacar dinero del bote", callback_data="-")],
                 [InlineKeyboardButton("Comunicar un gasto", callback_data="GASTO")]]
-    if update.effective_user.id == ID_TESORERIA:
+    if update.effective_user.id == ID_TESORERIA or update.effective_user.id == ID_ADMIN:
         keyboard.append([InlineKeyboardButton("A PAGAR A PAGAR 🤑🤑", callback_data="PAGO")])
     keyboard.append([InlineKeyboardButton("Terminar", callback_data="TERMINAR")])
     reply_markup = InlineKeyboardMarkup(keyboard)
