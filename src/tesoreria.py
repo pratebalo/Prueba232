@@ -112,7 +112,7 @@ def pagar(update: Update, context: CallbackContext):
 
     keyboard.append([InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))])
     reply_markup = InlineKeyboardMarkup(keyboard)
-    context.bot.sendMessage(chat_id=update.effective_chat.id, text=texto, parse_mode="HTML", reply_markup=reply_markup)
+    update.callback_query.edit_message_text(text=texto, parse_mode="HTML", reply_markup=reply_markup)
     return PAGAR
 
 
