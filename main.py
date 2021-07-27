@@ -25,7 +25,7 @@ from io import BytesIO
 from utils import database as db
 import os
 from src import poll, tareas, birthday, listas, tesoreria, drive
-
+import  win32com.client
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
@@ -120,24 +120,24 @@ def echo(update: Update, context: CallbackContext):
                 logger.info(
                     f"{update.effective_chat.type} -> {fila.apodo} ha enviado un gif. Con un total de {fila.total_mensajes} mensajes")
             elif update.message.document:
-                # doc = update.message.document
-                # if "acta" in doc.file_name.lower() and (doc.mime_type == 'application/msword' or doc.mime_type == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'):
-                #     file = context.bot.get_file(doc.file_id)
-                #     file.download(doc.file_name)
-                #     path = os.path.dirname(os.path.realpath(__file__))
-                #     file_name = doc.file_name.replace(".docx", ".pdf").replace(".doc", ".pdf")
-                #     in_file = path + f"/{doc.file_name}"
-                #     out_file = path + f"/{file_name}"
-                #
-                #     word = client.DispatchEx('Word.Application')
-                #     doc = word.Documents.Open(in_file)
-                #     print(out_file)
-                #     doc.SaveAs(out_file, FileFormat=17)
-                #     doc.Close()
-                #     with open(file_name, "rb") as file:
-                #         context.bot.sendDocument(update.effective_chat.id, file)
-                #     client_drive.upload_file(file_name,parent_id='1V34ehU4iaHgadWCRSl9hlvZUIn62qWSM')
-                #     client_drive.upload_file(doc.file_name,parent_id='1V34ehU4iaHgadWCRSl9hlvZUIn62qWSM')
+                doc = update.message.document
+                if "acta" in doc.file_name.lower() and (doc.mime_type == 'application/msword' or doc.mime_type == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'):
+                    file = context.bot.get_file(doc.file_id)
+                    file.download(doc.file_name)
+                    path = os.path.dirname(os.path.realpath(__file__))
+                    file_name = doc.file_name.replace(".docx", ".pdf").replace(".doc", ".pdf")
+                    in_file = path + f"/{doc.file_name}"
+                    out_file = path + f"/{file_name}"
+
+                    word = win32com.client.DispatchEx('Word.Application')
+                    doc = word.Documents.Open(in_file)
+                    print(out_file)
+                    doc.SaveAs(out_file, FileFormat=17)
+                    doc.Close()
+                    with open(file_name, "rb") as file:
+                        context.bot.sendDocument(update.effective_chat.id, file)
+                    client_drive.upload_file(file_name,parent_id='1V34ehU4iaHgadWCRSl9hlvZUIn62qWSM')
+                    client_drive.upload_file(doc.file_name,parent_id='1V34ehU4iaHgadWCRSl9hlvZUIn62qWSM')
                 logger.info(
                     f"{update.effective_chat.type} -> {fila.apodo} ha enviado el documento {update.message.document.file_name} tipo "
                     f"{update.message.document.mime_type}. Con un total de {fila.total_mensajes} mensajes")
@@ -325,47 +325,7 @@ def start(update: Update, context: CallbackContext):
                                      "  ·pietrobot -  Envíame un mensaje por privado y lo envío por el grupo\n"
                                      "  ·culos - Inserta la cara de alguien en un culo")
 
-import subprocess
-import re
-import os
 
-def get_destination_path(path, file_url):
-    down_file = os.path.join(path, os.path.basename(file_url))
-    new_file = os.path.join(path, os.path.splitext(
-                os.path.basename(file_url))[0]) + '.pdf'
-    return down_file, new_file
-
-def document_saver(update: Update, context: CallbackContext):
-    if update.message.document and check_document(update.message.document.file_name):
-        last_document = update.message.document
-        try:
-            doc_file = context.bot.getFile(last_document.file_id)
-            my_path = os.path.abspath(os.path.dirname(__file__))
-            down, new = get_destination_path(my_path, update.message.document.file_name)
-            doc = doc_file.download(down)
-            convert_to(my_path, update.message.document.file_name)
-            context.bot.sendMessage(chat_id=update.message.chat_id,
-                            text='Converting "%s"!' % update.message.document.file_name)
-            context.bot.send_document(chat_id=update.message.chat_id,
-                              document=open(new, 'rb'))
-            if os.path.exists(doc):
-                os.remove(doc)
-            if os.path.exists(new):
-                os.remove(new)
-        except Exception as e:
-            logger.error('Error:%s' % e)
-            context.bot.sendMessage(chat_id=update.message.chat_id,
-                            text="Error! :(")
-    else:
-        context.bot.sendMessage(chat_id=update.message.chat_id,
-                        text="I'm only able to convert DOCX and DOC files!")
-def check_document(file_name):
-    return file_name.endswith('.docx') or file_name.endswith('.doc')
-def convert_to(folder, source):
-    args = ['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', folder, source]
-    process = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=None)
-    file = re.search('-> (.*?) using filter', process.stdout.decode())
-    return file.group(1)
 if __name__ == "__main__":
     load_dotenv()
     my_bot = Bot(token=TOKEN)
@@ -404,7 +364,6 @@ if __name__ == "__main__":
 
     )
 
-    dp.add_handler(MessageHandler(Filters.document, document_saver))
     dp.add_handler(listas.conv_handler_listas)
     dp.add_handler(tesoreria.conv_handler_tesoreria)
     dp.add_handler(conv_handler_loquendo)
