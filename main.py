@@ -14,7 +14,7 @@ from gtts import gTTS
 from PIL import Image, ImageDraw
 import utils.client_drive as client_drive
 
-import comtypes.client
+from win32com import client
 import pandas as pd
 from dotenv import load_dotenv
 import sys
@@ -130,12 +130,11 @@ def echo(update: Update, context: CallbackContext):
                     in_file = path + f"/{doc.file_name}"
                     out_file = path + f"/{file_name}"
 
-                    comtypes.CoInitialize()
-                    word = comtypes.client.CreateObject('Word.Application')
-                    pdf = word.Documents.Open(in_file)
-                    pdf.SaveAs(out_file, FileFormat=17)
-                    pdf.Close()
-                    word.Quit()
+                    word = client.DispatchEx('Word.Application')
+                    doc = word.Documents.Open(in_file)
+                    print(out_file)
+                    doc.SaveAs(out_file, FileFormat=17)
+                    doc.Close()
                     with open(file_name, "rb") as file:
                         context.bot.sendDocument(update.effective_chat.id, file)
                     client_drive.upload_file(file_name,parent_id='1V34ehU4iaHgadWCRSl9hlvZUIn62qWSM')
