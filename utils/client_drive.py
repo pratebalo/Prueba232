@@ -5,14 +5,20 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.http import MediaIoBaseDownload, MediaIoBaseUpload
+
+from mimetypes import MimeTypes
+
+from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
+from googleapiclient.errors import HttpError
 from io import BytesIO
 from datetime import datetime
 import pandas as pd
 
-DICT = {'application/vnd.google-apps.document': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'application/vnd.google-apps.spreadsheet': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'application/vnd.google-apps.form': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-        'application/vnd.google-apps.jam': ''}
+DICT = {
+    'application/vnd.google-apps.document': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.google-apps.spreadsheet': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.google-apps.form': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'application/vnd.google-apps.jam': ''}
 FOLDER_BASE = '0AHBcqK_64EhOUk9PVA'
 
 # If modifying these scopes, delete the file token.json.
@@ -24,14 +30,14 @@ creds = None
 # created automatically when the authorization flow completes for the first
 # time.
 if os.path.exists(ROOT_DIR + '/../token.json'):
-    creds = Credentials.from_authorized_user_file(ROOT_DIR + '/../token.json', SCOPES)
+    creds = Credentials.from_authorized_user_file(ROOT_DIR + '/../token.json',
+                                                  SCOPES)
 # If there are no (valid) credentials available, let the user log in.
 if not creds or not creds.valid:
     if creds and creds.expired and creds.refresh_token:
         creds.refresh(Request())
     else:
-        flow = InstalledAppFlow.from_client_secrets_file(
-            ROOT_DIR + '/../credentials2.json', SCOPES)
+        flow = InstalledAppFlow.from_client_secrets_file(ROOT_DIR + '/../credentials2.json', SCOPES)
         creds = flow.run_local_server(port=0)
     # Save the credentials for the next run
     with open(ROOT_DIR + '/../token.json', 'w') as token:
@@ -40,19 +46,6 @@ if not creds or not creds.valid:
 drive_service = build('drive', 'v3', credentials=creds)
 
 
-def upload_file(s_buf, name, parent_folder):
-    file_metadata = {'name': name,
-                     'parents': [parent_folder]}
-    media = MediaIoBaseUpload(s_buf,
-                              mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                              chunksize=1024 * 1024,
-                              resumable=True)
-
-    file = drive_service.files().create(body=file_metadata,
-                                        media_body=media,
-                                        supportsAllDrives=True,
-                                        fields='id').execute()
-    print('File ID: %s' % file.get('id'))
 
 
 def get_file_by_id(file_id, mimeType):
@@ -85,9 +78,9 @@ def get_file(file):
             status, done = downloader.next_chunk()
             print("Download %d%%." % int(status.progress() * 100))
 
-
     except:
-        request = drive_service.files().export_media(fileId=file.id, mimeType=file.mimeType)
+        request = drive_service.files().export_media(fileId=file.id,
+                                                     mimeType=file.mimeType)
         fh = BytesIO()
         downloader = MediaIoBaseDownload(fd=fh, request=request)
         done = False
@@ -106,7 +99,8 @@ def get_file(file):
 
 
 def get_parent_id(file_id):
-    file = drive_service.files().get(fileId=file_id, fields='id, name, parents').execute()
+    file = drive_service.files().get(fileId=file_id,
+                                     fields='id, name, parents').execute()
     if file.get('parents'):
         return file.get('parents')[0]
     else:
@@ -127,7 +121,10 @@ def create_folder(name, parent_folder):
 
 def get_all_files_description(parent_folder):
     query = f"'{parent_folder}' in parents and trashed= False "
-    response = drive_service.files().list(pageSize=1000, supportsAllDrives=False, includeItemsFromAllDrives=False, q=query,
+    response = drive_service.files().list(pageSize=1000,
+                                          supportsAllDrives=False,
+                                          includeItemsFromAllDrives=False,
+                                          q=query,
                                           fields="nextPageToken, files(id, name,kind,mimeType)").execute()
     files = response.get('files')
 
@@ -139,12 +136,37 @@ def get_all_files_description(parent_folder):
 
 
 def get_file_description(file_id):
-    data = drive_service.files().get(fileId=file_id, supportsAllDrives=True).execute()
+    data = drive_service.files().get(fileId=file_id,
+                                     supportsAllDrives=True).execute()
     file = pd.DataFrame([pd.Series(data)])
-    file.loc[file.mimeType == "application/vnd.google-apps.document", "name"] += ".docx"
-    file.loc[file.mimeType == "application/vnd.google-apps.spreadsheet", "name"] += ".xlsx"
+    file.loc[
+        file.mimeType == "application/vnd.google-apps.document", "name"] += ".docx"
+    file.loc[
+        file.mimeType == "application/vnd.google-apps.spreadsheet", "name"] += ".xlsx"
     file = file.replace({'mimeType': DICT})
     return file.squeeze()
+
+
+def upload_file(path, parent_id=None):
+    mime = MimeTypes()
+
+    file_metadata = {
+        'name': os.path.basename(path),
+        # 'mimeType' : 'application/vnd.google-apps.spreadsheet'
+    }
+    if parent_id:
+        file_metadata['parents'] = [parent_id]
+
+    media = MediaFileUpload(path, mimetype=mime.guess_type(os.path.basename(path))[0],
+                            resumable=True)
+    try:
+        file = drive_service.files().create(body=file_metadata,
+                                            media_body=media,
+                                            fields='id').execute()
+    except HttpError:
+        print('corrupted file')
+        pass
+    print(file.get('id'))
 
 
 if __name__ == '__main__':
