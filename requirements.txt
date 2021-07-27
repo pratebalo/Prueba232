@@ -12,5 +12,4 @@ pytz
 google-api-python-client
 google-auth-oauthlib
 docx2pdf
-comtypes==1.1.7
-win32com
+comtypes

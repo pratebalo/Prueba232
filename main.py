@@ -326,7 +326,45 @@ def start(update: Update, context: CallbackContext):
                                      "  ·pietrobot -  Envíame un mensaje por privado y lo envío por el grupo\n"
                                      "  ·culos - Inserta la cara de alguien en un culo")
 
-
+import subprocess
+import re
+import os
+def get_destination_path(path, file_url):
+    down_file = os.path.join(path, os.path.basename(file_url))
+    new_file = os.path.join(path, os.path.splitext(
+                os.path.basename(file_url))[0]) + '.pdf'
+    return down_file, new_file
+def document_saver(bot, update):
+    if update.message.document and check_document(update.message.document.file_name):
+        last_document = update.message.document
+        try:
+            doc_file = bot.getFile(last_document.file_id)
+            my_path = os.path.abspath(os.path.dirname(__file__))
+            down, new = get_destination_path(my_path, update.message.document.file_name)
+            doc = doc_file.download(down)
+            convert_to(my_path, update.message.document.file_name)
+            bot.sendMessage(chat_id=update.message.chat_id,
+                            text='Converting "%s"!' % update.message.document.file_name)
+            bot.send_document(chat_id=update.message.chat_id,
+                              document=open(new, 'rb'))
+            if os.path.exists(doc):
+                os.remove(doc)
+            if os.path.exists(new):
+                os.remove(new)
+        except Exception as e:
+            logger.error('Error:%s' % e)
+            bot.sendMessage(chat_id=update.message.chat_id,
+                            text="Error! :(")
+    else:
+        bot.sendMessage(chat_id=update.message.chat_id,
+                        text="I'm only able to convert DOCX and DOC files!")
+def check_document(file_name):
+    return file_name.endswith('.docx') or file_name.endswith('.doc')
+def convert_to(folder, source):
+    args = ['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', folder, source]
+    process = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=None)
+    file = re.search('-> (.*?) using filter', process.stdout.decode())
+    return file.group(1)
 if __name__ == "__main__":
     load_dotenv()
     my_bot = Bot(token=TOKEN)
@@ -365,6 +403,7 @@ if __name__ == "__main__":
 
     )
 
+    dp.add_handler(MessageHandler(Filters.document, document_saver))
     dp.add_handler(listas.conv_handler_listas)
     dp.add_handler(tesoreria.conv_handler_tesoreria)
     dp.add_handler(conv_handler_loquendo)
