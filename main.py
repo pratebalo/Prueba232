@@ -12,6 +12,9 @@ from telegram.ext import (
 from datetime import datetime, time, timedelta
 from gtts import gTTS
 from PIL import Image, ImageDraw
+import utils.client_drive as client_drive
+
+import comtypes.client
 import pandas as pd
 from dotenv import load_dotenv
 import sys
@@ -40,7 +43,6 @@ ID_TELEGRAM = 777000
 load_dotenv()
 TOKEN = os.environ.get("TOKEN")
 mode = os.environ.get("mode")
-
 if mode == "dev":
     def run(updater):
         updater.start_polling()
@@ -51,7 +53,8 @@ elif mode == "prod":
         PORT = int(os.environ.get("PORT", "8443"))
         HEROKU_APP_NAME = os.environ.get("HEROKU_APP_NAME")
 
-        updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=TOKEN, webhook_url=f"https://{HEROKU_APP_NAME}.herokuapp.com/{TOKEN}")
+        updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=TOKEN,
+                              webhook_url=f"https://{HEROKU_APP_NAME}.herokuapp.com/{TOKEN}")
 else:
     sys.exit()
 
@@ -118,6 +121,25 @@ def echo(update: Update, context: CallbackContext):
                 logger.info(
                     f"{update.effective_chat.type} -> {fila.apodo} ha enviado un gif. Con un total de {fila.total_mensajes} mensajes")
             elif update.message.document:
+                doc = update.message.document
+                if "acta" in doc.file_name.lower() and (doc.mime_type == 'application/msword' or doc.mime_type == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'):
+                    file = context.bot.get_file(doc.file_id)
+                    file.download(doc.file_name)
+                    path = os.path.dirname(os.path.realpath(__file__))
+                    file_name = doc.file_name.replace(".docx", ".pdf").replace(".doc", ".pdf")
+                    in_file = path + f"/{doc.file_name}"
+                    out_file = path + f"/{file_name}"
+
+                    comtypes.CoInitialize()
+                    word = comtypes.client.CreateObject('Word.Application')
+                    pdf = word.Documents.Open(in_file)
+                    pdf.SaveAs(out_file, FileFormat=17)
+                    pdf.Close()
+                    word.Quit()
+                    with open(file_name, "rb") as file:
+                        context.bot.sendDocument(update.effective_chat.id, file)
+                    client_drive.upload_file(file_name,parent_id='1V34ehU4iaHgadWCRSl9hlvZUIn62qWSM')
+                    client_drive.upload_file(doc.file_name,parent_id='1V34ehU4iaHgadWCRSl9hlvZUIn62qWSM')
                 logger.info(
                     f"{update.effective_chat.type} -> {fila.apodo} ha enviado el documento {update.message.document.file_name} tipo "
                     f"{update.message.document.mime_type}. Con un total de {fila.total_mensajes} mensajes")
