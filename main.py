@@ -328,23 +328,25 @@ def start(update: Update, context: CallbackContext):
 import subprocess
 import re
 import os
+
 def get_destination_path(path, file_url):
     down_file = os.path.join(path, os.path.basename(file_url))
     new_file = os.path.join(path, os.path.splitext(
                 os.path.basename(file_url))[0]) + '.pdf'
     return down_file, new_file
-def document_saver(bot, update):
+
+def document_saver(update: Update, context: CallbackContext):
     if update.message.document and check_document(update.message.document.file_name):
         last_document = update.message.document
         try:
-            doc_file = bot.getFile(last_document.file_id)
+            doc_file = context.bot.getFile(last_document.file_id)
             my_path = os.path.abspath(os.path.dirname(__file__))
             down, new = get_destination_path(my_path, update.message.document.file_name)
             doc = doc_file.download(down)
             convert_to(my_path, update.message.document.file_name)
-            bot.sendMessage(chat_id=update.message.chat_id,
+            context.bot.sendMessage(chat_id=update.message.chat_id,
                             text='Converting "%s"!' % update.message.document.file_name)
-            bot.send_document(chat_id=update.message.chat_id,
+            context.bot.send_document(chat_id=update.message.chat_id,
                               document=open(new, 'rb'))
             if os.path.exists(doc):
                 os.remove(doc)
@@ -352,10 +354,10 @@ def document_saver(bot, update):
                 os.remove(new)
         except Exception as e:
             logger.error('Error:%s' % e)
-            bot.sendMessage(chat_id=update.message.chat_id,
+            context.bot.sendMessage(chat_id=update.message.chat_id,
                             text="Error! :(")
     else:
-        bot.sendMessage(chat_id=update.message.chat_id,
+        context.bot.sendMessage(chat_id=update.message.chat_id,
                         text="I'm only able to convert DOCX and DOC files!")
 def check_document(file_name):
     return file_name.endswith('.docx') or file_name.endswith('.doc')
