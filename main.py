@@ -25,7 +25,8 @@ from io import BytesIO
 from utils import database as db
 import os
 from src import poll, tareas, birthday, listas, tesoreria, drive
-import  win32com.client
+# import win32com.client
+
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
@@ -121,23 +122,24 @@ def echo(update: Update, context: CallbackContext):
                     f"{update.effective_chat.type} -> {fila.apodo} ha enviado un gif. Con un total de {fila.total_mensajes} mensajes")
             elif update.message.document:
                 doc = update.message.document
-                if "acta" in doc.file_name.lower() and (doc.mime_type == 'application/msword' or doc.mime_type == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'):
-                    file = context.bot.get_file(doc.file_id)
-                    file.download(doc.file_name)
-                    path = os.path.dirname(os.path.realpath(__file__))
-                    file_name = doc.file_name.replace(".docx", ".pdf").replace(".doc", ".pdf")
-                    in_file = path + f"/{doc.file_name}"
-                    out_file = path + f"/{file_name}"
-
-                    word = win32com.client.DispatchEx('Word.Application')
-                    doc = word.Documents.Open(in_file)
-                    print(out_file)
-                    doc.SaveAs(out_file, FileFormat=17)
-                    doc.Close()
-                    with open(file_name, "rb") as file:
-                        context.bot.sendDocument(update.effective_chat.id, file)
-                    client_drive.upload_file(file_name,parent_id='1V34ehU4iaHgadWCRSl9hlvZUIn62qWSM')
-                    client_drive.upload_file(doc.file_name,parent_id='1V34ehU4iaHgadWCRSl9hlvZUIn62qWSM')
+                # if "acta" in doc.file_name.lower() and (
+                #         doc.mime_type == 'application/msword' or doc.mime_type == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'):
+                #     # file = context.bot.get_file(doc.file_id)
+                #     # file.download(doc.file_name)
+                #     # path = os.path.dirname(os.path.realpath(__file__))
+                #     # file_name = doc.file_name.replace(".docx", ".pdf").replace(".doc", ".pdf")
+                #     # in_file = path + f"/{doc.file_name}"
+                #     # out_file = path + f"/{file_name}"
+                #     #
+                #     # word = win32com.client.DispatchEx('Word.Application')
+                #     # doc = word.Documents.Open(in_file)
+                #     # print(out_file)
+                #     # doc.SaveAs(out_file, FileFormat=17)
+                #     # doc.Close()
+                #     # with open(file_name, "rb") as file:
+                #     #     context.bot.sendDocument(update.effective_chat.id, file)
+                #     # client_drive.upload_file(file_name, parent_id='1V34ehU4iaHgadWCRSl9hlvZUIn62qWSM')
+                #     # client_drive.upload_file(doc.file_name, parent_id='1V34ehU4iaHgadWCRSl9hlvZUIn62qWSM')
                 logger.info(
                     f"{update.effective_chat.type} -> {fila.apodo} ha enviado el documento {update.message.document.file_name} tipo "
                     f"{update.message.document.mime_type}. Con un total de {fila.total_mensajes} mensajes")
