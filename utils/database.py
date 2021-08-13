@@ -27,11 +27,27 @@ def delete(table, id):
     return result
 
 
-def update_data(data):
+def insert_data(id, nombre):
+    query = f"""INSERT INTO data
+                (id,nombre)
+                VALUES ({id},'{nombre}');"""
+
+    connect(query)
+
+
+def update_data1(data):
     query = f"""set DateStyle='ISO, DMY';
         UPDATE data
         SET ultimo_mensaje='{data.ultimo_mensaje}', total_mensajes={data.total_mensajes}, sticker={data.sticker}, gif={data.gif}
         WHERE id={data.id};"""
+    connect(query)
+
+
+def update_data2(id, nombre, apellidos, apodo, genero, cumple, cumple_ano):
+    query = f"""set DateStyle='ISO, DMY';
+        UPDATE data
+        SET nombre='{nombre}', apellidos='{apellidos}', apodo='{apodo}', genero='{genero}', cumple='{cumple}', cumple_ano={cumple_ano}
+        WHERE id={id};"""
     connect(query)
 
 
@@ -121,7 +137,7 @@ def update_cumple(id_persona, cancion, idioma, sticker):
     connect(query)
 
 
-def insert_poll(id, question, options, is_public, votes,url):
+def insert_poll(id, question, options, is_public, votes, url):
     query = f"""set DateStyle='ISO, DMY';
     INSERT INTO encuestas    
     (id, question, options, is_public, votes, url)
@@ -129,7 +145,7 @@ def insert_poll(id, question, options, is_public, votes,url):
     connect(query)
 
 
-def update_poll(id,votes):
+def update_poll(id, votes):
     query = f"""
         UPDATE encuestas
         SET votes = ARRAY{votes}::integer[]
