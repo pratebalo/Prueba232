@@ -24,8 +24,7 @@ from io import BytesIO
 
 from utils import database as db
 import os
-from src import poll, tareas, birthday, listas, tesoreria, drive
-# import win32com.client
+from src import poll, tareas, birthday, listas, tesoreria, drive, new_member
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -122,33 +121,25 @@ def echo(update: Update, context: CallbackContext):
                     f"{update.effective_chat.type} -> {fila.apodo} ha enviado un gif. Con un total de {fila.total_mensajes} mensajes")
             elif update.message.document:
                 doc = update.message.document
-                # if "acta" in doc.file_name.lower() and (
-                #         doc.mime_type == 'application/msword' or doc.mime_type == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'):
-                #     # file = context.bot.get_file(doc.file_id)
-                #     # file.download(doc.file_name)
-                #     # path = os.path.dirname(os.path.realpath(__file__))
-                #     # file_name = doc.file_name.replace(".docx", ".pdf").replace(".doc", ".pdf")
-                #     # in_file = path + f"/{doc.file_name}"
-                #     # out_file = path + f"/{file_name}"
-                #     #
-                #     # word = win32com.client.DispatchEx('Word.Application')
-                #     # doc = word.Documents.Open(in_file)
-                #     # print(out_file)
-                #     # doc.SaveAs(out_file, FileFormat=17)
-                #     # doc.Close()
-                #     # with open(file_name, "rb") as file:
-                #     #     context.bot.sendDocument(update.effective_chat.id, file)
-                #     # client_drive.upload_file(file_name, parent_id='1V34ehU4iaHgadWCRSl9hlvZUIn62qWSM')
-                #     # client_drive.upload_file(doc.file_name, parent_id='1V34ehU4iaHgadWCRSl9hlvZUIn62qWSM')
-                logger.info(
-                    f"{update.effective_chat.type} -> {fila.apodo} ha enviado el documento {update.message.document.file_name} tipo "
-                    f"{update.message.document.mime_type}. Con un total de {fila.total_mensajes} mensajes")
+            #     if "acta" in doc.file_name.lower() and doc.mime_type == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+            #         file = context.bot.get_file(doc.file_id)
+            #         file.download(doc.file_name)
+            #         path = os.path.dirname(os.path.realpath(__file__))
+            #         docx2pdf.convert(doc.file_name)
+            #         file_name = doc.file_name.replace(".docx", ".pdf")
+            #
+            #         client_drive.upload_file(file_name, parent_id='1V34ehU4iaHgadWCRSl9hlvZUIn62qWSM')
+            #         client_drive.upload_file(doc.file_name, parent_id='1V34ehU4iaHgadWCRSl9hlvZUIn62qWSM')
+            #     logger.info(
+            #         f"{update.effective_chat.type} -> {fila.apodo} ha enviado el documento {update.message.document.file_name} tipo "
+            #         f"{update.message.document.mime_type}. Con un total de {fila.total_mensajes} mensajes")
             elif update.message.new_chat_members:
+                new_member2(update, context)
                 logger.info(
                     f"{update.effective_chat.type} -> {update.message.new_chat_members} ha entrado al grupo ")
             else:
                 logger.info(f"{update.effective_chat.type} -> update.message desconocido:  {update.message}")
-            db.update_data(fila)
+            db.update_data1(fila)
         elif update.edited_message:
             logger.warning(
                 f"{update.effective_chat.type} -> {fila.apodo} ha editado el mensaje por {update.edited_message.text}. Con un total de {fila.total_mensajes} mensajes")
@@ -302,30 +293,12 @@ def end_pietrobot(update: Update, context: CallbackContext):
     return ConversationHandler.END
 
 
-def start(update: Update, context: CallbackContext):
-    data = db.select("data")
-    user_id = int(update.effective_user.id)
-    chat_id = int(update.effective_chat.id)
-
-    nombre = update.effective_user.first_name
-    fila = data.loc[data.id == user_id]
-    if len(fila) == 1:
-        fila = fila.iloc[0]
-        logger.info(f"{update.effective_chat.type} -> {fila.apodo} ha iniciado el bot")
-        context.bot.sendMessage(chat_id,
-                                f"Bienvenido {fila.apodo}\nPuedes probar a usar los comandos poniendo / seguido del nombre del comando")
-    else:
-        logger.info(f"{update.effective_chat.type} -> {nombre} con id: {user_id} ha iniciado el bot")
-        context.bot.sendMessage(chat_id,
-                                f"Bienvenido {nombre}\nPuedes probar a usar los comandos poniendo / seguido del nombre del comando")
-
-    context.bot.sendMessage(chat_id, "Los comandos son:\n"
-                                     "  ·listas - Crea, edita o borra una lista\n"
-                                     "  ·tareas - Crea, edita o borra una tarea\n"
-                                     "  ·loquendo - Envíame un texto y te reenvío un audio\n"
-                                     "  ·tesoreria - Tesorería\n"
-                                     "  ·pietrobot -  Envíame un mensaje por privado y lo envío por el grupo\n"
-                                     "  ·culos - Inserta la cara de alguien en un culo")
+def new_member2(update: Update, context: CallbackContext):
+    member = update.message.new_chat_members[0]
+    context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML",
+                            text=f'Bienvenido al grupo {member.first_name}. '
+                                 f'Necesito que pulses <a href="https://t.me/manitoba232bot">aquí</a> y le des a Iniciar')
+    db.insert_data(member.id, member.first_name)
 
 
 if __name__ == "__main__":
@@ -373,7 +346,6 @@ if __name__ == "__main__":
     dp.add_handler(birthday.conv_handler_birthday)
     dp.add_handler(conv_handler_culos)
     dp.add_handler(tareas.conv_handler_tareas)
-    dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CommandHandler('cumples', birthday.get_birthday))
     dp.add_handler(CommandHandler('felicitar', birthday.birthday2))
     dp.add_handler(PollAnswerHandler(poll.receive_poll_answer))
@@ -381,8 +353,8 @@ if __name__ == "__main__":
     dp.add_handler(CommandHandler('demo', poll.democracia))
     dp.add_handler(CommandHandler('bot', poll.bot_activado))
     dp.add_handler(drive.conv_handler_drive)
-
-    # dp.add_handler(MessageHandler(Filters.all, echo))
+    dp.add_handler(new_member.conv_handler_start)
+    dp.add_handler(MessageHandler(Filters.all, echo))
     #
     job.run_daily(birthday.birthday, time(7, 00, 00, tzinfo=pytz.timezone('Europe/Madrid')))
     # job.run_daily(muditos, time(17, 54, 00, 000000))
