@@ -114,7 +114,7 @@ def end_crear_lista(update: Update, context: CallbackContext):
     new_lista = pd.Series(
         {"nombre": context.user_data["nombre_lista"], "elementos": elementos, "tipo_elementos": tipo_elementos,
          "creador": update.effective_user["id"],
-         "fecha": datetime.today().strftime('%d/%m/%Y %H:%M'), "mensaje_id": 0})
+         "fecha": datetime.today().strftime('%d/%m/%Y %H:%M'), "id_mensaje": 0})
 
     text = f"""{update.effective_user.first_name} ha creado la lista:\n{lista_to_text(new_lista)}\n"""
     keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR_EDITAR")),
@@ -123,7 +123,7 @@ def end_crear_lista(update: Update, context: CallbackContext):
     logger.warning(
         f"{update.effective_chat.type} -> {update.effective_user.first_name} ha creado la lista {context.user_data['nombre_lista']}")
     mensaje_crear = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML", text=text)
-    new_lista.mensaje_id = mensaje_crear.message_id
+    new_lista.id_mensaje = mensaje_crear.message_id
     db.insert_lista(new_lista)
     context.bot.sendMessage(update.effective_chat.id, text="Quieres hacer algo mas?",
                             reply_markup=InlineKeyboardMarkup(keyboard))
