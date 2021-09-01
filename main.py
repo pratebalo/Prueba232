@@ -13,7 +13,7 @@ from datetime import datetime, time, timedelta
 from gtts import gTTS
 from PIL import Image, ImageDraw
 import utils.client_drive as client_drive
-
+from random import randrange
 import pandas as pd
 from dotenv import load_dotenv
 import sys
@@ -227,41 +227,28 @@ def culos(update: Update, context: CallbackContext):
 
 
 def culos2(update: Update, context: CallbackContext):
-    im1 = Image.open('mono.jpg')
+
+    size_list = [(160, 160), (90, 90)]
+    point_list = [(345, 480), (427, 333)]
+    photo_list = ['mono.jpg', 'perro.jpg']
+    n = randrange(len(size_list))
+    im1 = Image.open(photo_list[n])
     url = context.bot.get_file(file_id=update.message.photo[-1].file_id).file_path
     response = requests.get(url)
     im2 = Image.open(BytesIO(response.content))
-    size = 150, 150
+    size = size_list[n]
     im2.thumbnail(size, Image.ANTIALIAS)
     x, y = im2.size
-    eX, eY = 90, 130  # Size of Bounding Box for ellipse
+    eX, eY = size[0] * 3 / 5, size[0] * 13 / 15  # Size of Bounding Box for ellipse
     bbox = (x / 2 - eX / 2, y / 2 - eY / 2, x / 2 + eX / 2, y / 2 + eY / 2)
 
     mask_im = Image.new("L", im2.size, 0)
     draw = ImageDraw.Draw(mask_im)
     draw.ellipse(bbox, fill=255)
+    mask_im.save('cara_cortada.jpg', quality=95)
     back_im = im1.copy()
-    back_im.paste(im2, (260, 350), mask_im)
-    back_im.save('culo_final.jpg', quality=95)
-
-    # im1 = Image.open('mono.jpg')
-    # url = context.bot.get_file(file_id=update.message.photo[-1].file_id).file_path
-    # response = requests.get(url)
-    # im2 = Image.open(BytesIO(response.content))
-    # size = 160, 160
-    # im2.thumbnail(size, Image.ANTIALIAS)
-    # x, y = im2.size
-    # eX, eY = 80, 120  # Size of Bounding Box for ellipse
-    # bbox = (x / 2 - eX / 2, y / 2 - eY / 2, x / 2 + eX / 2, y / 2 + eY / 2)
-    #
-    # mask_im = Image.new("L", im2.size, 0)
-    # draw = ImageDraw.Draw(mask_im)
-    # draw.ellipse(bbox, fill=255)
-    #
-    # back_im = im1.copy()
-    # back_im.paste(im2, (680, 90), mask_im)
-    # back_im.show()
-    # back_im.save('culo_final.jpg', quality=95)
+    back_im.paste(im2, (point_list[n][0] - int(x / 2), point_list[n][1] - int(y / 2)), mask_im)
+    back_im.save('photo_final.jpg', quality=95)
 
     chat_id = update.message.chat_id
     user = update.effective_user
@@ -269,7 +256,7 @@ def culos2(update: Update, context: CallbackContext):
     # Send message with text and appended InlineKeyboard
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
-    context.bot.sendPhoto(chat_id, photo=open("culo_final.jpg", "rb"))
+    context.bot.sendPhoto(chat_id, photo=open("photo_final.jpg", "rb"))
 
     # Tell ConversationHandler that we're in state `FIRST` now
     return ConversationHandler.END
