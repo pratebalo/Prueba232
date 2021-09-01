@@ -227,10 +227,9 @@ def culos(update: Update, context: CallbackContext):
 
 
 def culos2(update: Update, context: CallbackContext):
-
-    size_list = [(160, 160), (90, 90)]
-    point_list = [(345, 480), (427, 333)]
-    photo_list = ['mono.jpg', 'perro.jpg']
+    size_list = [(160, 160), (90, 90), (140, 140)]
+    point_list = [(345, 480), (427, 333), (462, 248)]
+    photo_list = ['mono.jpg', 'perro.jpg', 'mono2.jpg']
     n = randrange(len(size_list))
     im1 = Image.open(photo_list[n])
     url = context.bot.get_file(file_id=update.message.photo[-1].file_id).file_path
@@ -245,7 +244,6 @@ def culos2(update: Update, context: CallbackContext):
     mask_im = Image.new("L", im2.size, 0)
     draw = ImageDraw.Draw(mask_im)
     draw.ellipse(bbox, fill=255)
-    mask_im.save('cara_cortada.jpg', quality=95)
     back_im = im1.copy()
     back_im.paste(im2, (point_list[n][0] - int(x / 2), point_list[n][1] - int(y / 2)), mask_im)
     back_im.save('photo_final.jpg', quality=95)
