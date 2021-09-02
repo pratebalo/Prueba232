@@ -65,12 +65,13 @@ def get_birthday(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     context.bot.deleteMessage(chat_id, update.message.message_id)
     data = db.select("data")
-    data.cumple = pd.to_datetime(data.cumple, format='%d/%m').apply(lambda dt: dt.replace(year=2021))
+    year = datetime.now().year
+    data.cumple = pd.to_datetime(data.cumple, format='%d/%m').apply(lambda dt: dt.replace(year=year))
 
     a = data[data.cumple > datetime.today()].sort_values("cumple")[0:4]
     texto = ""
     for _, persona in a.iterrows():
-        texto += persona.nombre_completo + " | " + persona.cumple.strftime('%d/%m') + "/" + str(persona.cumple_ano) + "\n"
+        texto += f"{persona.nombre} {persona.apellidos}  | {persona.cumple.strftime('%d/%m')}/{str(persona.cumple_ano)}\n"
 
     context.bot.sendMessage(chat_id, texto)
 
