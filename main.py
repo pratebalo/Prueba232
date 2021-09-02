@@ -108,6 +108,10 @@ def echo(update: Update, context: CallbackContext):
             if update.message.text:
                 logger.info(
                     f"{update.effective_chat.type} -> {fila.apodo} ha enviado {update.message.text}. Con un total de {fila.total_mensajes} mensajes")
+                if "ha añadido elementos a la lista:" in update.message.text:
+                    context.bot.deleteMessage(chat_id, update.message.message_id)
+                    context.bot.sendMessage(chat_id, text="Aprende a usar el bot, parguela! -> /listas")
+
             elif update.message.sticker:
                 fila.sticker += 1
                 logger.info(
