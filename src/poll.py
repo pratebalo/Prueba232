@@ -1,22 +1,58 @@
 import logging
-
-from telegram import Update
+import os
 
 from telegram.ext import (
+    CommandHandler,
+    CallbackQueryHandler,
+    ConversationHandler,
     CallbackContext,
 )
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+
 from utils import database as db
+
+ID_MANITOBA = int(os.environ.get("ID_MANITOBA"))
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
+ELEGIR_ENCUESTA, FINAL_OPTION = range(2)
+
+
+def encuestas(update: Update, context: CallbackContext) -> None:
+    polls = db.select("encuestas")
+    polls = polls[~polls.end].reset_index()
+    chat_id = update.effective_chat.id
+    user = update.effective_user
+
+    logger.warning(f"{update.effective_chat.type} -> {user.first_name} entró en el comando encuestas")
+
+    keyboard = []
+    text = f"{user.first_name} ¿Qué quieres hacer?\n"
+
+    for i, poll in polls.iterrows():
+        keyboardline = []
+        text += f" {i + 1}. {poll.question}\n"
+        keyboardline.append(InlineKeyboardButton(i + 1, callback_data="NADA"))
+        keyboardline.append(InlineKeyboardButton("🗑", callback_data="ELIMINAR" + str(poll.id)))
+        keyboardline.append(InlineKeyboardButton("📯", callback_data="FINALIZAR" + str(poll.id)))
+        keyboard.append(keyboardline)
+    keyboard.append([InlineKeyboardButton("Democracia 🗳️", callback_data=str("DEMOCRACIA"))])
+    keyboard.append([InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    context.user_data["query_listas"] = context.bot.sendMessage(chat_id, text, reply_markup=reply_markup)
+    if update.message:
+        context.bot.deleteMessage(chat_id, update.message.message_id)
+    return ELEGIR_ENCUESTA
+
 
 def receive_poll_answer(update: Update, context: CallbackContext) -> None:
     """Summarize a users poll vote"""
     polls = db.select("encuestas")
-    poll_id = update.poll_answer.poll_id
+    poll_id = int(update.poll_answer.poll_id)
     poll = polls[polls.id == poll_id].squeeze()
     votes = poll.votes
     respuesta = update.poll_answer
@@ -37,7 +73,7 @@ def receive_poll(update: Update, context: CallbackContext) -> None:
     logger.warning(f"{update.effective_user.first_name} ha creado la encuesta {actual_poll.question}")
     if not actual_poll.is_anonymous and not update.message.forward_from:
 
-        update.effective_message.delete()
+        # update.effective_message.delete()
         options = [o.text for o in actual_poll.options]
         if update.message.reply_to_message:
             if update.message.reply_to_message.forward_from_chat:
@@ -70,30 +106,41 @@ def receive_poll(update: Update, context: CallbackContext) -> None:
             )
             url = f"https://t.me/c/{str(new_poll.chat.id)[4:]}/{new_poll.message_id}"
 
-        db.insert_poll(new_poll.poll.id, new_poll.poll.question, options, new_poll.poll.is_anonymous, [], url)
+        db.insert_poll(new_poll.poll.id, new_poll.poll.question, options, [], url, update.message.chat_id,
+                       new_poll.message_id)
 
 
 def democracia(update: Update, context: CallbackContext) -> None:
+    update.callback_query.delete_message()
     logger.warning(f"{update.effective_user.first_name} ha ejecutado el comando democracia")
     data = db.select("data")
     encuestas = db.select("encuestas")
     encuestas = encuestas[~encuestas.end]
+    texto = "Estos son los miserables que odian la democracia:\n"
     for _, persona in data.iterrows():
         questions = ""
+        total = 0
         for _, encuesta in encuestas.iterrows():
             if persona.id not in encuesta.votes:
                 questions += f"- <a href='{encuesta.url}'>{encuesta.question}</a>\n"
+                total += 1
 
         if questions:
+            texto += f"- <a href='tg://user?id={persona.id}'>{persona.apodo}</a>"
+            if total == 1:
+                texto += "\n"
+            else:
+                texto += f"x{total}\n"
             text = f"{persona.apodo}, al vivir en una democracia tienes derecho a votar en las encuestas\n" + questions
             try:
                 context.bot.sendMessage(chat_id=persona.id, parse_mode="HTML", text=text)
             except:
                 print(f"{persona.apodo} con id {persona.id} NO tiene activado el bot")
 
+    context.bot.sendMessage(update.effective_chat.id, text=texto)
+
 
 def bot_activado(update: Update, context: CallbackContext) -> None:
-
     logger.warning(f"{update.effective_user.first_name} ha ejecutado el comando bot_activado")
     data = db.select("data")
     for _, persona in data.iterrows():
@@ -103,3 +150,60 @@ def bot_activado(update: Update, context: CallbackContext) -> None:
             # print(f"{persona.apodo} con id {persona.id} tiene activado el bot")
         except:
             print(f"{persona.apodo} con id {persona.id} NO tiene activado el bot")
+
+
+def terminar(update: Update, context: CallbackContext):
+    update.callback_query.delete_message()
+
+    return ConversationHandler.END
+
+
+def eliminar_encuesta(update: Update, context: CallbackContext):
+    id_encuesta = int(update.callback_query.data.replace("ELIMINAR", ""))
+    polls = db.select("encuestas")
+    poll = polls[polls.id == id_encuesta].squeeze()
+
+    chat = int(poll.chat_id)
+    id_mensaje = int(poll.message_id)
+    db.delete("encuestas", poll.id)
+    update.callback_query.delete_message()
+    context.bot.deleteMessage(chat, id_mensaje)
+
+    encuestas(update, context)
+
+
+def finalizar_encuesta(update: Update, context: CallbackContext):
+    id_encuesta = int(update.callback_query.data.replace("FINALIZAR", ""))
+    data = db.select("data")
+    polls = db.select("encuestas")
+    poll = polls[polls.id == id_encuesta].squeeze()
+    update.callback_query.delete_message()
+
+    logger.warning(f"{update.effective_user.first_name} ha ejecutado el comando democracia")
+    texto = f"La encuesta {poll.question} ha finalizado.\nEstos son los miserables que odian la democracia:\n"
+    for _, persona in data.iterrows():
+        if persona.id not in poll.votes:
+            texto += f"<a href='tg://user?id={persona.id}'>{persona.apodo}</a>\n"
+    db.end_poll(poll.id)
+    context.bot.stopPoll(int(poll.chat_id), int(poll.message_id))
+    context.bot.forwardMessage(int(poll.chat_id), int(poll.chat_id), int(poll.message_id), )
+    context.bot.sendMessage(ID_MANITOBA, texto, parse_mode="HTML")
+
+    encuestas(update, context)
+
+
+conv_handler_encuestas = ConversationHandler(
+    entry_points=[CommandHandler('encuestas', encuestas)],
+    states={
+        ELEGIR_ENCUESTA: [
+            CallbackQueryHandler(eliminar_encuesta, pattern='^ELIMINAR'),
+            CallbackQueryHandler(finalizar_encuesta, pattern='^FINALIZAR'),
+            CallbackQueryHandler(democracia, pattern='^DEMOCRACIA'),
+            CallbackQueryHandler(terminar, pattern='^TERMINAR$')
+        ],
+        FINAL_OPTION: [
+            CallbackQueryHandler(encuestas, pattern='^CONTINUAR$'),
+
+            CallbackQueryHandler(terminar, pattern='^TERMINAR')]},
+    fallbacks=[CommandHandler('encuestas', encuestas)],
+)

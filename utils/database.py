@@ -18,7 +18,7 @@ def select(table):
 
 def delete(table, id):
     query = f"""DELETE FROM {table}
-            WHERE ID = {id}
+            WHERE id = {id}
             RETURNING *;"""
     connection = psycopg2.connect(DATABASE_URL)
     result = pd.read_sql(query, connection)
@@ -137,11 +137,11 @@ def update_cumple(id_persona, cancion, idioma, sticker):
     connect(query)
 
 
-def insert_poll(id, question, options, is_public, votes, url):
+def insert_poll(id, question, options, votes, url,chat_id,message_id):
     query = f"""set DateStyle='ISO, DMY';
     INSERT INTO encuestas    
-    (id, question, options, is_public, votes, url)
-         VALUES ('{id}', '{question}', ARRAY{options}, {is_public},ARRAY{votes}::integer[], '{url}');"""
+    (id, question, options, votes, url,chat_id,message_id)
+         VALUES ({id}, '{question}', ARRAY{options},ARRAY{votes}::integer[], '{url}',{chat_id},{message_id});"""
     connect(query)
 
 
@@ -149,7 +149,15 @@ def update_poll(id, votes):
     query = f"""
         UPDATE encuestas
         SET votes = ARRAY{votes}::integer[]
-        WHERE id = '{id}';"""
+        WHERE id = {id};"""
+    connect(query)
+
+
+def end_poll(id):
+    query = f"""
+        UPDATE encuestas
+        SET "end" = true
+        WHERE id = {id};"""
     connect(query)
 
 

@@ -2,6 +2,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, Bot
 from telegram.ext import (
     CommandHandler,
     PollAnswerHandler,
+    PollHandler,
     CallbackQueryHandler,
     ConversationHandler,
     CallbackContext,
@@ -290,6 +291,7 @@ def new_member2(update: Update, context: CallbackContext):
     db.insert_data(member.id, member.first_name)
 
 
+
 if __name__ == "__main__":
     load_dotenv()
     my_bot = Bot(token=TOKEN)
@@ -339,8 +341,8 @@ if __name__ == "__main__":
     dp.add_handler(CommandHandler('felicitar', birthday.birthday2))
     dp.add_handler(PollAnswerHandler(poll.receive_poll_answer))
     dp.add_handler(MessageHandler(Filters.poll, poll.receive_poll))
-    dp.add_handler(CommandHandler('demo', poll.democracia))
     dp.add_handler(CommandHandler('bot', poll.bot_activado))
+    dp.add_handler(poll.conv_handler_encuestas)
     dp.add_handler(drive.conv_handler_drive)
     dp.add_handler(new_member.conv_handler_start)
     dp.add_handler(MessageHandler(Filters.all, echo))
