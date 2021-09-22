@@ -7,7 +7,8 @@ from telegram.ext import (
     ConversationHandler,
     CallbackContext,
 )
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, KeyboardButton, KeyboardButtonPollType, \
+    ReplyKeyboardMarkup
 
 from utils import database as db
 
@@ -31,15 +32,17 @@ def encuestas(update: Update, context: CallbackContext) -> None:
 
     keyboard = []
     text = f"{user.first_name} ¿Qué quieres hacer?\n"
-
-    for i, poll in polls.iterrows():
-        keyboardline = []
-        text += f" {i + 1}. {poll.question}\n"
-        keyboardline.append(InlineKeyboardButton(i + 1, callback_data="NADA"))
-        keyboardline.append(InlineKeyboardButton("🗑", callback_data="ELIMINAR" + str(poll.id)))
-        keyboardline.append(InlineKeyboardButton("📯", callback_data="FINALIZAR" + str(poll.id)))
-        keyboard.append(keyboardline)
-    keyboard.append([InlineKeyboardButton("Democracia 🗳️", callback_data=str("DEMOCRACIA"))])
+    if polls.empty:
+        keyboard.append([InlineKeyboardButton("No hay encuestas activas 😢", callback_data="NADA")])
+    else:
+        for i, poll in polls.iterrows():
+            keyboardline = []
+            text += f" {i + 1}. {poll.question}\n"
+            keyboardline.append(InlineKeyboardButton(i + 1, callback_data="NADA"))
+            keyboardline.append(InlineKeyboardButton("🗑", callback_data="ELIMINAR" + str(poll.id)))
+            keyboardline.append(InlineKeyboardButton("📯", callback_data="FINALIZAR" + str(poll.id)))
+            keyboard.append(keyboardline)
+        keyboard.append([InlineKeyboardButton("Democracia 🗳️", callback_data=str("DEMOCRACIA"))])
     keyboard.append([InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))])
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -74,12 +77,12 @@ def receive_poll(update: Update, context: CallbackContext) -> None:
     if not actual_poll.is_anonymous and not update.message.forward_from:
 
         # update.effective_message.delete()
-        options = [o.text for o in actual_poll.options]
+        options = [o.text.replace("'", "") for o in actual_poll.options]
         if update.message.reply_to_message:
             if update.message.reply_to_message.forward_from_chat:
                 new_poll = context.bot.send_poll(
                     update.effective_chat.id,
-                    question=actual_poll.question,
+                    question=actual_poll.question.replace("'", ""),
                     options=options,
                     is_anonymous=False,
                     allows_multiple_answers=actual_poll.allows_multiple_answers,
@@ -90,7 +93,7 @@ def receive_poll(update: Update, context: CallbackContext) -> None:
             else:
                 new_poll = context.bot.send_poll(
                     update.effective_chat.id,
-                    question=actual_poll.question,
+                    question=actual_poll.question.replace("'", ""),
                     options=options,
                     is_anonymous=False,
                     allows_multiple_answers=actual_poll.allows_multiple_answers
@@ -99,7 +102,7 @@ def receive_poll(update: Update, context: CallbackContext) -> None:
         else:
             new_poll = context.bot.send_poll(
                 update.effective_chat.id,
-                question=actual_poll.question,
+                question=actual_poll.question.replace("'", ""),
                 options=options,
                 is_anonymous=False,
                 allows_multiple_answers=actual_poll.allows_multiple_answers
