@@ -76,7 +76,7 @@ def receive_poll(update: Update, context: CallbackContext) -> None:
     logger.warning(f"{update.effective_user.first_name} ha creado la encuesta {actual_poll.question}")
     if not actual_poll.is_anonymous and not update.message.forward_from:
 
-        # update.effective_message.delete()
+        update.effective_message.delete()
         options = [o.text.replace("'", "") for o in actual_poll.options]
         if update.message.reply_to_message:
             if update.message.reply_to_message.forward_from_chat:
