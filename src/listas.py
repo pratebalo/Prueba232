@@ -355,7 +355,6 @@ def editar_lista_manual(update: Update, context: CallbackContext):
     new_message = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML", text=texto)
     lista.id_mensaje = new_message.message_id
     db.update_lista(lista)
-    print()
 
 
 conv_handler_listas = ConversationHandler(
