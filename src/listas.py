@@ -11,7 +11,7 @@ import pandas as pd
 from datetime import datetime
 import logging
 from utils import database as db
-import os
+import os, re
 
 ELEGIR_LISTA, CREAR_LISTA1, CREAR_LISTA2, EDITAR_LISTA1, EDITAR_LISTA2, EDITAR_LISTA_A, EDITAR_LISTA_E, \
 FINAL_OPTION = range(8)
@@ -338,6 +338,24 @@ def lista_to_text(lista):
         else:
             text += f"  {n + 1}. <s>{elemento}</s>\n"
     return text
+
+
+def editar_lista_manual(update: Update, context: CallbackContext):
+    all_listas = db.select("listas")
+
+    poll_name = (update.message.text.split(":\n"))[1]
+    lista = all_listas[all_listas.nombre == poll_name].squeeze()
+    elementos = (update.message.text.split(":\n"))[2].split("\n")
+    elementos2 = [re.sub(r"^[\t]*[ ]*[0-9]*[.]*[ ]*", r"", element) for element in elementos]
+    lista.elementos = elementos2
+    lista.tipo_elementos = [0] * len(elementos2)
+    context.bot.deleteMessage(update.effective_chat.id, update.message.message_id)
+    context.bot.deleteMessage(ID_MANITOBA, int(lista.id_mensaje))
+    texto = f"{update.effective_user.first_name} ha editado la lista:\n{lista_to_text(lista)}"
+    new_message = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML", text=texto)
+    lista.id_mensaje = new_message.message_id
+    db.update_lista(lista)
+    print()
 
 
 conv_handler_listas = ConversationHandler(

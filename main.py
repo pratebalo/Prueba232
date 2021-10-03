@@ -109,9 +109,10 @@ def echo(update: Update, context: CallbackContext):
             if update.message.text:
                 logger.info(
                     f"{update.effective_chat.type} -> {fila.apodo} ha enviado {update.message.text}. Con un total de {fila.total_mensajes} mensajes")
-                if "ha añadido elementos a la lista:" in update.message.text or "ha creado la lista:" in update.message.text:
-                    context.bot.deleteMessage(chat_id, update.message.message_id)
-                    context.bot.sendMessage(chat_id, text="Aprende a usar el bot, parguela! -> /listas")
+                if "ha añadido elementos a la lista:" in update.message.text \
+                        or "ha creado la lista:" in update.message.text \
+                        or "ha editado la lista:" in update.message.text:
+                    listas.editar_lista_manual(update, context)
 
             elif update.message.sticker:
                 fila.sticker += 1
@@ -289,7 +290,6 @@ def new_member2(update: Update, context: CallbackContext):
                             text=f'Bienvenido al grupo {member.first_name}. '
                                  f'Necesito que pulses <a href="https://t.me/manitoba232bot">aquí</a> y le des a Iniciar')
     db.insert_data(member.id, member.first_name)
-
 
 
 if __name__ == "__main__":
