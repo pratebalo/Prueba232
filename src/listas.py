@@ -304,6 +304,7 @@ def end_editar_lista_editar(update: Update, context: CallbackContext):
 
 
 def eliminar_lista(update: Update, context: CallbackContext):
+    context.bot.deleteMessage(update.message.message_id,update.message.chat_id)
     id_lista = int(update.callback_query.data.replace("ELIMINAR", ""))
     lista = db.delete("listas", id_lista).iloc[0]
     logger.warning(
