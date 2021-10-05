@@ -229,8 +229,9 @@ def end_editar_lista_eliminar(update: Update, context: CallbackContext):
     lista.id_mensaje = new_message.message_id
     db.update_lista(lista)
     context.user_data["lista"] = lista
-    update.callback_query.edit_message_text(text="Quieres hacer algo mas?",
-                                            reply_markup=InlineKeyboardMarkup(keyboard))
+    update.callback_query.delete_message()
+    context.bot.sendMessage(update.effective_chat.id, text="Quieres hacer algo mas?",
+                            reply_markup=InlineKeyboardMarkup(keyboard))
 
     return FINAL_OPTION
 
