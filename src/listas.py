@@ -352,7 +352,10 @@ def editar_lista_manual(update: Update, context: CallbackContext):
     lista.elementos = elementos2
     lista.tipo_elementos = [0] * len(elementos2)
     context.bot.deleteMessage(update.effective_chat.id, update.message.message_id)
-    context.bot.deleteMessage(ID_MANITOBA, int(lista.id_mensaje))
+    try:
+        context.bot.deleteMessage(ID_MANITOBA, int(lista.id_mensaje))
+    except:
+        print("Mensaje eliminado")
     texto = f"{update.effective_user.first_name} ha editado la lista:\n{lista_to_text(lista)}"
     new_message = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML", text=texto)
     lista.id_mensaje = new_message.message_id
