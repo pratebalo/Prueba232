@@ -286,7 +286,7 @@ def end_editar_lista_editar(update: Update, context: CallbackContext):
         f"{update.effective_chat.type} -> {update.effective_user.first_name} ha escrito el nuevo elemento {elemento_editado}")
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
-    texto = f"{update.effective_user.first_name} ha editado el elemento {pos_elemento + 1}. '{elemento_editado}' de la lista:\n {lista_to_text(lista)}"
+    texto = f"{update.effective_user.first_name} ha editado el elemento {pos_elemento + 1}. '{elemento_editado}' de la lista:\n{lista_to_text(lista)}"
 
     keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR")),
                  InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))]]
