@@ -109,9 +109,7 @@ def echo(update: Update, context: CallbackContext):
             if update.message.text:
                 logger.info(
                     f"{update.effective_chat.type} -> {fila.apodo} ha enviado {update.message.text}. Con un total de {fila.total_mensajes} mensajes")
-                if "ha añadido elementos a la lista:" in update.message.text \
-                        or "ha creado la lista:" in update.message.text \
-                        or "ha editado el elemento:" in update.message.text:
+                if "la lista:\n" in update.message.text:
                     listas.editar_lista_manual(update, context)
 
             elif update.message.sticker:
