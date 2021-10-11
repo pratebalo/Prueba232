@@ -14,7 +14,7 @@ from utils import database as db
 import os, re
 
 ELEGIR_LISTA, CREAR_LISTA1, CREAR_LISTA2, EDITAR_LISTA1, EDITAR_LISTA2, EDITAR_LISTA_A, EDITAR_LISTA_E, \
-FINAL_OPTION = range(8)
+ELIMINAR_LISTA, FINAL_OPTION = range(9)
 ID_MANITOBA = int(os.environ.get("ID_MANITOBA"))
 logger = logging.getLogger()
 
@@ -42,11 +42,7 @@ def listas(update: Update, context: CallbackContext):
         keyboardline.append(InlineKeyboardButton(i + 1, callback_data="NADA"))
         keyboardline.append(InlineKeyboardButton("👀", callback_data="VER" + str(lista.id)))
         keyboardline.append(InlineKeyboardButton("🖋", callback_data="EDITAR" + str(lista.id)))
-        if user.id in list(all_listas.creador):
-            if lista.creador == user.id:
-                keyboardline.append(InlineKeyboardButton("🗑", callback_data="ELIMINAR" + str(lista.id)))
-            else:
-                keyboardline.append(InlineKeyboardButton(" ", callback_data="NADA"))
+        keyboardline.append(InlineKeyboardButton("🗑", callback_data="ELIMINAR" + str(lista.id)))
         keyboard.append(keyboardline)
     keyboard.append([InlineKeyboardButton("Crear nueva lista", callback_data=str("CREAR"))])
     keyboard.append([InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))])
@@ -305,7 +301,19 @@ def end_editar_lista_editar(update: Update, context: CallbackContext):
 
 
 def eliminar_lista(update: Update, context: CallbackContext):
-    context.bot.deleteMessage(update.message.message_id,update.message.chat_id)
+    id_lista = int(update.callback_query.data.replace("ELIMINAR", ""))
+
+    texto = f"¿Seguro que quieres eliminar la lista?"
+    keyboard = [[InlineKeyboardButton("Eliminar", callback_data="ELIMINAR"+str(id_lista)),
+                 InlineKeyboardButton("Volver atrás", callback_data="VOLVER")]]
+
+    update.callback_query.edit_message_text(texto, reply_markup=InlineKeyboardMarkup(keyboard))
+
+    return ELIMINAR_LISTA
+
+
+def eliminar_lista2(update: Update, context: CallbackContext):
+    update.callback_query.delete_message()
     id_lista = int(update.callback_query.data.replace("ELIMINAR", ""))
     lista = db.delete("listas", id_lista).iloc[0]
     logger.warning(
@@ -383,6 +391,9 @@ conv_handler_listas = ConversationHandler(
             CallbackQueryHandler(terminar, pattern='^TERMINAR$')],
         EDITAR_LISTA_A: [MessageHandler(Filters.text & ~Filters.command, end_editar_lista_anadir)],
         EDITAR_LISTA_E: [MessageHandler(Filters.text & ~Filters.command, end_editar_lista_editar)],
+        ELIMINAR_LISTA: [
+            CallbackQueryHandler(eliminar_lista2, pattern='^ELIMINAR'),
+            CallbackQueryHandler(listas, pattern='^VOLVER')],
         FINAL_OPTION: [
             CallbackQueryHandler(listas, pattern='^CONTINUAR$'),
             CallbackQueryHandler(editar_lista, pattern='^CONTINUAR_EDITAR$'),

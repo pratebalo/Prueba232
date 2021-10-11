@@ -140,7 +140,7 @@ def democracia(update: Update, context: CallbackContext) -> None:
             except:
                 print(f"{persona.apodo} con id {persona.id} NO tiene activado el bot")
 
-    context.bot.sendMessage(update.effective_chat.id, text=texto)
+    context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML", text=texto)
 
 
 def bot_activado(update: Update, context: CallbackContext) -> None:
@@ -170,8 +170,11 @@ def eliminar_encuesta(update: Update, context: CallbackContext):
     id_mensaje = int(poll.message_id)
     db.delete("encuestas", poll.id)
     update.callback_query.delete_message()
-    context.bot.deleteMessage(chat, id_mensaje)
-
+    try:
+        context.bot.deleteMessage(chat, id_mensaje)
+        # print(f"{persona.apodo} con id {persona.id} tiene activado el bot")
+    except:
+        print(f"No se puede eliminar el mensaje")
     encuestas(update, context)
 
 
