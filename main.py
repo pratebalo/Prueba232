@@ -138,9 +138,13 @@ def echo(update: Update, context: CallbackContext):
             #         f"{update.effective_chat.type} -> {fila.apodo} ha enviado el documento {update.message.document.file_name} tipo "
             #         f"{update.message.document.mime_type}. Con un total de {fila.total_mensajes} mensajes")
             elif update.message.new_chat_members:
-                new_member2(update, context)
+                new_member.new_member(update, context)
                 logger.info(
-                    f"{update.effective_chat.type} -> {update.message.new_chat_members} ha entrado al grupo ")
+                    f"{update.effective_chat.type} -> {update.message.new_chat_members[0]} ha entrado al grupo ")
+            elif update.message.left_chat_member:
+                new_member.left_member(update, context)
+                logger.info(
+                    f"{update.effective_chat.type} -> {update.message.left_chat_member} ha salido del grupo ")
             else:
                 logger.info(f"{update.effective_chat.type} -> update.message desconocido:  {update.message}")
             db.update_data1(fila)
@@ -282,14 +286,6 @@ def end_pietrobot(update: Update, context: CallbackContext):
     return ConversationHandler.END
 
 
-def new_member2(update: Update, context: CallbackContext):
-    member = update.message.new_chat_members[0]
-    context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML",
-                            text=f'Bienvenido al grupo {member.first_name}. '
-                                 f'Necesito que pulses <a href="https://t.me/manitoba232bot">aquí</a> y le des a Iniciar')
-    db.insert_data(member.id, member.first_name)
-
-
 if __name__ == "__main__":
     load_dotenv()
     my_bot = Bot(token=TOKEN)
@@ -337,8 +333,8 @@ if __name__ == "__main__":
     dp.add_handler(tareas.conv_handler_tareas)
     dp.add_handler(CommandHandler('cumples', birthday.get_birthday))
     dp.add_handler(CommandHandler('felicitar', birthday.birthday2))
-    dp.add_handler(PollAnswerHandler(poll.receive_poll_answer))
-    dp.add_handler(MessageHandler(Filters.poll, poll.receive_poll))
+   # dp.add_handler(PollAnswerHandler(poll.receive_poll_answer))
+    #dp.add_handler(MessageHandler(Filters.poll, poll.receive_poll))
     dp.add_handler(CommandHandler('bot', poll.bot_activado))
     dp.add_handler(poll.conv_handler_encuestas)
     dp.add_handler(drive.conv_handler_drive)

@@ -142,6 +142,19 @@ def terminar(update: Update, context: CallbackContext):
                                      "  ·culos - Inserta la cara de alguien en un culo")
     return ConversationHandler.END
 
+def new_member(update: Update, context: CallbackContext):
+    member = update.message.new_chat_members[0]
+    context.bot.sendMessage(update.effective_chat.id, parse_mode="HTML",
+                            text=f'Bienvenido al grupo {member.first_name}. '
+                                 f'Necesito que pulses <a href="https://t.me/manitoba232bot">aquí</a> y le des a Iniciar')
+    db.insert_data(member.id, member.first_name)
+
+
+def left_member(update: Update, context: CallbackContext):
+    member = update.message.left_chat_member
+    db.delete("data", member.id)
+
+
 
 conv_handler_start = ConversationHandler(
     entry_points=[CommandHandler('start', start)],
