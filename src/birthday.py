@@ -22,15 +22,15 @@ def birthday(context: CallbackContext):
     fecha = datetime.today().strftime('%d/%m')
     cumpleaneros = data[data.cumple == fecha]
     for _, cumpleanero in cumpleaneros.iterrows():
-        tts = gTTS(cumpleanero.cumple_song, lang=cumpleanero.cumple_lang)
-        tts.save(f"Felicitacion de su majestad para {cumpleanero.apodo}.mp3")
+        # tts = gTTS(cumpleanero.cumple_song, lang=cumpleanero.cumple_lang)
+        # tts.save(f"Felicitacion de su majestad para {cumpleanero.apodo}.mp3")
 
         context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                 text=f"Felicidades <b>{cumpleanero.apodo}</b>!!!!!")
         context.bot.sendSticker(chat_id=ID_MANITOBA,
                                 sticker=cumpleanero.cumple_sticker)
-        context.bot.sendAudio(chat_id=ID_MANITOBA,
-                              audio=open(f"Felicitacion de su majestad para {cumpleanero.apodo}.mp3", "rb"))
+        # context.bot.sendAudio(chat_id=ID_MANITOBA,
+        #                       audio=open(f"Felicitacion de su majestad para {cumpleanero.apodo}.mp3", "rb"))
         if cumpleanero.genero == "M":
             context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                     text=f"Por seeeeerrrr tan bueeeennaa muchaaaaachaaaaa 🎉🎊🎈")
