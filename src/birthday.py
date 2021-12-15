@@ -11,16 +11,23 @@ from datetime import datetime
 from gtts import gTTS
 import pandas as pd
 from utils import database as db
-import os
+import os, random
 
 CUMPLE1, CUMPLE2, CUMPLE3, CUMPLE4 = range(4)
 ID_MANITOBA = int(os.environ.get("ID_MANITOBA"))
-
+STICKERS = ["CAACAgIAAxkBAAEDfgNhugP6zcKUVHjHDThT6UFcw7Ex7AACPQEAAiI3jgRzp-LtkvRpKCME",
+            "CAACAgIAAxkBAAEDfgVhugQphnj0lZMlP6wgXvp7tVp4ogACCwEAAvcCyA_F9DuYlapx2yME",
+            "CAACAgIAAxkBAAEDfgdhugQt8geB2KWFbDQ0TA2IXbx7ZQACNQADO2AkFOi0JbQQZiMhIwQ",
+            "CAACAgIAAxkBAAEDfghhugQuCg9Bnus-lr1f-cdt2bYsBAACWQADrWW8FPS7RxeJ4S0JIwQ",
+            "CAACAgIAAxkBAAEDfgthugQyW3f6sBqc9cq-rBhArU-16gACAQwAArbpmEtKWijuVpAoPiME",
+            "CAACAgIAAxkBAAEDfg1hugQ1DdHic0OmMnwBfIhq7Ab8ZgACiQADFkJrCkbL2losgrCOIwQ",
+            "CAACAgIAAxkBAAEDfg9hugQ4Tv9ioGb0Wo6tUyjZZbEB3AAC8AIAArVx2ga4Ryudl_pd6CME"]
 
 def birthday(context: CallbackContext):
     data = db.select("data")
     fecha = datetime.today().strftime('%d/%m')
     cumpleaneros = data[data.cumple == fecha]
+
     for _, cumpleanero in cumpleaneros.iterrows():
         # tts = gTTS(cumpleanero.cumple_song, lang=cumpleanero.cumple_lang)
         # tts.save(f"Felicitacion de su majestad para {cumpleanero.apodo}.mp3")
@@ -28,7 +35,7 @@ def birthday(context: CallbackContext):
         context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                 text=f"Felicidades <b>{cumpleanero.apodo}</b>!!!!!")
         context.bot.sendSticker(chat_id=ID_MANITOBA,
-                                sticker=cumpleanero.cumple_sticker)
+                                sticker=STICKERS[random.randint(0, len(STICKERS) - 1)])
         # context.bot.sendAudio(chat_id=ID_MANITOBA,
         #                       audio=open(f"Felicitacion de su majestad para {cumpleanero.apodo}.mp3", "rb"))
         if cumpleanero.genero == "M":
@@ -50,7 +57,7 @@ def birthday2(update: Update, context: CallbackContext):
         context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                 text=f"Felicidades <b>{cumpleanero.apodo}</b>!!!!!")
         context.bot.sendSticker(chat_id=ID_MANITOBA,
-                                sticker=cumpleanero.cumple_sticker)
+                                sticker=STICKERS[random.randint(0, len(STICKERS) - 1)])
         # context.bot.sendAudio(chat_id=ID_MANITOBA,
         #                       audio=open(f"Felicitacion de su majestad para {cumpleanero.apodo}.mp3", "rb"))
         if cumpleanero.genero == "M":
@@ -136,7 +143,8 @@ def set_birthday5(update: Update, context: CallbackContext):
                             sticker=update.message.sticker.file_id)
     context.bot.sendAudio(chat_id=chat_id,
                           audio=open(f"Felicitacion de su majestad para {context.user_data['personaId']}.mp3", "rb"))
-    db.update_cumple(context.user_data["personaId"], context.user_data["cancion"], context.user_data["idioma"], update.message.sticker.file_id)
+    db.update_cumple(context.user_data["personaId"], context.user_data["cancion"], context.user_data["idioma"],
+                     update.message.sticker.file_id)
     return ConversationHandler.END
 
 

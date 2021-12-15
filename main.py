@@ -31,7 +31,7 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger("main")
-
+logging.getLogger('apscheduler.executors.default').propagate = False
 LOQUENDO_1, LOQUENDO_2 = range(2)
 ESTADO_UNICO = range(1)
 
@@ -107,8 +107,7 @@ def echo(update: Update, context: CallbackContext):
         fila.ultimo_mensaje = datetime.today().strftime('%d/%m/%Y %H:%M:S')
         if update.message:
             if update.message.text:
-                logger.info(
-                    f"{update.effective_chat.type} -> {fila.apodo} ha enviado {update.message.text}. Con un total de {fila.total_mensajes} mensajes")
+                # logger.info(f"{update.effective_chat.type} -> {fila.apodo} ha enviado {update.message.text}. Con un total de {fila.total_mensajes} mensajes")
                 if "la lista:\n" in update.message.text:
                     listas.editar_lista_manual(update, context)
 
