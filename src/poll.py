@@ -17,7 +17,7 @@ ID_MANITOBA = int(os.environ.get("ID_MANITOBA"))
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("poll")
 
 ELEGIR_ENCUESTA, FINAL_OPTION = range(2)
 

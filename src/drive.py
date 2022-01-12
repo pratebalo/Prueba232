@@ -20,7 +20,7 @@ from telegram_bot_calendar import DetailedTelegramCalendar, DAY
 DRIVE1, DRIVE2, DRIVE3 = range(3)
 
 ID_MANITOBA = int(os.environ.get("ID_MANITOBA"))
-logger = logging.getLogger()
+logger = logging.getLogger("drive")
 
 
 def drive(update: Update, context: CallbackContext):

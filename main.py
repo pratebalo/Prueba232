@@ -1,3 +1,5 @@
+import warnings
+warnings.filterwarnings("ignore")
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, Bot
 from telegram.ext import (
     CommandHandler,
@@ -31,7 +33,7 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger("main")
-logging.getLogger('apscheduler.executors.default').propagate = False
+logging.getLogger('apscheduler').propagate = False
 LOQUENDO_1, LOQUENDO_2 = range(2)
 ESTADO_UNICO = range(1)
 
@@ -39,7 +41,6 @@ ID_MANITOBA = int(os.environ.get("ID_MANITOBA"))
 ID_CONVERSACIONES = int(os.environ.get("ID_CONVERSACIONES"))
 
 ID_TELEGRAM = 777000
-
 load_dotenv()
 TOKEN = os.environ.get("TOKEN")
 mode = os.environ.get("mode")
@@ -343,5 +344,5 @@ if __name__ == "__main__":
     job.run_daily(birthday.birthday, time(7, 00, 00, tzinfo=pytz.timezone('Europe/Madrid')))
     # job.run_daily(muditos, time(17, 54, 00, 000000))
     job.run_daily(tareas.recoradar_tareas, time(9, 00, 00, tzinfo=pytz.timezone('Europe/Madrid')), days=(1,))
-    run(updater)
     logger.info(f"Iniciando el bot")
+    run(updater)

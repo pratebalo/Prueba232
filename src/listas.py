@@ -16,7 +16,7 @@ import os, re
 ELEGIR_LISTA, CREAR_LISTA1, CREAR_LISTA2, EDITAR_LISTA1, EDITAR_LISTA2, EDITAR_LISTA_A, EDITAR_LISTA_E, \
 ELIMINAR_LISTA, FINAL_OPTION = range(9)
 ID_MANITOBA = int(os.environ.get("ID_MANITOBA"))
-logger = logging.getLogger()
+logger = logging.getLogger("listas")
 
 
 def listas(update: Update, context: CallbackContext):

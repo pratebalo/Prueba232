@@ -18,7 +18,7 @@ OPCION, BOTE, BOTE2, PAGAR, FINAL_OPTION = range(5)
 ID_MANITOBA = int(os.environ.get("ID_MANITOBA"))
 ID_TESORERIA = int(os.environ.get("ID_TESORERIA"))
 ID_ADMIN = int(os.environ.get("ID_ADMIN"))
-logger = logging.getLogger()
+logger = logging.getLogger("tesoreria")
 
 
 def tesoreria(update: Update, context: CallbackContext):
