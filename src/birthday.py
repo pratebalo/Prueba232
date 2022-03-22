@@ -38,7 +38,7 @@ def birthday(context: CallbackContext):
                                 sticker=STICKERS[random.randint(0, len(STICKERS) - 1)])
         # context.bot.sendAudio(chat_id=ID_MANITOBA,
         #                       audio=open(f"Felicitacion de su majestad para {cumpleanero.apodo}.mp3", "rb"))
-        if cumpleanero.genero == "M":
+        if cumpleanero.genero == "F":
             context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                     text=f"Por seeeeerrrr tan bueeeennaa muchaaaaachaaaaa 🎉🎊🎈")
         else:
@@ -60,10 +60,10 @@ def birthday2(update: Update, context: CallbackContext):
                                 sticker=STICKERS[random.randint(0, len(STICKERS) - 1)])
         # context.bot.sendAudio(chat_id=ID_MANITOBA,
         #                       audio=open(f"Felicitacion de su majestad para {cumpleanero.apodo}.mp3", "rb"))
-        if cumpleanero.genero == "M":
+        if cumpleanero.genero == "F":
             context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                     text=f"Por seeeeerrrr tan bueeeennaa muchaaaaachaaaaa 🎉🎊🎈")
-        elif cumpleanero.genero == "F":
+        elif cumpleanero.genero == "M":
             context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                     text=f"Por seeeeerrrr tan bueeeenn muchaaaaachooooo 🎉🎊🎈")
         else:

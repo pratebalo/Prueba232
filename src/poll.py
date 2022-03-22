@@ -39,6 +39,7 @@ def encuestas(update: Update, context: CallbackContext) -> None:
             keyboardline = []
             text += f" {i + 1}. {poll.question}\n"
             keyboardline.append(InlineKeyboardButton(i + 1, callback_data="NADA"))
+            # keyboardline.append(InlineKeyboardButton("👀", callback_data="VER" + str(poll.id)))
             keyboardline.append(InlineKeyboardButton("🗑", callback_data="ELIMINAR" + str(poll.id)))
             keyboardline.append(InlineKeyboardButton("📯", callback_data="FINALIZAR" + str(poll.id)))
             keyboard.append(keyboardline)
@@ -161,6 +162,23 @@ def terminar(update: Update, context: CallbackContext):
     return ConversationHandler.END
 
 
+def ver_encuesta(update: Update, context: CallbackContext):
+    id_encuesta = int(update.callback_query.data.replace("VER", ""))
+    polls = db.select("encuestas")
+    poll = polls[polls.id == id_encuesta].squeeze()
+
+    chat = int(poll.chat_id)
+    id_mensaje = int(poll.message_id)
+    db.delete("encuestas", poll.id)
+    update.callback_query.delete_message()
+    try:
+        context.bot.deleteMessage(chat, id_mensaje)
+        # print(f"{persona.apodo} con id {persona.id} tiene activado el bot")
+    except:
+        print(f"No se puede eliminar el mensaje")
+    encuestas(update, context)
+
+
 def eliminar_encuesta(update: Update, context: CallbackContext):
     id_encuesta = int(update.callback_query.data.replace("ELIMINAR", ""))
     polls = db.select("encuestas")
@@ -202,6 +220,7 @@ conv_handler_encuestas = ConversationHandler(
     entry_points=[CommandHandler('encuestas', encuestas)],
     states={
         ELEGIR_ENCUESTA: [
+            CallbackQueryHandler(ver_encuesta, pattern='^VER'),
             CallbackQueryHandler(eliminar_encuesta, pattern='^ELIMINAR'),
             CallbackQueryHandler(finalizar_encuesta, pattern='^FINALIZAR'),
             CallbackQueryHandler(democracia, pattern='^DEMOCRACIA'),

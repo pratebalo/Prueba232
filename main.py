@@ -1,4 +1,5 @@
 import warnings
+
 warnings.filterwarnings("ignore")
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, Bot
 from telegram.ext import (
@@ -35,7 +36,7 @@ logging.basicConfig(
 logger = logging.getLogger("main")
 logging.getLogger('apscheduler').propagate = False
 LOQUENDO_1, LOQUENDO_2 = range(2)
-ESTADO_UNICO = range(1)
+ESTADO_UNO, ESTADO_DOS = range(2)
 
 ID_MANITOBA = int(os.environ.get("ID_MANITOBA"))
 ID_CONVERSACIONES = int(os.environ.get("ID_CONVERSACIONES"))
@@ -93,7 +94,7 @@ def echo(update: Update, context: CallbackContext):
             try:
                 context.bot.deleteMessage(chat_id=ID_MANITOBA, message_id=int(conversacion.mensaje_id))
             except:
-                print("Mensaje eliminado")
+                logger.error(f"Fallo al eliminar el mensaje  {conversacion.mensaje_id}")
 
             mensaje = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML",
                                               text=f"La conversacion <a href='https://t.me/c/1462256012/{conversacion.id}?thread={conversacion.id}'>{conversacion.nombre}</a> tiene un total de {conversacion.total_mensajes} mensajes")
@@ -231,7 +232,7 @@ def culos(update: Update, context: CallbackContext):
                                                               f"{update.effective_user.first_name}: Enviame una imagen cuadrada de una cara sin bordes")
     context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
     # Tell ConversationHandler that we're in state `FIRST` now
-    return ESTADO_UNICO
+    return ESTADO_UNO
 
 
 def culos2(update: Update, context: CallbackContext):
@@ -271,18 +272,36 @@ def culos2(update: Update, context: CallbackContext):
 def pietrobot(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     context.bot.deleteMessage(chat_id, update.message.message_id)
+
     logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name} ha entrado en pietrobot")
     if not chat_id == ID_MANITOBA:
-        context.bot.sendMessage(chat_id, text="¿Qué texto quieres enviar?\nMe ha parecido oir que...")
-        return ESTADO_UNICO
+        keyboard = [[InlineKeyboardButton("Me ha parecido oir que", callback_data="Me ha parecido oir que")],
+                    [InlineKeyboardButton("Me ha dicho un pajarito que",
+                                          callback_data="Me ha dicho un pajarito que")],
+                    [InlineKeyboardButton("Se dice se comenta que", callback_data="Se dice se comenta que")]]
+
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        context.bot.sendMessage(chat_id, text="¿Con qué texto quieres que empiece el mensaje?",
+                                reply_markup=reply_markup)
+        return ESTADO_UNO
     else:
         return ConversationHandler.END
+
+
+def pietrobot2(update: Update, context: CallbackContext):
+    chat_id = update.effective_chat.id
+    context.user_data["inicio"] = update.callback_query.data
+    context.bot.deleteMessage(chat_id, update.callback_query.message.message_id)
+
+    context.bot.sendMessage(chat_id, text=f"¿Qué texto quieres enviar?\n{context.user_data['inicio']}...")
+    return ESTADO_DOS
 
 
 def end_pietrobot(update: Update, context: CallbackContext):
     logger.warning(
         f"{update.effective_chat.type} -> {update.effective_user.first_name} ha escrito {update.message.text}")
-    context.bot.sendMessage(ID_MANITOBA, text="Me ha parecido oir que " + update.message.text)
+    context.bot.sendMessage(ID_MANITOBA, text=context.user_data["inicio"] +" "+ update.message.text)
     return ConversationHandler.END
 
 
@@ -309,7 +328,7 @@ if __name__ == "__main__":
     conv_handler_culos = ConversationHandler(
         entry_points=[CommandHandler('culos', culos)],
         states={
-            ESTADO_UNICO: [MessageHandler(Filters.photo & ~Filters.command, culos2)]
+            ESTADO_UNO: [MessageHandler(Filters.photo & ~Filters.command, culos2)]
 
         },
         fallbacks=[CommandHandler('culos', culos)],
@@ -317,8 +336,8 @@ if __name__ == "__main__":
     conv_handler_pietrobot = ConversationHandler(
         entry_points=[CommandHandler('pietrobot', pietrobot)],
         states={
-            ESTADO_UNICO: [MessageHandler(Filters.text & ~Filters.command, end_pietrobot)]
-
+            ESTADO_UNO: [CallbackQueryHandler(pietrobot2)],
+            ESTADO_DOS: [MessageHandler(Filters.text & ~Filters.command, end_pietrobot)],
         },
         fallbacks=[CommandHandler('pietrobot', pietrobot)],
 

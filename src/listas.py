@@ -41,7 +41,7 @@ def listas(update: Update, context: CallbackContext):
         text += f" {i + 1}. {lista.nombre}\n"
         keyboardline.append(InlineKeyboardButton(i + 1, callback_data="NADA"))
         keyboardline.append(InlineKeyboardButton("👀", callback_data="VER" + str(lista.id)))
-        keyboardline.append(InlineKeyboardButton("🖋", callback_data="EDITAR" + str(lista.id)))
+        # keyboardline.append(InlineKeyboardButton("🖋", callback_data="EDITAR" + str(lista.id)))
         keyboardline.append(InlineKeyboardButton("🗑", callback_data="ELIMINAR" + str(lista.id)))
         keyboard.append(keyboardline)
     keyboard.append([InlineKeyboardButton("Crear nueva lista", callback_data=str("CREAR"))])
@@ -195,7 +195,7 @@ def end_editar_lista_anadir(update: Update, context: CallbackContext):
     try:
         context.bot.deleteMessage(chat_id=ID_MANITOBA, message_id=int(lista.id_mensaje))
     except:
-        print("Mensaje eliminado")
+        logger.error(f"Fallo al eliminar el mensaje  {lista.id_mensaje}")
     new_message = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML", text=texto)
     lista.id_mensaje = new_message.message_id
     db.update_lista(lista)
@@ -220,7 +220,7 @@ def end_editar_lista_eliminar(update: Update, context: CallbackContext):
     try:
         context.bot.deleteMessage(chat_id=ID_MANITOBA, message_id=int(lista.id_mensaje))
     except:
-        print("Mensaje eliminado")
+        logger.error(f"Fallo al eliminar el mensaje  {lista.id_mensaje}")
     new_message = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML", text=texto)
     lista.id_mensaje = new_message.message_id
     db.update_lista(lista)
@@ -247,7 +247,7 @@ def end_editar_lista_marcar(update: Update, context: CallbackContext):
     try:
         context.bot.deleteMessage(chat_id=ID_MANITOBA, message_id=int(lista.id_mensaje))
     except:
-        print("Mensaje eliminado")
+        logger.error(f"Fallo al eliminar el mensaje  {lista.id_mensaje}")
 
     new_message = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML", text=texto)
     lista.id_mensaje = new_message.message_id
@@ -289,7 +289,7 @@ def end_editar_lista_editar(update: Update, context: CallbackContext):
     try:
         context.bot.deleteMessage(chat_id=ID_MANITOBA, message_id=int(lista.id_mensaje))
     except:
-        print("Mensaje eliminado")
+        logger.error(f"Fallo al eliminar el mensaje  {lista.id_mensaje}")
 
     new_message = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML", text=texto)
     lista.id_mensaje = new_message.message_id
@@ -317,14 +317,14 @@ def eliminar_lista2(update: Update, context: CallbackContext):
     id_lista = int(update.callback_query.data.replace("ELIMINAR", ""))
     lista = db.delete("listas", id_lista).iloc[0]
     logger.warning(
-        f"{update.effective_chat.type} -> ""{update.effective_user.first_name} ha eliminado la lista '{lista.nombre}'""")
+        f"{update.effective_chat.type} -> {update.effective_user.first_name} ha eliminado la lista '{lista.nombre}'")
     texto = f"{update.effective_user.first_name} ha eliminado la lista:\n{lista_to_text(lista)}"
     keyboard = [[InlineKeyboardButton("Continuar", callback_data=str("CONTINUAR")),
                  InlineKeyboardButton("Terminar", callback_data=str("TERMINAR"))]]
     try:
         context.bot.deleteMessage(chat_id=ID_MANITOBA, message_id=int(lista.id_mensaje))
     except:
-        print("Mensaje eliminado")
+        logger.error(f"Fallo al eliminar el mensaje  {lista.id_mensaje}")
 
     context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML", text=texto)
 
@@ -353,6 +353,8 @@ def lista_to_text(lista):
 def editar_lista_manual(update: Update, context: CallbackContext):
     all_listas = db.select("listas")
 
+    logger.warning(f"{update.effective_user.name} ha editado la lista con el mensaje\n{update.message.text} ")
+
     poll_name = (update.message.text.split(":\n"))[1]
     lista = all_listas[all_listas.nombre == poll_name].squeeze()
     elementos = (update.message.text.split(":\n"))[2].split("\n")
@@ -363,7 +365,7 @@ def editar_lista_manual(update: Update, context: CallbackContext):
     try:
         context.bot.deleteMessage(ID_MANITOBA, int(lista.id_mensaje))
     except:
-        print("Mensaje eliminado")
+        logger.error(f"Fallo al eliminar el mensaje  {lista.id_mensaje}")
     texto = f"{update.effective_user.first_name} ha editado la lista:\n{lista_to_text(lista)}"
     new_message = context.bot.sendMessage(chat_id=ID_MANITOBA, parse_mode="HTML", text=texto)
     lista.id_mensaje = new_message.message_id
