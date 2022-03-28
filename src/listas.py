@@ -357,7 +357,7 @@ def editar_lista_manual(update: Update, context: CallbackContext):
 
     poll_name = (update.message.text.split(":\n"))[1]
     lista = all_listas[all_listas.nombre == poll_name].squeeze()
-    elementos = (update.message.text.split(":\n"))[2].split("\n")
+    elementos = (update.message.text.split(":\n",2))[2].split("\n")
     elementos2 = [re.sub(r"^[\t]*[ ]*[0-9]*[.]*[ ]*", r"", element) for element in elementos]
     lista.elementos = elementos2
     lista.tipo_elementos = [0] * len(elementos2)
