@@ -351,7 +351,9 @@ if __name__ == "__main__":
     dp.add_handler(conv_handler_culos)
     dp.add_handler(tareas.conv_handler_tareas)
     dp.add_handler(CommandHandler('cumples', birthday.get_birthday))
+    dp.add_handler(CommandHandler('allcumples', birthday.get_all_birthday))
     dp.add_handler(CommandHandler('felicitar', birthday.birthday2))
+
     dp.add_handler(PollAnswerHandler(poll.receive_poll_answer))
     dp.add_handler(MessageHandler(Filters.poll, poll.receive_poll))
     dp.add_handler(CommandHandler('bot', poll.bot_activado))

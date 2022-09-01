@@ -43,7 +43,7 @@ class MyTranslationCalendar(DetailedTelegramCalendar):
 
 def start(update: Update, context: CallbackContext):
     data = db.select("data")
-    context.bot.deleteMessage(update.message.chat_id,update.message.message_id)
+    context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
     user_id = int(update.effective_user.id)
     chat_id = int(update.effective_chat.id)
 
@@ -65,23 +65,25 @@ def start(update: Update, context: CallbackContext):
 
 def elegir_apellidos(update: Update, context: CallbackContext):
     context.user_data["nombre"] = update.message.text
-    context.bot.deleteMessage(update.message.chat_id,update.message.message_id)
+    context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
-    context.user_data["oldMessage"] = context.bot.sendMessage(update.effective_chat.id, '¿Cuáles son tus apellidos? (ej. García Pérez)')
+    context.user_data["oldMessage"] = context.bot.sendMessage(update.effective_chat.id,
+                                                              '¿Cuáles son tus apellidos? (ej. García Pérez)')
     return ELEGIR_APELLIDO
 
 
 def elegir_mote(update: Update, context: CallbackContext):
     context.user_data["apellidos"] = update.message.text
-    context.bot.deleteMessage(update.message.chat_id,update.message.message_id)
+    context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
-    context.user_data["oldMessage"] = context.bot.sendMessage(update.effective_chat.id, '¿Cuáles es tu mote? Si no tienes, dime tu nombre')
+    context.user_data["oldMessage"] = context.bot.sendMessage(update.effective_chat.id,
+                                                              '¿Cuáles es tu mote? Si no tienes, dime tu nombre')
     return ELEGIR_MOTE
 
 
 def elegir_genero(update: Update, context: CallbackContext):
     context.user_data["mote"] = update.message.text
-    context.bot.deleteMessage(update.message.chat_id,update.message.message_id)
+    context.bot.deleteMessage(update.message.chat_id, update.message.message_id)
     context.bot.deleteMessage(context.user_data["oldMessage"].chat_id, context.user_data["oldMessage"].message_id)
     texto = f"¿Con que género te identifícas?"
     keyboard = [[InlineKeyboardButton("Femenino", callback_data="F"),
@@ -95,7 +97,7 @@ def elegir_genero(update: Update, context: CallbackContext):
 
 def elegir_fecha(update: Update, context: CallbackContext):
     context.user_data["genero"] = update.callback_query.data
-    context.bot.deleteMessage(update.callback_query.message.chat_id,update.callback_query.message.message_id)
+    context.bot.deleteMessage(update.callback_query.message.chat_id, update.callback_query.message.message_id)
     calendar, step = MyTranslationCalendar().build()
     context.bot.sendMessage(update.effective_chat.id, parse_mode=f"HTML", reply_markup=calendar,
                             text=f"<b>Introduce tu cumpleaños</b>\nElige {PRUEBA[step]}")
@@ -122,7 +124,6 @@ def elegir_fecha2(update: Update, context: CallbackContext):
 
 
 def terminar(update: Update, context: CallbackContext):
-    logger.warning(f"{update.effective_chat.type} -> {update.effective_user.first_name} ha salido de tareas")
     context.bot.deleteMessage(context.user_data["oldMessage2"].chat_id, context.user_data["oldMessage2"].message_id)
     db.update_data2(update.effective_user.id, context.user_data["nombre"], context.user_data["apellidos"],
                     context.user_data["mote"], context.user_data["genero"], context.user_data["fecha"],
@@ -134,13 +135,14 @@ def terminar(update: Update, context: CallbackContext):
                             f"Puedes probar a usar los comandos poniendo / seguido del nombre del comando")
 
     context.bot.sendMessage(update.effective_chat.id, "Los comandos son:\n"
-                                     "  ·listas - Crea, edita o borra una lista\n"
-                                     "  ·tareas - Crea, edita o borra una tarea\n"
-                                     "  ·loquendo - Envíame un texto y te reenvío un audio\n"
-                                     "  ·tesoreria - Comunicar gastos a la tesorera\n"
-                                     "  ·pietrobot -  Envíame un mensaje por privado y lo envío por el grupo anónimamente\n"
-                                     "  ·culos - Inserta la cara de alguien en un culo")
+                                                      "  ·listas - Crea, edita o borra una lista\n"
+                                                      "  ·tareas - Crea, edita o borra una tarea\n"
+                                                      "  ·loquendo - Envíame un texto y te reenvío un audio\n"
+                                                      "  ·tesoreria - Comunicar gastos a la tesorera\n"
+                                                      "  ·pietrobot -  Envíame un mensaje por privado y lo envío por el grupo anónimamente\n"
+                                                      "  ·culos - Inserta la cara de alguien en un culo")
     return ConversationHandler.END
+
 
 def new_member(update: Update, context: CallbackContext):
     member = update.message.new_chat_members[0]
@@ -153,7 +155,6 @@ def new_member(update: Update, context: CallbackContext):
 def left_member(update: Update, context: CallbackContext):
     member = update.message.left_chat_member
     db.delete("data", member.id)
-
 
 
 conv_handler_start = ConversationHandler(

@@ -85,6 +85,24 @@ def get_birthday(update: Update, context: CallbackContext):
 
     context.bot.sendMessage(chat_id, texto)
 
+def get_all_birthday(update: Update, context: CallbackContext):
+    chat_id = update.effective_chat.id
+    context.bot.deleteMessage(chat_id, update.message.message_id)
+    data = db.select("data")
+    year = datetime.now().year
+    data.cumple = pd.to_datetime(data.cumple, format='%d/%m').apply(lambda dt: dt.replace(year=year))
+
+    a = data.sort_values("cumple")
+    texto = ""
+    for _, persona in a.iterrows():
+        if pd.isna(persona.cumple):
+            texto += f"{persona.nombre} {persona.apellidos}  | N/A\n"
+        else:
+            texto += f"{persona.nombre} {persona.apellidos}  | {persona.cumple.strftime('%d/%m')}/{str(int(persona.cumple_ano))}\n"
+
+
+    context.bot.sendMessage(chat_id, texto)
+
 
 def set_birthday(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
