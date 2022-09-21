@@ -1,6 +1,10 @@
 import warnings
-
-warnings.filterwarnings("ignore")
+import sys
+import logging
+import requests
+import pytz
+import pandas as pd
+import os
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, Bot
 from telegram.ext import (
     CommandHandler,
@@ -16,19 +20,13 @@ from telegram.ext import (
 from datetime import datetime, time, timedelta
 from gtts import gTTS
 from PIL import Image, ImageDraw
-import utils.client_drive as client_drive
 from random import randrange
-import pandas as pd
 from dotenv import load_dotenv
-import sys
-import logging
-import requests
-import pytz
 from io import BytesIO
-
 from utils import database as db
-import os
 from src import poll, tareas, birthday, listas, tesoreria, drive, new_member
+
+warnings.filterwarnings("ignore")
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -301,7 +299,7 @@ def pietrobot2(update: Update, context: CallbackContext):
 def end_pietrobot(update: Update, context: CallbackContext):
     logger.warning(
         f"{update.effective_chat.type} -> {update.effective_user.first_name} ha escrito {update.message.text}")
-    context.bot.sendMessage(ID_MANITOBA, text=context.user_data["inicio"] +" "+ update.message.text)
+    context.bot.sendMessage(ID_MANITOBA, text=context.user_data["inicio"] + " " + update.message.text)
     return ConversationHandler.END
 
 

@@ -148,7 +148,7 @@ def insert_poll(id, question, options, votes, url,chat_id,message_id):
 def update_poll(id, votes):
     query = f"""
         UPDATE encuestas
-        SET votes = ARRAY{votes}::integer[]
+        SET votes = ARRAY{votes}::bigint[]
         WHERE id = {id};"""
     connect(query)
 
