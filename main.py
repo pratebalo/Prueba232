@@ -307,7 +307,6 @@ if __name__ == "__main__":
     load_dotenv()
     my_bot = Bot(token=TOKEN)
     updater = Updater(my_bot.token, use_context=True)
-
     dp = updater.dispatcher
 
     job = updater.job_queue
