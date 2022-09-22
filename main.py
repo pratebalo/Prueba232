@@ -9,7 +9,6 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, Bot
 from telegram.ext import (
     CommandHandler,
     PollAnswerHandler,
-    PollHandler,
     CallbackQueryHandler,
     ConversationHandler,
     CallbackContext,
@@ -24,6 +23,7 @@ from random import randrange
 from dotenv import load_dotenv
 from io import BytesIO
 from utils import database as db
+from utils import contacts_drive as contacts
 from src import poll, tareas, birthday, listas, tesoreria, drive, new_member
 
 warnings.filterwarnings("ignore")
@@ -236,7 +236,7 @@ def culos(update: Update, context: CallbackContext):
 def culos2(update: Update, context: CallbackContext):
     size_list = [(160, 160), (90, 90), (140, 140)]
     point_list = [(345, 480), (427, 333), (462, 248)]
-    photo_list = ['mono.jpg', 'perro.jpg', 'mono2.jpg']
+    photo_list = ['images/mono.jpg', 'images/perro.jpg', 'images/mono2.jpg']
     n = randrange(len(size_list))
     im1 = Image.open(photo_list[n])
     url = context.bot.get_file(file_id=update.message.photo[-1].file_id).file_path
@@ -360,6 +360,7 @@ if __name__ == "__main__":
     dp.add_handler(MessageHandler(Filters.all, echo))
     #
     job.run_daily(birthday.birthday, time(7, 00, 00, tzinfo=pytz.timezone('Europe/Madrid')))
+    job.run_daily(contacts.birthday, time(4, 00, 00, tzinfo=pytz.timezone('Europe/Madrid')))
     # job.run_daily(muditos, time(17, 54, 00, 000000))
     job.run_daily(tareas.recoradar_tareas, time(9, 00, 00, tzinfo=pytz.timezone('Europe/Madrid')), days=(1,))
     logger.info(f"Iniciando el bot")
