@@ -137,7 +137,7 @@ def update_cumple(id_persona, cancion, idioma, sticker):
     connect(query)
 
 
-def insert_poll(id, question, options, votes, url,chat_id,message_id):
+def insert_poll(id, question, options, votes, url, chat_id, message_id):
     query = f"""set DateStyle='ISO, DMY';
     INSERT INTO encuestas    
     (id, question, options, votes, url,chat_id,message_id)

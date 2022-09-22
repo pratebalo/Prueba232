@@ -79,6 +79,8 @@ def receive_poll(update: Update, context: CallbackContext) -> None:
 
         update.effective_message.delete()
         options = [o.text.replace("'", "") for o in actual_poll.options]
+        if len(options) < 10:
+            options += ["NS/NC - No puedo"]
         if update.message.reply_to_message:
             if update.message.reply_to_message.forward_from_chat:
                 new_poll = context.bot.send_poll(
@@ -204,10 +206,15 @@ def finalizar_encuesta(update: Update, context: CallbackContext):
     update.callback_query.delete_message()
 
     logger.warning(f"{update.effective_user.first_name} ha ejecutado el comando democracia")
-    texto = f"La encuesta {poll.question} ha finalizado.\nEstos son los miserables que odian la democracia:\n"
+    texto = f"La encuesta {poll.question} ha finalizado.\n"
+    texto2 = f"Estos son los miserables que odian la democracia:\n"
+    all_voted = True
     for _, persona in data.iterrows():
         if persona.id not in poll.votes:
-            texto += f"<a href='tg://user?id={persona.id}'>{persona.apodo}</a>\n"
+            all_voted = False
+            texto2 += f"<a href='tg://user?id={persona.id}'>{persona.apodo}</a>\n"
+    if not all_voted:
+        texto += texto2
     db.end_poll(poll.id)
     context.bot.stopPoll(int(poll.chat_id), int(poll.message_id))
     context.bot.forwardMessage(int(poll.chat_id), int(poll.chat_id), int(poll.message_id), )
