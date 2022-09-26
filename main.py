@@ -360,7 +360,7 @@ if __name__ == "__main__":
     dp.add_handler(MessageHandler(Filters.all, echo))
     #
     job.run_daily(birthday.birthday, time(7, 00, 00, tzinfo=pytz.timezone('Europe/Madrid')))
-    job.run_daily(contacts.birthday, time(4, 00, 00, tzinfo=pytz.timezone('Europe/Madrid')))
+    job.run_daily(contacts.update_contacts, time(4, 00, 00, tzinfo=pytz.timezone('Europe/Madrid')))
     # job.run_daily(muditos, time(17, 54, 00, 000000))
     job.run_daily(tareas.recoradar_tareas, time(9, 00, 00, tzinfo=pytz.timezone('Europe/Madrid')), days=(1,))
     logger.info(f"Iniciando el bot")

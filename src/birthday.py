@@ -23,6 +23,7 @@ STICKERS = ["CAACAgIAAxkBAAEDfgNhugP6zcKUVHjHDThT6UFcw7Ex7AACPQEAAiI3jgRzp-LtkvR
             "CAACAgIAAxkBAAEDfg1hugQ1DdHic0OmMnwBfIhq7Ab8ZgACiQADFkJrCkbL2losgrCOIwQ",
             "CAACAgIAAxkBAAEDfg9hugQ4Tv9ioGb0Wo6tUyjZZbEB3AAC8AIAArVx2ga4Ryudl_pd6CME"]
 
+
 def birthday(context: CallbackContext):
     data = db.select("data")
     fecha = datetime.today().strftime('%d/%m')
@@ -85,6 +86,7 @@ def get_birthday(update: Update, context: CallbackContext):
 
     context.bot.sendMessage(chat_id, texto)
 
+
 def get_all_birthday(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     context.bot.deleteMessage(chat_id, update.message.message_id)
@@ -99,7 +101,6 @@ def get_all_birthday(update: Update, context: CallbackContext):
             texto += f"{persona.nombre} {persona.apellidos}  | N/A\n"
         else:
             texto += f"{persona.nombre} {persona.apellidos}  | {persona.cumple.strftime('%d/%m')}/{str(int(persona.cumple_ano))}\n"
-
 
     context.bot.sendMessage(chat_id, texto)
 
