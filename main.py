@@ -45,7 +45,7 @@ TOKEN = os.environ.get("TOKEN")
 mode = os.environ.get("mode")
 print(TOKEN)
 print(mode)
-if mode == "dev":
+if mode == "prod":
     def run(updater):
         updater.start_polling()
         updater.idle()
