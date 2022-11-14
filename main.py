@@ -43,6 +43,8 @@ ID_TELEGRAM = 777000
 load_dotenv()
 TOKEN = os.environ.get("TOKEN")
 mode = os.environ.get("mode")
+print(TOKEN)
+print(mode)
 if mode == "dev":
     def run(updater):
         updater.start_polling()
@@ -52,13 +54,13 @@ elif mode == "prod":
     def run(updater):
         PORT = int(os.environ.get("PORT", "8443"))
         HEROKU_APP_NAME = os.environ.get("HEROKU_APP_NAME")
-
         updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=TOKEN,
                               webhook_url=f"https://{HEROKU_APP_NAME}.herokuapp.com/{TOKEN}")
 else:
     sys.exit()
 
-
+print(TOKEN)
+print(mode)
 def muditos(context: CallbackContext):
     data = db.select("data")
     hoy = datetime.today()
