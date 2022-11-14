@@ -55,7 +55,7 @@ elif mode == "prod":
         PORT = int(os.environ.get("PORT", "8443"))
         HEROKU_APP_NAME = os.environ.get("HEROKU_APP_NAME")
         updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=TOKEN,
-                              webhook_url=f"https://{HEROKU_APP_NAME}.herokuapp.com/{TOKEN}")
+                              webhook_url="https://web-production-3fc5.up.railway.app/")
 else:
     sys.exit()
 
